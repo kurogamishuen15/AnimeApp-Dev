@@ -25,7 +25,11 @@ Los tests no acreditan una ejecución de modelo nocturna. Revisar estado Git, im
 ## Próxima tarea
 F0.2 se completó: commit inicial `84efbfb4a3468170acac27a9f39fef58746e1b5a`, `main` activa y subida a `origin` privado; se conservó `ai/setup-autonomous-environment` en el commit inicial. `AnimeApp-Dev` es privado y el público `AnimeApp` continúa vacío. La clonación limpia, las 40 pruebas de IA y la verificación de memoria pasaron. Identidad de Git configurada solo localmente; no copiar sus datos a documentos. `.ai-local/` y `.codex/config.toml` están excluidos. Los informes `ENVIRONMENT_AUDIT.md` y `MCP_RESEARCH.md` son internos: el proceso público exige seleccionar archivos expresamente y excluye esos informes salvo aprobación de versiones revisadas y depuradas.
 
-El plan original sitúa F0.1 antes de F0.2; F0.1–F0.6 ya se revisaron bajo autorización expresa, sin avanzar a Fase 1. media_kit y el reproductor quedan fuera. No instalar paquetes del sistema ni modificar configuraciones globales.
+El plan original sitúa F0.1 antes de F0.2. F0.1/F0.3 están completas y F0.4–F0.6 siguen parciales. La autorización explícita del 2026-11-08 permitió iniciar y completar documentalmente F1.1/F1.2 sin cerrar F0 ni implementar funcionalidades. media_kit y el reproductor quedan fuera. No instalar paquetes del sistema ni modificar configuraciones globales.
+
+### F1.1/F1.2 — 2026-11-08
+
+El propietario proporcionó las 14 selecciones exactas de sección 3 y pidió conciliarlas. F1.2 quedó uno-a-uno en ADR-001–ADR-014; 13 análisis anteriores se conservaron como adicionales en `docs/adr/additional/`. F1.1 se amplió con seis comportamientos MVP citados en `PROJECT_PLAN.md`; FR-12/NFR-12 se conservan como candidatos no contados. Estado y aprobaciones pendientes: `PROGRESS.md`, `PROJECT_PLAN.md`, `TECH_DECISIONS.md`, `docs/requirements/F1.1-CORE-REQUIREMENTS.md` y `docs/adr/README.md`. No se agregó código ni dependencia. Esperar la aprobación formal de F1.1/selecciones pendientes y no avanzar a F1.3 en esta tarea.
 
 ### Avance F0.1–F0.6 (2026-11-08)
 

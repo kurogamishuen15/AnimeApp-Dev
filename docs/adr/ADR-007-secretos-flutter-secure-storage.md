@@ -1,0 +1,24 @@
+# ADR-007: Almacenamiento de secretos
+
+- Fuente: plan maestro, sección 3 (lista suministrada por el propietario el 2026-11-08).
+- Estado: **Especificado en el plan; aprobación formal no consta en el registro local**.
+- Fase: F1.9.
+- Requisitos: FR-04, FR-06, NFR-03, NFR-04, NFR-06.
+
+## Contexto
+
+OAuth AniList requiere guardar y borrar credenciales. F0.1 observó libsecret disponible en el entorno, pero no verificó Flutter Secure Storage ni otros sistemas operativos.
+
+## Propuesta
+
+Evaluar `flutter_secure_storage` como adaptador detrás de un contrato de almacén seguro. Dominio y casos de uso no dependen del plugin. Si el almacén está indisponible, se informa error y nunca se degrada a texto claro.
+
+## Alternativas
+
+- Plugin multiplataforma alternativo sujeto a auditoría equivalente.
+- Adaptadores nativos por plataforma detrás del mismo puerto.
+- Preferencias/archivo plano: no aceptables para tokens.
+
+## Consecuencias y aceptación
+
+Antes de integrar: comprobar mantenimiento, licencias y mecanismos de cada plataforma; probar guardar/leer/borrar, almacén bloqueado/ausente, redacción y que el token no aparece en prefs, logs, fixtures o artefactos. Aprobación local del plugin sigue pendiente.
