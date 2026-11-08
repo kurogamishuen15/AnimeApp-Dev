@@ -1,25 +1,25 @@
 # ADR F1.2 — Decisiones del plan maestro
 
-Fuente: sección 3 de `Plan_AnimeApp_actualizado.docx`, lista transcrita por el propietario en conversación el 2026-11-08. El archivo DOCX no se inspeccionó ni se requiere para esta conciliación.
+Fuente: sección 3 de `Plan_AnimeApp_actualizado.docx`, lista transcrita por el propietario en conversación el 2026-11-08. El propietario aprobó formalmente las 14 selecciones el 2026-11-08 como arquitectura de referencia. El archivo DOCX no se inspeccionó ni se requiere para esta conciliación.
 
 ## Correspondencia exacta
 
 | # original | Decisión de sección 3 | ADR | Coincidencia | Estado de aprobación en el proyecto |
 | --- | --- | --- | --- | --- |
-| 1 | Flutter + Dart | [ADR-001](ADR-001-cliente-flutter-dart.md) | Coincide | Aprobado en F0.4; ver `TECH_DECISIONS.md`. |
-| 2 | media_kit (libmpv) detrás de `PlaybackEngine` | [ADR-002](ADR-002-motor-video.md) | Coincide; el wrapper visual `media_kit_video` también figura en el registro local | Aprobado como punto de partida; compatibilidad/rendimiento pendientes. |
-| 3 | Riverpod | [ADR-003](ADR-003-estado-riverpod.md) | Coincide | Propuesta; aprobación formal pendiente. |
-| 4 | go_router | [ADR-004](ADR-004-navegacion-go-router.md) | Coincide | Propuesta; aprobación formal pendiente. |
-| 5 | Drift (SQLite) | [ADR-005](ADR-005-persistencia-drift.md) | Coincide | Propuesta; aprobación formal y spike pendientes. |
-| 6 | Dio | [ADR-006](ADR-006-red-dio.md) | Coincide | Propuesta; aprobación formal y spike pendientes. |
-| 7 | flutter_secure_storage | [ADR-007](ADR-007-secretos-flutter-secure-storage.md) | Coincide | Plan maestro lo especifica; no consta aprobación formal en el registro local. |
-| 8 | AniList GraphQL, cliente propio, sin codegen | [ADR-008](ADR-008-anilist-graphql.md) | Añade GraphQL, cliente propio y restricción sin codegen al requisito local genérico de lectura AniList | Plan maestro lo especifica; no consta aprobación formal local. |
-| 9 | Supabase (Postgres + Auth + RLS) | [ADR-009](ADR-009-backend-supabase.md) | Concreta el proveedor que el registro local dejaba pendiente | Plan maestro lo especifica; backend concreto no está formalmente aprobado en el registro local. |
-| 10 | qr_flutter genera; mobile_scanner escanea solo Android | [ADR-010](ADR-010-qr.md) | Coincide | Plan maestro lo especifica; no consta aprobación formal local. |
-| 11 | Motor propio con ThemeExtension | [ADR-011](ADR-011-temas.md) | Concreta ThemeExtension; el principio local de packs validables sí está aprobado | Principio de temas aprobado; mecanismo concreto no consta aprobado. |
-| 12 | Estilo de subtítulos por propiedades de mpv | [ADR-012](ADR-012-subtitulos-mpv.md) | Coincide | Plan maestro lo especifica; no consta aprobación formal local. |
-| 13 | flutter_test + fakes escritos a mano | [ADR-013](ADR-013-pruebas.md) | Coincide | `flutter_test` ya se usa en F0; estrategia de fakes del núcleo no consta aprobada. |
-| 14 | Flatpak como formato Linux principal | [ADR-014](ADR-014-empaquetado-flatpak.md) | Coincide | Plan maestro lo especifica; no consta aprobación formal local. |
+| 1 | Flutter + Dart | [ADR-001](ADR-001-cliente-flutter-dart.md) | Coincide | Aprobado previamente en F0.4; independencia del dominio respecto de Flutter se mantiene. |
+| 2 | media_kit (libmpv) detrás de `PlaybackEngine` | [ADR-002](ADR-002-motor-video.md) | Coincide; `media_kit_video` es wrapper complementario del registro local | Aprobado como punto de partida; compatibilidad/rendimiento pendientes antes de integrar. |
+| 3 | Riverpod | [ADR-003](ADR-003-estado-riverpod.md) | Coincide | Aceptado como selección arquitectónica; spike/ciclo de vida pendientes. |
+| 4 | go_router | [ADR-004](ADR-004-navegacion-go-router.md) | Coincide | Aceptado; validación de flujos/targets en F3.3. |
+| 5 | Drift (SQLite) | [ADR-005](ADR-005-persistencia-drift.md) | Coincide | Aceptado; schema, migraciones, licencias y rendimiento en F1.6. |
+| 6 | Dio | [ADR-006](ADR-006-red-dio.md) | Coincide | Aceptado; timeout/cancelación/errores y licencia en F1.8/F5. |
+| 7 | flutter_secure_storage | [ADR-007](ADR-007-secretos-flutter-secure-storage.md) | Coincide | Aceptado; seguridad/mecanismo/compatibilidad por plataforma en F1.9. |
+| 8 | AniList GraphQL, cliente propio, sin codegen | [ADR-008](ADR-008-anilist-graphql.md) | Antes solo constaba lectura AniList genérica; se añadieron protocolo, cliente propio y no-codegen | Aceptado; contrato, consultas, límites y errores a verificar en F1.8. |
+| 9 | Supabase (Postgres + Auth + RLS) | [ADR-009](ADR-009-backend-supabase.md) | Concreta el proveedor que el registro local dejaba pendiente | Aceptado como referencia; auth/RLS, transporte, offline y protección de datos deben verificarse antes de F5. |
+| 10 | qr_flutter genera; mobile_scanner escanea solo Android | [ADR-010](ADR-010-qr.md) | Coincide | Aceptado; licencias/permisos/ciclo de vida en F5; escaneo Android únicamente. |
+| 11 | Motor propio con ThemeExtension | [ADR-011](ADR-011-temas.md) | Concreta ThemeExtension; el principio de packs validables ya estaba aprobado | Aceptado; rendering/fallback/seguridad de packs en F3. |
+| 12 | Estilo de subtítulos por propiedades de mpv | [ADR-012](ADR-012-subtitulos-mpv.md) | Coincide | Aceptado; verificar propiedades disponibles y efecto en F2. |
+| 13 | flutter_test + fakes escritos a mano | [ADR-013](ADR-013-pruebas.md) | Coincide | Aceptado; validar contratos/fakes del núcleo en F1.12. |
+| 14 | Flatpak como formato Linux principal | [ADR-014](ADR-014-empaquetado-flatpak.md) | Coincide | Formato principal propuesto para distribución, aceptado como referencia; permisos/licencias/artefacto en F5.1. |
 
 ## Cambios de interpretación corregidos
 
@@ -49,6 +49,12 @@ Estos documentos pertenecen a la colección creada durante la primera pasada. No
 | [A12](additional/ADR-A12-gestion-de-estado.md) | Análisis inicial de gestión de estado | Complementa ADR-003 |
 | [A13](additional/ADR-A13-navegacion.md) | Análisis inicial de navegación | Complementa ADR-004 |
 
+## Condiciones de la aprobación y validaciones pendientes
+
+La aprobación es de **selección arquitectónica**, no de instalación inmediata ni de implementación fuera de fase. Se mantienen las condiciones del propietario: dominio independiente de Flutter; motor media_kit/libmpv aislado tras `PlaybackEngine`; rendimiento y compatibilidad real previos a integrar motor; persistencia local-first; validación de Supabase/Auth/RLS; backend sin videos; `mobile_scanner` solo Android; revisión de licencias/compatibilidad antes de distribuir; Flatpak como formato Linux principal propuesto.
+
+Los ADR originales están aceptados como selección; cada uno conserva sus validaciones por fase. Los 13 ADR adicionales son documentación complementaria y no se aprobaron automáticamente.
+
 ## Criterio de cierre de F1.2
 
-La conciliación documental queda completa cuando cada fila 1–14 tiene un ADR coincidente con el plan, diferencias explícitas, estado de aprobación respaldado y verificación para su fase. Implementar o agregar paquetes requiere la aprobación y evidencia indicadas en cada ADR. Los ADR adicionales no sustituyen el conjunto original.
+La conciliación documental queda completa cuando cada fila 1–14 tiene un ADR coincidente con el plan, diferencias explícitas, aprobación formal y verificación para su fase. La aprobación no autoriza instalar todas las dependencias ni adelantar implementación. Los ADR adicionales no sustituyen el conjunto original.

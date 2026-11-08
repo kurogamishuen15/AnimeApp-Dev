@@ -1,7 +1,7 @@
 # ADR-004: Navegación
 
 - Fuente de propuesta: plan maestro, sección 3 (lista suministrada por el propietario el 2026-11-08).
-- Estado: **Propuesto; no consta aprobación formal**. `TECH_DECISIONS.md` también lo marca como propuesta.
+- Estado: **Aceptado por el propietario el 2026-11-08 como selección arquitectónica; validación técnica pendiente**.
 - Fase: F3.3.
 - Requisitos: MVP de búsqueda/ficha/episodios; NFR-06, NFR-10.
 
@@ -11,7 +11,7 @@ El scaffold no implementa navegación. El primer entorno es Fedora/Linux y el pl
 
 ## Propuesta
 
-Evaluar go_router para rutas declarativas, manteniendo parámetros/rutas dentro de presentación. La navegación no contiene reglas de dominio.
+Usar go_router para rutas declarativas, manteniendo parámetros/rutas dentro de presentación. La navegación no contiene reglas de dominio. Integración en F3.3, no en F1.2.
 
 ## Alternativas
 
@@ -20,4 +20,4 @@ Evaluar go_router para rutas declarativas, manteniendo parámetros/rutas dentro 
 
 ## Consecuencias y aceptación
 
-No se incorpora paquete aún. Spike en F3.3 con navegación a búsqueda/ficha/episodio, retorno/restauración en escritorio y plataformas previstas, rutas inválidas y revisión de dependencias/licencia.
+Integrar solo en F3.3 tras probar navegación a búsqueda/ficha/episodio, retorno/restauración en escritorio y plataformas previstas, rutas inválidas y revisión de dependencias/licencia.

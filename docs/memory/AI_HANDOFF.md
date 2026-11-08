@@ -10,7 +10,7 @@ Evidencia: Herramientas, docs y resultados reproducibles
 ## Contexto mínimo
 Regla permanente: lee, busca e inspecciona solo esta raíz y sus subcarpetas. No explores Imágenes ni otras carpetas. No sigas enlaces fuera del proyecto. Si falta material fuera de aquí, documenta el bloqueo y pide que se coloque dentro del proyecto.
 
-Trabajas solo en esta carpeta PROYECTO ANIME dentro de Vídeos. El usuario autoriza infraestructura de IA, no funciones de AnimeApp. No hay código de producto. No acceder a otro repositorio ni configuraciones personales.
+Trabajas solo en esta carpeta PROYECTO ANIME dentro de Vídeos. El alcance inicial de infraestructura IA no autoriza funciones del producto; la autorización posterior permitió únicamente documentación F1.1/F1.2. No implementar funcionalidades sin nueva instrucción. No acceder a otro repositorio ni configuraciones personales.
 
 ## Cómo continuar
 Leer AGENTS.md, PROJECT_STATE.md y FINAL_REPORT.md; buscar memoria con tools/ai/memory.py. Python stdlib, FTS5, fuentes Markdown, caché local ignorada. Ver MODULE_INDEX.md y DECISIONS.md.
@@ -25,11 +25,11 @@ Los tests no acreditan una ejecución de modelo nocturna. Revisar estado Git, im
 ## Próxima tarea
 F0.2 se completó: commit inicial `84efbfb4a3468170acac27a9f39fef58746e1b5a`, `main` activa y subida a `origin` privado; se conservó `ai/setup-autonomous-environment` en el commit inicial. `AnimeApp-Dev` es privado y el público `AnimeApp` continúa vacío. La clonación limpia, las 40 pruebas de IA y la verificación de memoria pasaron. Identidad de Git configurada solo localmente; no copiar sus datos a documentos. `.ai-local/` y `.codex/config.toml` están excluidos. Los informes `ENVIRONMENT_AUDIT.md` y `MCP_RESEARCH.md` son internos: el proceso público exige seleccionar archivos expresamente y excluye esos informes salvo aprobación de versiones revisadas y depuradas.
 
-El plan original sitúa F0.1 antes de F0.2. F0.1/F0.3 están completas y F0.4–F0.6 siguen parciales. La autorización explícita del 2026-11-08 permitió iniciar y completar documentalmente F1.1/F1.2 sin cerrar F0 ni implementar funcionalidades. media_kit y el reproductor quedan fuera. No instalar paquetes del sistema ni modificar configuraciones globales.
+El plan original sitúa F0.1 antes de F0.2. F0.1/F0.3 están completas y F0.4–F0.6 siguen parciales. La autorización explícita del 2026-11-08 permitió completar documentalmente F1.1/F1.2 sin cerrar F0 ni implementar funcionalidades. media_kit está aprobado solo como motor de referencia para F2; no se instala ni implementa en F1. No instalar paquetes del sistema ni modificar configuraciones globales.
 
 ### F1.1/F1.2 — 2026-11-08
 
-El propietario proporcionó las 14 selecciones exactas de sección 3 y pidió conciliarlas. F1.2 quedó uno-a-uno en ADR-001–ADR-014; 13 análisis anteriores se conservaron como adicionales en `docs/adr/additional/`. F1.1 se amplió con seis comportamientos MVP citados en `PROJECT_PLAN.md`; FR-12/NFR-12 se conservan como candidatos no contados. Estado y aprobaciones pendientes: `PROGRESS.md`, `PROJECT_PLAN.md`, `TECH_DECISIONS.md`, `docs/requirements/F1.1-CORE-REQUIREMENTS.md` y `docs/adr/README.md`. No se agregó código ni dependencia. Esperar la aprobación formal de F1.1/selecciones pendientes y no avanzar a F1.3 en esta tarea.
+El propietario aprobó formalmente el 2026-11-08 F1.1 (18 FR + 13 NFR; FR-11 con semántica por campo pendiente y sin reglas inventadas; metas de rendimiento preliminares) y las 14 selecciones ADR-001–ADR-014 como arquitectura de referencia. Las integraciones requieren validaciones de sus fases; ADR-A01–A13 son complementarios y no se aprueban automáticamente. No se agregó código ni dependencia. No avanzar a F1.3 hasta que el propietario lo indique. El push quedó bloqueado porque los commits pendientes tienen email personal en metadata y el propietario prohibió reescribir historial; ver sesión de aprobación.
 
 ### Avance F0.1–F0.6 (2026-11-08)
 

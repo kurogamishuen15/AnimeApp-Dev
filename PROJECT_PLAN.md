@@ -9,6 +9,7 @@ AnimeApp será una aplicación cliente multiplataforma para descubrir, organizar
 - Mantener proveedores de contenido fuera del núcleo y activados solo tras evaluación técnica y legal. El MVP usa un proveedor mock.
 - No alojar video en el backend de sincronización.
 - Aplicar optimización y documentación desde F0, con mediciones reales y reproducibles.
+- Los objetivos iniciales de rendimiento son metas preliminares; no se consideran límites aprobados o resultados verificados hasta medir cargas representativas en el dispositivo objetivo y registrar evidencia.
 - No implementar reproductor, fuentes reales, descargas ni temas avanzados durante F0.3–F0.6.
 
 ## MVP previsto
@@ -32,7 +33,7 @@ Las dependencias y criterios detallados de subfase se registran en `ROADMAP.md` 
 
 ### Selecciones tecnológicas del plan maestro (sección 3)
 
-La siguiente transcripción de las 14 selecciones fue proporcionada por el propietario el 2026-11-08. La presencia en el plan maestro documenta la selección de planificación, pero no se trata automáticamente como aprobación formal de implementación. El estado de aprobación se registra por separado en `TECH_DECISIONS.md` y en cada ADR.
+La siguiente transcripción de las 14 selecciones fue proporcionada por el propietario el 2026-11-08. El propietario aprobó formalmente el 2026-11-08 las 14 selecciones como arquitectura de referencia de AnimeApp. Esta aprobación no autoriza instalar todas las dependencias ni implementar fuera de sus fases; quedan vigentes las validaciones de cada ADR y las condiciones de seguridad, rendimiento, compatibilidad y licencias.
 
 | N.º | Selección del plan | ADR |
 | --- | --- | --- |
@@ -51,7 +52,9 @@ La siguiente transcripción de las 14 selecciones fue proporcionada por el propi
 | 13 | Tests: flutter_test + fakes escritos a mano | [ADR-013](docs/adr/ADR-013-pruebas.md) |
 | 14 | Empaquetado Linux: Flatpak como formato principal | [ADR-014](docs/adr/ADR-014-empaquetado-flatpak.md) |
 
-Las decisiones de sincronización local-first, FakeRemote, contratos de capas, errores/logs, ajustes, progreso local y OAuth de AniList permanecen documentadas como ADR adicionales; no reemplazan estos catorce elementos.
+Las condiciones de la aprobación son: dominio independiente de Flutter; media_kit/libmpv tras `PlaybackEngine` y pruebas de rendimiento/compatibilidad antes de integrarlo; persistencia local-first; validación de seguridad de Supabase/Auth/RLS; backend sin video; escaneo mobile_scanner solo Android; licencias/compatibilidad antes de distribuir; Flatpak como formato principal propuesto para distribución. La aprobación no autoriza instalar todas las dependencias ni implementar funcionalidades fuera de sus fases.
+
+Las decisiones de sincronización local-first, FakeRemote, contratos de capas, errores/logs, ajustes, progreso local y OAuth de AniList permanecen documentadas como ADR adicionales; no reemplazan estos catorce elementos ni se aprueban automáticamente.
 
 ### Documentación F0.3
 

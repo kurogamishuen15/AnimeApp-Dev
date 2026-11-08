@@ -1,7 +1,7 @@
 # ADR-013: Estrategia de pruebas
 
 - Fuente: plan maestro, sección 3 (lista suministrada por el propietario el 2026-11-08).
-- Estado: **Herramienta parcialmente usada en F0; estrategia de fakes manuales especificada en plan, aprobación formal no consta**.
+- Estado: **Aceptado por el propietario el 2026-11-08 como selección de estrategia; cobertura del núcleo pendiente de F1.12**.
 - Fase: F1.12 para núcleo; pruebas de reproducción/UI en F2–F4.
 - Requisitos: NFR-09, NFR-10.
 
@@ -16,4 +16,4 @@ Usar `flutter_test` para pruebas Flutter/widgets y fakes escritos a mano para pu
 
 ## Consecuencias y aceptación
 
-En F1.12 compartir pruebas de contrato entre repositorios/fakes y cubrir errores, offline e integridad. F0 ya usa `flutter_test` para el widget test; eso no equivale a validar aún la estrategia del núcleo. Cada fake debe ser determinista y mantener comportamiento verificable.
+En F1.12 compartir pruebas de contrato entre repositorios/fakes y cubrir errores, offline e integridad. F0 ya usa `flutter_test` para el widget test; eso no equivale a validar aún la estrategia del núcleo. Cada fake debe ser determinista y mantener comportamiento verificable. No incorporar herramientas de mocking/codegen sin nueva revisión.

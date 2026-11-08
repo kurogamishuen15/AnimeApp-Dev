@@ -1,13 +1,13 @@
 # ADR-012: Estilo de subtítulos
 
 - Fuente: plan maestro, sección 3 (lista suministrada por el propietario el 2026-11-08).
-- Estado: **Especificado en el plan; aprobación formal no consta en el registro local**.
+- Estado: **Aceptado por el propietario el 2026-11-08 como selección arquitectónica; propiedades soportadas pendientes de spike**.
 - Fase: F2.6–F2.8.
 - Requisitos: MVP de reproducción mock; detalle de controles pendiente de F2.
 
 ## Propuesta
 
-Aplicar estilo de subtítulos mediante propiedades de mpv a través del adaptador `media_kit`/`PlaybackEngine`, si la API expuesta permite las propiedades necesarias. La UI no escribe propiedades directamente sobre el motor.
+Aplicar estilo de subtítulos mediante propiedades de mpv a través del adaptador `media_kit`/`PlaybackEngine`. La UI no escribe propiedades directamente sobre el motor.
 
 ## Alternativas
 
@@ -16,4 +16,4 @@ Aplicar estilo de subtítulos mediante propiedades de mpv a través del adaptado
 
 ## Consecuencias y aceptación
 
-No implementar ahora. En F2 probar estilos con archivos/casos representativos, cambio de fuente, sincronización y liberación de recursos; mapear solo propiedades soportadas y documentar límites. Subtítulos externos cumplen sus subfases separadas.
+No implementar ahora. En F2 probar estilos con archivos/casos representativos, cambio de fuente, sincronización y liberación de recursos; verificar qué propiedades expone la integración y documentar límites antes de integrar. Subtítulos externos cumplen sus subfases separadas.

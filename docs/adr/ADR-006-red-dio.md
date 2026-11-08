@@ -1,7 +1,7 @@
 # ADR-006: Transporte de red
 
 - Fuente de propuesta: plan maestro, sección 3 (lista suministrada por el propietario el 2026-11-08).
-- Estado: **Propuesto; no consta aprobación formal**. `TECH_DECISIONS.md` también lo marca como propuesta.
+- Estado: **Aceptado por el propietario el 2026-11-08 como selección arquitectónica; spike y validación técnica pendientes**.
 - Fase: F1.8 para AniList; F5 para cliente/backend de sincronización si procede.
 - Requisitos: FR-05, NFR-06, NFR-08.
 
@@ -11,7 +11,7 @@ La red se restringe a adaptadores; el dominio no importa clientes HTTP. Dio fue 
 
 ## Propuesta
 
-Evaluar Dio como cliente de transporte inyectable en el adaptador AniList. No usar interceptores globales para logging de cuerpos o secretos.
+Usar Dio como cliente de transporte inyectable en adaptadores remotos. No usar interceptores globales para logging de cuerpos o secretos.
 
 ## Alternativas
 
@@ -20,4 +20,4 @@ Evaluar Dio como cliente de transporte inyectable en el adaptador AniList. No us
 
 ## Consecuencias y aceptación
 
-No agregar el paquete aún. Spike con timeout, cancelación, HTTP/JSON inválidos, cliente falso, redacción de headers, licencia y compatibilidad. Pruebas usan transporte falso sin llamar servicios externos por defecto.
+Integrar en F1.8 (y donde lo requiera F5) tras verificar timeout, cancelación, HTTP/JSON inválidos, cliente falso, redacción de headers, licencia y compatibilidad. Pruebas usan transporte falso sin llamar servicios externos por defecto.

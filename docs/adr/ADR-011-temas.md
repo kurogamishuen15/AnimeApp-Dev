@@ -1,7 +1,7 @@
 # ADR-011: Sistema de temas
 
 - Fuente: plan maestro, sección 3 (lista suministrada por el propietario el 2026-11-08).
-- Estado: **Principio aprobado en `TECH_DECISIONS.md`; motor ThemeExtension aún no consta aprobado**.
+- Estado: **Aceptado por el propietario el 2026-11-08 como selección arquitectónica**.
 - Fase: F3.1 y packs F3.6.
 - Requisitos: NFR-10; UI y temas excluidos de F1.
 
@@ -15,4 +15,4 @@ Implementar el motor de tema propio usando `ThemeExtension` de Flutter para toke
 
 ## Consecuencias y aceptación
 
-No implementar en F1. En F3 validar temas claro/oscuro/contraste si se aprueba, extensiones completas, fallback para claves ausentes y que contenido de pack no ejecute código. La biblioteca/custom renderer adicional no está seleccionada.
+No implementar en F1. En F3 validar temas, extensiones completas, fallback para claves ausentes y que contenido de pack no ejecute código. Contrastes/estados visuales se verifican conforme al requisito de accesibilidad NFR-12. No se autoriza una biblioteca/custom renderer adicional.
