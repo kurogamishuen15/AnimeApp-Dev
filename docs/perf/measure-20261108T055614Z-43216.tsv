@@ -1,0 +1,17 @@
+# AnimeApp initial Linux measurement
+# measured_at_utc	2026-11-08T05:56:14Z
+# app_version	1.0.0+1
+# mode	release
+# os_kernel	Linux 6.19.10-300.fc44.x86_64
+# cpu_arch	x86_64
+# online_cpu_count	8
+# memory_total_kib	7852852
+# window_detector	xdotool
+# pub_cache	.ai-local/pub-cache
+run	spawn_pid	window_status	launch_to_window_ms	rss_after_start_kib	idle_seconds	rss_after_idle_kib
+1	43234	window-timeout	NA	139528	5	139528
+2	44610	window-timeout	NA	139896	5	139896
+3	45995	window-timeout	NA	144944	5	144944
+# median_launch_to_window_ms	NA
+# median_rss_after_start_kib	139896
+# median_rss_after_idle_kib	139896

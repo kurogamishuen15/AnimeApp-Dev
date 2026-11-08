@@ -1,0 +1,23 @@
+# AnimeApp initial Linux measurement
+# measured_at_utc	2026-11-08T13:30:59Z
+# app_version	1.0.0+1
+# mode	release
+# os_kernel	Linux 6.19.10-300.fc44.x86_64
+# cpu_arch	x86_64
+# online_cpu_count	8
+# memory_total_kib	7852848
+# window_observer	unavailable-wayland-session
+# note	framework post-frame callback timing; superseded by engine-rasterized marker in 20261108T133341Z
+# cpu_ticks_per_second	100
+# pub_cache	.ai-local/pub-cache
+run	spawn_pid	process_identity	first_frame_ms	window_status	launch_to_window_ms	rss_after_frame_kib	idle_seconds	rss_after_idle_kib	cpu_idle_avg_percent_one_core
+# status	collecting; only status=complete is a valid full run
+1	14203	verified-bundle-executable	403	not-observable-wayland	NA	134096	5	140704	1.20
+2	14563	verified-bundle-executable	445	not-observable-wayland	NA	132152	5	145136	1.60
+3	14913	verified-bundle-executable	469	not-observable-wayland	NA	134020	5	145040	1.00
+# median_first_frame_ms	445
+# median_launch_to_window_ms	NA
+# median_rss_after_frame_kib	134020
+# median_rss_after_idle_kib	145040
+# median_cpu_idle_avg_percent_one_core	1.20
+# complete	true
