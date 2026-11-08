@@ -1,0 +1,58 @@
+# Estado derivado, respaldos y registros privados del entorno IA
+.ai-local/
+
+# Configuración local de Codex: contiene selección de herramientas MCP del equipo
+.codex/config.toml
+
+# Flutter y Dart (la aplicación vivirá en app/)
+app/.dart_tool/
+app/.packages
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/.pub-cache/
+app/build/
+app/coverage/
+app/android/local.properties
+app/linux/flutter/ephemeral/
+app/windows/flutter/ephemeral/
+
+# IDE y archivos temporales locales
+.idea/
+*.iml
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+*~
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Logs, temporales y credenciales
+*.log
+*.tmp
+*.bak
+*.orig
+*.secret
+*.token
+*.sqlite3-wal
+*.sqlite3-shm
+
+__pycache__/
+*.py[cod]
+.venv/
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+*.jks
+*.keystore
+key.properties
+client_secret*.json
+credentials*.json
+token.json
+auth.json

@@ -1,0 +1,10 @@
+{
+  "objective": "Lee AGENTS.md y la memoria declarada. Añade una frase de comprobación a docs/ai-system/DELEGATION_PROBE.md sin modificar otros archivos. Esta es una prueba de infraestructura, no una función de producto.",
+  "allowed_paths": ["docs/ai-system/DELEGATION_PROBE.md"],
+  "context_paths": ["AGENTS.md", "docs/memory/PROJECT_STATE.md"],
+  "validation_commands": [["python3", "-c", "from pathlib import Path; p=Path('docs/ai-system/DELEGATION_PROBE.md'); assert p.is_file() and p.stat().st_size > 50"]],
+  "timeout_seconds": 300,
+  "max_attempts": 1,
+  "network": "none",
+  "commit": false
+}

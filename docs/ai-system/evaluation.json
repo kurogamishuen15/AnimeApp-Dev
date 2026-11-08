@@ -1,0 +1,168 @@
+{
+  "date": "2026-11-07",
+  "timezone": "America/Bogota",
+  "measured_at_utc": "2026-11-08T04:30:22.116568+00:00",
+  "baseline": {
+    "documents": 29,
+    "characters": 57685,
+    "tokens_proxy_chars_div_4": 14422,
+    "milliseconds_median": 0.621,
+    "method": "lectura del corpus Markdown completo; sin invocar modelo"
+  },
+  "recovery_cases": [
+    {
+      "name": "tecnología",
+      "query": "por qué se eligió SQLite FTS5",
+      "passed": true,
+      "top1_relevant": true,
+      "precision_at_returned_fragments": 0.667,
+      "documents": [
+        "docs/ai-system/DELEGATION_PROBE.md",
+        "docs/memory/decisions/AI-001-memoria-local.md"
+      ],
+      "fragments": 3,
+      "relevant_paths_declared": [
+        "docs/ai-system/MEMORY_ARCHITECTURE.md",
+        "docs/memory/decisions/AI-001-memoria-local.md"
+      ],
+      "milliseconds_median": 40.866,
+      "context_characters": 2058,
+      "tokens_proxy_chars_div_4": 515,
+      "context_reduction_percent": 96.43
+    },
+    {
+      "name": "error histórico",
+      "query": "error histórico Podman solución",
+      "passed": true,
+      "top1_relevant": true,
+      "precision_at_returned_fragments": 0.667,
+      "documents": [
+        "docs/ai-system/RUNBOOK.md",
+        "docs/memory/LESSONS_LEARNED.md",
+        "docs/memory/sessions/2026-11-07-setup.md"
+      ],
+      "fragments": 3,
+      "relevant_paths_declared": [
+        "docs/ai-system/RUNBOOK.md",
+        "docs/memory/KNOWN_ISSUES.md",
+        "docs/memory/sessions/2026-11-07-setup.md"
+      ],
+      "milliseconds_median": 39.036,
+      "context_characters": 2201,
+      "tokens_proxy_chars_div_4": 551,
+      "context_reduction_percent": 96.18
+    },
+    {
+      "name": "módulo responsable",
+      "query": "módulo responsable recuperar conocimiento",
+      "passed": true,
+      "top1_relevant": true,
+      "precision_at_returned_fragments": 0.333,
+      "documents": [
+        "docs/ai-system/AUTONOMY_POLICY.md",
+        "docs/memory/MODULE_INDEX.md",
+        "docs/memory/README.md"
+      ],
+      "fragments": 3,
+      "relevant_paths_declared": [
+        "docs/memory/MODULE_INDEX.md"
+      ],
+      "milliseconds_median": 40.27,
+      "context_characters": 2900,
+      "tokens_proxy_chars_div_4": 725,
+      "context_reduction_percent": 94.97
+    },
+    {
+      "name": "rendimiento",
+      "query": "restricciones rendimiento RAM",
+      "passed": true,
+      "top1_relevant": true,
+      "precision_at_returned_fragments": 0.667,
+      "documents": [
+        "docs/ai-system/AGENT_REGISTRY.md",
+        "docs/memory/KNOWN_ISSUES.md",
+        "docs/memory/decisions/AI-002-autonomia.md"
+      ],
+      "fragments": 3,
+      "relevant_paths_declared": [
+        "docs/ai-system/AGENT_REGISTRY.md",
+        "docs/ai-system/ENVIRONMENT_AUDIT.md",
+        "docs/memory/decisions/AI-002-autonomia.md"
+      ],
+      "milliseconds_median": 40.916,
+      "context_characters": 2519,
+      "tokens_proxy_chars_div_4": 630,
+      "context_reduction_percent": 95.63
+    },
+    {
+      "name": "contexto para otra IA",
+      "passed": true,
+      "documents": [
+        "docs/memory/AI_HANDOFF.md",
+        "docs/memory/ARCHITECTURE_INDEX.md",
+        "docs/memory/DECISIONS.md",
+        "docs/memory/KNOWN_ISSUES.md",
+        "docs/memory/MODULE_INDEX.md",
+        "docs/memory/PROJECT_STATE.md"
+      ],
+      "milliseconds": 41.829,
+      "context_characters": 4697,
+      "tokens_proxy_chars_div_4": 1175,
+      "truncated": true
+    },
+    {
+      "name": "contradicciones y obsolescencia",
+      "passed": true,
+      "contradiction_detected": true,
+      "obsolete_detected": true,
+      "obsolete_hidden": true,
+      "resolved_after_correction": true,
+      "milliseconds": 1.26,
+      "issues": [
+        {
+          "path": "docs/memory/old.md",
+          "issue": "Memoria obsoleta"
+        },
+        {
+          "path": "docs/memory/a.md",
+          "issue": "Claim incompatible: fixture.backend",
+          "conflicts_with": "docs/memory/b.md"
+        }
+      ],
+      "scope": "fixture explícito, no contradicciones inventadas del producto"
+    }
+  ],
+  "memory_lint_issues": [],
+  "backup_hashes_valid": true,
+  "toolchain_fixture": {
+    "passed": true,
+    "branch": "ai/evaluation",
+    "commit": "d1d9dda406bb436b9b74422ca9dae054741ce380",
+    "clean": true,
+    "scope": "Git y herramientas reales en fixture temporal; no invoca modelo, red ni Podman",
+    "steps": [
+      "leer instrucciones",
+      "recuperar memoria",
+      "editar probe.txt",
+      "validar contenido",
+      "registrar episodio",
+      "comprobar metadata",
+      "preparar traspaso",
+      "revisar staged",
+      "commit local",
+      "Git limpio"
+    ]
+  },
+  "model_usage": {
+    "input_tokens": null,
+    "output_tokens": null,
+    "cached_input_tokens": null,
+    "model_calls": null,
+    "estimated_cost": null
+  },
+  "limitations": [
+    "proxy de contexto no es facturación ni tokenizer",
+    "fixture Git no certifica runner nocturno",
+    "no hay código de producto en este proyecto"
+  ]
+}
