@@ -1,15 +1,37 @@
 # AnimeApp
 
-Repositorio privado de desarrollo de AnimeApp y de su infraestructura de coordinación, memoria y verificación de IA. El estado confirmado de cada componente se registra en la documentación; la existencia de planificación no implica que una función esté implementada.
+AnimeApp es un proyecto multiplataforma para explorar, organizar y reproducir anime. El desarrollo empieza en Fedora Linux. La aplicación Flutter se está preparando; no se debe confundir el plan con funciones ya implementadas.
 
-## Orientación para colaboradores y agentes
+## Documentación principal del proyecto
 
-- Empezar en [AGENTS.md](AGENTS.md) y [docs/memory/PROJECT_STATE.md](docs/memory/PROJECT_STATE.md).
-- Consultar [CONTRIBUTING.md](CONTRIBUTING.md) para ramas, revisión y Conventional Commits.
-- Consultar [RELEASING.md](RELEASING.md) para el proceso futuro de aprobación y publicación pública.
-- La memoria técnica y el traspaso entre sesiones están en [docs/memory/README.md](docs/memory/README.md) y [docs/memory/AI_HANDOFF.md](docs/memory/AI_HANDOFF.md).
+| Documento | Propósito |
+| --- | --- |
+| [PROJECT_PLAN.md](PROJECT_PLAN.md) | Objetivos, alcance MVP, fases y criterios generales. |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Capas, límites de módulos y adaptadores previstos. |
+| [ROADMAP.md](ROADMAP.md) | Orden y dependencias de fases/subfases. |
+| [PROGRESS.md](PROGRESS.md) | Estado real, evidencia y pendientes por subfase. |
+| [TECH_DECISIONS.md](TECH_DECISIONS.md) | Decisiones aprobadas, propuestas y cuestiones abiertas. |
+| [CHANGELOG.md](CHANGELOG.md) | Cambios por subfase y versión. |
+| [TESTING.md](TESTING.md) | Comandos y alcance de las pruebas disponibles y previstas. |
+| [Decisión D3 sobre LICENSE](TECH_DECISIONS.md#licencia-del-proyecto) | Archivo legal adicional, pendiente de elección del propietario. |
 
-La aplicación Flutter está prevista en `app/`. No inicializarla ni instalar dependencias hasta que la subfase correspondiente esté autorizada.
+La documentación requerida de F0.3 consta de README más los otros siete documentos Markdown de la tabla; todos están creados y enlazados. `LICENSE` es un archivo adicional previsto, sujeto a D3, y su decisión pendiente no bloquea F0.3. No se inventa un archivo legal.
+
+## Contribuir y publicar
+
+- [AGENTS.md](AGENTS.md) es el punto de entrada para agentes.
+- [CONTRIBUTING.md](CONTRIBUTING.md) explica ramas, Conventional Commits y revisión.
+- [RELEASING.md](RELEASING.md) describe la publicación futura y la selección explícita de archivos.
+- [CHANGELOG.md](CHANGELOG.md) registra los cambios y [TESTING.md](TESTING.md) contiene las instrucciones de prueba.
+- El estado vigente para continuar es [docs/memory/PROJECT_STATE.md](docs/memory/PROJECT_STATE.md) y [docs/memory/AI_HANDOFF.md](docs/memory/AI_HANDOFF.md).
+
+AnimeApp-Dev es el repositorio privado de trabajo. AnimeApp es el repositorio público, actualmente vacío. No se publican automáticamente el historial ni los documentos internos.
+
+## Instalar, ejecutar y probar
+
+El esqueleto Linux está en `app/`; su instalación y pruebas están descritas en [TESTING.md](TESTING.md) y [app/README.md](app/README.md). No instalar paquetes del sistema ni modificar configuraciones globales sin autorización. El estado real de cada comprobación está en `PROGRESS.md`.
+
+La infraestructura de IA existente usa Python estándar y SQLite FTS5. Desde la raíz:
 
 ```bash
 python3 tools/ai/memory.py search "SQLite memoria" --max-chars 4000
@@ -18,8 +40,8 @@ python3 -m unittest discover -s tests/ai -v
 python3 tools/ai/evaluate.py
 ```
 
-Comenzar en [AGENTS.md](AGENTS.md), [guía del entorno](docs/ai-system/README.md) y [estado/informe final](docs/ai-system/FINAL_REPORT.md). Python 3.11+ con SQLite FTS5; memoria sin suscripciones ni procesos residentes. Hay 11 perfiles especializados de Codex y documentación portable para otras IA.
+Para la memoria técnica de IA, consulta [docs/ai-system/README.md](docs/ai-system/README.md) y [docs/ai-system/FINAL_REPORT.md](docs/ai-system/FINAL_REPORT.md). El proyecto conserva once perfiles especializados y documentación para continuidad entre IA.
 
 El ejecutor nocturno es experimental y se bloquea sin imagen, proveedor y pruebas reales de aislamiento. No confundir los tests con una certificación de operación desatendida. No se habilitan servicios, arranque automático ni push.
 
-Antes de publicar este proyecto debe decidirse una licencia. No se impone una licencia de producto durante esta misión de entorno.
+La licencia del proyecto y las licencias de dependencias deben revisarse antes de distribuir código o binarios.
