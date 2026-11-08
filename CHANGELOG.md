@@ -13,7 +13,7 @@ Cambios notables por versión y subfase. Sigue Conventional Commits para el hist
 ### F0.4 Esqueleto Flutter Linux
 
 - Se creó una app mínima con Linux, identidad de dominio Dart puro, composición UI, lints y prueba widget.
-- `pub get`, análisis Dart, widget test y arranque del proceso con `flutter run -d linux` pasaron; la visibilidad de la ventana no se pudo verificar en Wayland. `flutter analyze` queda bloqueado por error LSP.
+- `pub get`, análisis Dart, widget test y `flutter run -d linux` pasaron; Spectacle verificó la ventana Wayland en [captura](docs/perf/wayland-window-20261108.png). `flutter analyze` queda bloqueado por error LSP.
 
 ### F0.5 Controles de calidad
 
@@ -23,7 +23,7 @@ Cambios notables por versión y subfase. Sigue Conventional Commits para el hist
 ### F0.6 Medición inicial
 
 - Bundle Linux release compilado. Tres ejecuciones registraron 462 ms medianos al primer frame rasterizado, RSS de 140096 KiB tras el frame, 145284 KiB tras cinco segundos y CPU de reposo de 0.60% de un núcleo.
-- En Wayland la ventana es no observable mediante el detector X11; la latencia de ventana queda NA. El entorno reporta 7.5 GiB RAM y no representa el objetivo de 4 GB. No se midió reproducción ni fugas prolongadas.
+- La ventana se verificó visualmente con Spectacle, pero no hay latencia numérica (xdotool no observa Wayland). El entorno reporta 7.5 GiB RAM y no representa el objetivo de 4 GB. No se midió reproducción ni fugas prolongadas.
 - Datos: [medición F0.6](docs/perf/measure-20261108T133341Z-15982.tsv); método: [docs/perf/README.md](docs/perf/README.md).
 
 ### F0.3 Documentación
