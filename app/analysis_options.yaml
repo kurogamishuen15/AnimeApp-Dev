@@ -1,0 +1,19 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  strict-casts: true
+  strict-inference: true
+  strict-raw-types: true
+  exclude:
+    - build/**
+    - linux/**
+
+linter:
+  rules:
+    avoid_dynamic_calls: true
+    cancel_subscriptions: true
+    close_sinks: true
+    directives_ordering: true
+    prefer_final_locals: true
+    require_trailing_commas: true
+    unawaited_futures: true
