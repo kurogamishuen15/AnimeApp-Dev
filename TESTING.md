@@ -121,3 +121,11 @@ adaptador](app/lib/data/anilist/README.md).
 ## F1.10 — Progreso local
 
 `flutter test --no-pub test/data/local_db/local_progress_repository_test.dart` ejecuta tres pruebas con SQLite temporal bajo `.ai-local/`: guardar y recuperar después de cierre/reapertura, reemplazo por identidad exacta, y ausencia de fila/validación JSON. No prueba campos de progreso de producto, reanudación, sincronización, escritura interrumpida ni rendimiento; esos contratos siguen pendientes de definición en ADR-A10/FR-03/FR-11.
+
+## F1.11 — Contrato local-first
+
+`flutter test --no-pub test/data/testing/fake_sync_remote_test.dart` cubre ack, error configurable e ID vacío. El fake no tiene persistencia ni red. `dart scripts/check_imports.dart --root .` verifica que el dominio de sincronización no dependa de Flutter/infraestructura. Estas pruebas no acreditan idempotencia, conflicto, reintentos ni compatibilidad Supabase.
+
+## F1.12 — Núcleo integrado
+
+`flutter test --no-pub test/core/core_integration_test.dart` comprueba que, después de un submit que falla en `FakeSyncRemote`, un registro SQLite conserva su payload. Es una integración focalizada entre los adaptadores, no un flujo end-to-end: aún no existe coordinador de sincronización. `bash scripts/ci.sh` ejecuta la suite completa (40 pruebas IA, 36 pruebas Flutter, análisis, fixtures negativos del checker y validación global de imports). Para reproducir la ejecución actualmente validada, selecciona explícitamente Flutter 3.50.0-0.4.pre / Dart 3.14.0 desde `.ai-local/toolchains/flutter`; stable 3.47.9 todavía falla `flutter analyze` por la incidencia LSP de la ruta Unicode. No se declara CI verde con stable.

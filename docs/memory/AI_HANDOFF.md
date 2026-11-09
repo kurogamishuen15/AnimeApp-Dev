@@ -62,3 +62,11 @@ Puerto Dart puro `SecureCredentialStore` y adaptador `flutter_secure_storage 11.
 ### F1.10 — 2026-11-09
 
 `ProgressDraft`/`ProgressDocument`/`ProgressRepository` puros; `LocalProgressRepository` persiste JSON opaco en Drift, por identidad caller-owned y timestamp técnico UTC generado al guardar. 3 tests SQLite cubren cierre/reapertura, reemplazo exact-key, ausencia/JSON inválido. Revisión de datos pidió separar draft del read model y corregir el nombre de prueba; quedó atendida. F1.10 parcial: FR-03/FR-18 requieren definición propietaria de identidad anime/episodio y campos; no inventar posición, duración, porcentaje, finalización o precedencia. Ver sesión F1.10. Próximo F1.11 contract/FakeRemote; no real Supabase.
+
+### F1.12 — 2026-11-09
+
+`test/core/core_integration_test.dart` comprueba local-first: FakeSyncRemote falla y el progreso SQLite permanece. `bash scripts/ci.sh` exit 0 con Flutter 3.50.0-0.4.pre/Dart 3.14.0 beta: 40 IA, checks sintéticos, 36 Flutter, análisis y 8 archivos domain pasan. Stable 3.47.9 sigue fallando LSP Unicode; no decir universalmente CI verde. F1.9–F1.11 tienen límites/decisiones pendientes documentadas. No iniciar F2. Ver sesión F1.12.
+
+### F1.11 — 2026-11-09
+
+`domain/synchronization/SyncRemote` acepta un envelope JSON opaco y retorna un recibo. `FakeSyncRemote` registra deep snapshots inmutables, permite callback de respuesta y no deduplica, persiste, resuelve conflictos, reintenta ni usa Supabase. Cuatro pruebas; auditor contractual encontró aliasing anidado y se corrigió. F1.11 parcial hasta definir protocol identity/idempotency/conflict/order/delete/retry. Ver ADR-A11 y sesión.

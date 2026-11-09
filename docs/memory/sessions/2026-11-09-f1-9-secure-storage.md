@@ -38,4 +38,4 @@ Con Flutter 3.50.0-0.4.pre / Dart 3.14.0 beta:
 
 ## Commit
 
-- Commit de cierre F1.9: pendiente al momento de redactar esta sesión.
+- Commit F1.9: `5724afa`; tests de contrato agregados por `3bc6da3`.

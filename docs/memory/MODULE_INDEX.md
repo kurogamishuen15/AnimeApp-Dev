@@ -18,6 +18,8 @@ Evidencia: Rutas de herramientas y sus tests
 | Puerto de progreso local | app/lib/domain/progress y app/lib/data/local_db/local_progress_repository.dart; [README](../../app/lib/domain/progress/README.md) | SQLite real: guardar/reabrir, upsert por clave, ausencia y validación; campos de producto pendientes |
 | Puerto y adaptador de credenciales seguras | app/lib/domain/auth y app/lib/data/secure_storage; [README](../../app/lib/data/secure_storage/README.md) | CRUD fake-backed, análisis y build Linux; runtime del keyring/OAuth pendientes |
 | Identidad independiente del toolkit | app/lib/domain/app_identity.dart; [README](../../app/lib/domain/README.md) | test widget y checker recursivo de imports |
+| Contrato remoto de sincronización | app/lib/domain/synchronization y app/lib/data/testing/fake_sync_remote.dart; [README](../../app/lib/domain/synchronization/README.md) | fake configurable, deep snapshot y errores; protocolo pendiente |
+| Integración de contratos del núcleo | app/test/core/core_integration_test.dart; [sesión](sessions/2026-11-09-f1-12-core-tests.md) | fallo remoto fake preserva progreso SQLite local; ejecución dentro de `scripts/ci.sh` |
 | Runner nativo Linux | app/linux | `flutter build linux --release` |
 | CI local y límites de imports | scripts/ci.sh, scripts/check_imports.dart | prueba sintética y ejecución CI |
 | Medición de rendimiento Linux | scripts/measure.sh | TSV en docs/perf; evidencia de PID y salida completa |

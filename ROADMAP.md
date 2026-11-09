@@ -37,6 +37,10 @@ F1.10 aporta persistencia local genérica de documentos opacos por identidad exa
 
 F1.4 conserva solo el scaffold Linux y el dominio Dart puro existentes; no crea carpetas vacías ni código, servicios, interfaces o dependencias para Android, Android TV o Windows. El checker de imports protege todos los subdirectorios `domain` de `app/lib`. Las plataformas futuras se incorporarán con adaptadores solo tras identificar diferencias y consumidores reales. F1.5 define el catálogo y contrato funcional de ajustes; F1.6 aporta persistencia durable Drift, migraciones y verificación tras reinicio.
 
+F1.11 aporta únicamente un contrato opaco de submit y FakeRemote configurable; no resuelve idempotencia, conflictos, reintentos ni orden y no activa Supabase. Ver [ADR-A11](docs/adr/additional/ADR-A11-sincronizacion-fakeremote.md) y [PROGRESS.md](PROGRESS.md).
+
+F1.12 verificó el núcleo técnico mediante CI, fakes manuales, SQLite aislado y loopback HTTP; una falla remota fake conserva el progreso local. El resultado no cierra OAuth/keyring, modelo de progreso, política de conflictos ni elegibilidad AniList. CI pasa solo con el SDK beta aislado seleccionado; stable 3.47.9 mantiene el fallo LSP documentado. [Evidencia](docs/memory/sessions/2026-11-09-f1-12-core-tests.md).
+
 ## F2 Reproductor
 
 F2.1 evaluación de motores → F2.2 spike media_kit → F2.3 controles → F2.4 sesión/estados → F2.5 contrato y proveedor mock → F2.6 subtítulos internos → F2.7 cambio de fuente → F2.8 subtítulos externos → F2.9–F2.10 saltos → F2.11 rendimiento y estabilidad.

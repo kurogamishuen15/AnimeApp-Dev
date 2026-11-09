@@ -21,6 +21,14 @@ Cambios notables por versión y subfase. Sigue Conventional Commits para el hist
 - Añadidos contratos de definición/registro con valor por defecto, propietario, codec JSON y validador; store SQLite local-first con `get`, `set` y `watch` reactivo. Resultados y errores usan los tipos de F1.7.
 - Cinco pruebas reales cubren defaults, validación, tipo corrupto, registro único, actualización reactiva, errores del stream y persistencia al reabrir. No se inventaron claves/defaults de producto ausentes en los documentos aprobados; el registro productivo continúa vacío. Ver [README settings](app/lib/settings/README.md).
 
+### F1.12 — Pruebas del núcleo
+
+- Añadida prueba de integración local-first; CI beta aislada valida fakes, SQLite temporal, loopback, análisis y límites de imports. No requiere servicios externos.
+
+### F1.11 — Contrato de sincronización
+
+- Añadido puerto `SyncRemote` y `FakeSyncRemote` de pruebas con respuesta inyectable. No fija conflicto/idempotencia ni conecta backend.
+
 ### F1.10 — Persistencia local de progreso
 
 - Añadido repositorio Drift de documentos opacos por identidad exacta, con timestamps técnicos UTC y tests SQLite de reapertura y reemplazo. No se eligieron campos de producto ni semántica temporal de progreso.

@@ -30,4 +30,4 @@ Definir identidad estable anime/episodio, campos mínimos para continuidad, qué
 
 ## Commit
 
-- Commit F1.10: pendiente al momento de redactar esta sesión.
+- Commit F1.10: `0c6bc4c`.

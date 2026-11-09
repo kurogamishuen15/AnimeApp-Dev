@@ -28,4 +28,4 @@ Definir por el propietario identidad/idempotencia de cambios, concurrencia/confl
 
 ## Commit
 
-- Commit F1.11: pendiente al momento de redactar esta sesión.
+- Commit F1.11: `6bea050`.
