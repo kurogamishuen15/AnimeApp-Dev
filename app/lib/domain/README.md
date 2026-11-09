@@ -11,9 +11,11 @@ Contiene identidad y, cuando existan, modelos, reglas y contratos propios del ne
 | `app_identity.dart` | `AppIdentity.name`, constante pública con el nombre de la aplicación. |
 | `catalog/anime_summary.dart` | Resultado de búsqueda de dominio con fuente explícita, modelo anime minimal y error de refresco opcional. |
 | `catalog/anime_catalog_repository.dart` | Puerto Dart puro para búsqueda de catálogo, usando `Result` y modelos propios. |
+| `auth/secure_credential_store.dart` | Puerto Dart puro para leer, guardar y borrar localmente el token de acceso en un adaptador seguro. |
 
-El dominio incluye los modelos de catálogo puros en `catalog/`; el repositorio
-AniList se declara aquí y el adaptador reside en `data/anilist`.
+El dominio incluye los modelos de catálogo puros en `catalog/`, el puerto de
+credenciales en `auth/` y el repositorio AniList; sus adaptadores residen en
+`data/anilist` y `data/secure_storage`.
 
 ## Dependencias permitidas y prohibidas
 
@@ -27,4 +29,7 @@ El widget raíz usa `AppIdentity.name`. Los modelos de catálogo no ejecutan I/O
 
 ## Portabilidad y trabajo pendiente
 
-El módulo es Dart puro y reutilizable en todas las plataformas objetivo. El checker de imports impide acoplarlo a Flutter/Drift/Dio/plugins. El adapter AniList y su cache son infraestructura externos y no son necesarios para analizar o usar capacidades locales.
+El módulo es Dart puro y reutilizable en todas las plataformas objetivo. El
+checker de imports impide acoplarlo a Flutter/Drift/Dio/plugins. Los adaptadores
+AniList, almacenamiento seguro y cache son infraestructura externa y no son
+necesarios para analizar o usar capacidades locales.

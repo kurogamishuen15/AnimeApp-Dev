@@ -29,3 +29,7 @@ No se implementa OAuth en F1.1/F1.2. F1.9 documentará redirect, PKCE/secretos, 
 ## Aceptación y verificación
 
 Antes de implementación: citar documentación primaria vigente, demostrar el flujo compatible con app nativa, restringir permisos a lectura requerida, probar cancelación/error/callback inválido y confirmar que desconectar borra credenciales. Revisión de seguridad antes de aprobar.
+
+## Investigación F1.9 (sin decisión de flujo)
+
+La [guía oficial de autenticación](https://docs.anilist.co/guide/auth/) describe OAuth2 y tanto Authorization Code Grant como Implicit Grant. Esto confirma alternativas soportadas por el proveedor, pero no selecciona una para AnimeApp ni define cliente nativo, redirect/callback, scopes, expiry/refresh, cancelación o revocación. No se incorporó OAuth ni se creó una sesión.

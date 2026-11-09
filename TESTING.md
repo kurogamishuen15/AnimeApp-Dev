@@ -113,3 +113,7 @@ El uso en producción permanece desconectado hasta revisar los términos de
 AniList para el alcance de AnimeApp. La caché implementada reemplaza una sola
 búsqueda explícita y nunca hace scraping/prefetch/bulk. Ver [documentación del
 adaptador](app/lib/data/anilist/README.md).
+
+## F1.9 — Almacenamiento seguro
+
+`flutter test --no-pub test/data/secure_storage` ejecuta cuatro pruebas contra un fake manual: guardar/leer/borrar, rechazo de token vacío, ausencia de token y errores genéricos que no revelan excepciones del backend. No contactan el keyring. `flutter build linux --debug` comprueba compilación del plugin Linux `flutter_secure_storage_linux`; no ejecuta operaciones de runtime. La prueba real de Secret Service debe realizarse en un entorno autorizado y aislado antes de habilitar cuentas. OAuth sigue pendiente de decisión y no tiene pruebas de flujo/callback.

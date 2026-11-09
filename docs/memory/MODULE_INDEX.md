@@ -15,6 +15,7 @@ Evidencia: Rutas de herramientas y sus tests
 | Definición, catálogo y store local de ajustes | app/lib/settings; [README](../../app/lib/settings/README.md) | defaults, codec/validación, get/set/watch y reinicio |
 | Contrato catálogo puro | app/lib/domain/catalog; [README](../../app/lib/domain/README.md) | import checker; modelos sin Flutter/SQL/HTTP |
 | AniList GraphQL y cache acotada | app/lib/data/anilist; [README](../../app/lib/data/anilist/README.md) | transporte HTTP loopback, errores, rate limiter y migración v2→v3 |
+| Puerto y adaptador de credenciales seguras | app/lib/domain/auth y app/lib/data/secure_storage; [README](../../app/lib/data/secure_storage/README.md) | CRUD fake-backed, análisis y build Linux; runtime del keyring/OAuth pendientes |
 | Identidad independiente del toolkit | app/lib/domain/app_identity.dart; [README](../../app/lib/domain/README.md) | test widget y checker recursivo de imports |
 | Runner nativo Linux | app/linux | `flutter build linux --release` |
 | CI local y límites de imports | scripts/ci.sh, scripts/check_imports.dart | prueba sintética y ejecución CI |
