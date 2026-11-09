@@ -70,3 +70,7 @@ Puerto Dart puro `SecureCredentialStore` y adaptador `flutter_secure_storage 11.
 ### F1.11 — 2026-11-09
 
 `domain/synchronization/SyncRemote` acepta un envelope JSON opaco y retorna un recibo. `FakeSyncRemote` registra deep snapshots inmutables, permite callback de respuesta y no deduplica, persiste, resuelve conflictos, reintenta ni usa Supabase. Cuatro pruebas; auditor contractual encontró aliasing anidado y se corrigió. F1.11 parcial hasta definir protocol identity/idempotency/conflict/order/delete/retry. Ver ADR-A11 y sesión.
+
+### Auditoría real F1.5–F1.12 — 2026-11-09
+
+Informe verificable: [`docs/validation/2026-11-09-f1-5-f1-12-real-tests.md`](../../docs/validation/2026-11-09-f1-5-f1-12-real-tests.md). Focaliza trabajo posterior en decisiones propietarias: elegibilidad AniList, TTL/retención de búsquedas, catálogo de preferencias, OAuth/keyring, esquema de progreso y protocolos sync. No hacer request público ni activar keyring sin que se resuelvan sus condiciones. 44 pruebas Flutter, analyze, Linux release y CI exit 0 con SDK beta aislado; stable 3.47.9 sigue con la falla LSP Unicode. No confundir el flujo de integración entre adaptadores con una función de producto conectada a UI. No iniciar F2.

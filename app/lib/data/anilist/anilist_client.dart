@@ -72,6 +72,7 @@ class AniListClient implements AnimeCatalogRepository {
         },
         options: Options(
           contentType: Headers.jsonContentType,
+          followRedirects: false,
           validateStatus: (status) => status != null,
         ),
       );
@@ -115,6 +116,9 @@ class AniListClient implements AnimeCatalogRepository {
     if (statusCode == 403) {
       return const Failure(UnavailableError());
     }
+    if (statusCode == 401) {
+      return const Failure(AuthAppError());
+    }
     if (statusCode == null || statusCode < 200 || statusCode >= 300) {
       return const Failure(NetworkError());
     }
@@ -139,6 +143,9 @@ class AniListClient implements AnimeCatalogRepository {
         }
         if (graphQlStatus == 403) {
           return const Failure(UnavailableError());
+        }
+        if (graphQlStatus == 401) {
+          return const Failure(AuthAppError());
         }
         return const Failure(
           UnknownAppError('AniList returned a GraphQL error.'),
@@ -224,10 +231,14 @@ class AniListClient implements AnimeCatalogRepository {
 
 /// Shared per-process request gate. Separate adapters should share this gate.
 class AniListRateLimiter {
-  AniListRateLimiter({DateTime Function()? clock})
-    : _clock = clock ?? DateTime.now;
+  AniListRateLimiter({
+    DateTime Function()? clock,
+    Future<void> Function(Duration duration)? delay,
+  }) : _clock = clock ?? DateTime.now,
+       _delay = delay ?? _defaultDelay;
 
   final DateTime Function() _clock;
+  final Future<void> Function(Duration duration) _delay;
   Future<void> _queue = Future<void>.value();
   DateTime _nextRequestAt = DateTime.fromMillisecondsSinceEpoch(0, isUtc: true);
   DateTime? _retryUntil;
@@ -254,7 +265,7 @@ class AniListRateLimiter {
       }
       final Duration wait = target.difference(now);
       if (wait > Duration.zero) {
-        await Future<void>.delayed(wait);
+        await _delay(wait);
       }
       _nextRequestAt = _clock().toUtc().add(_minimumRequestInterval);
     } finally {
@@ -286,4 +297,7 @@ class AniListRateLimiter {
     _retryUntil = _clock().toUtc().add(retryAfter);
     return RateLimitError(retryAfter: retryAfter);
   }
+
+  static Future<void> _defaultDelay(Duration duration) =>
+      Future<void>.delayed(duration);
 }

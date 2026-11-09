@@ -4,6 +4,18 @@ Cambios notables por versión y subfase. Sigue Conventional Commits para el hist
 
 ## Sin publicar
 
+### Auditoría de pruebas reales F1.5–F1.12
+
+- Añadida integración de settings, SQLite persistente, HTTP loopback, cache,
+  desconexión/reinicio y recuperación; verificación de integridad de SQLite.
+- Corregidas emisiones redundantes de `SettingsStore.watch`, redirecciones
+  reenviadas de AniList, mapeo de 401 y saneamiento de URL malformadas.
+- Ampliadas pruebas para statuses HTTP/GraphQL, tasas con reloj simulado,
+  cache corrupta y conexiones cerradas. La elegibilidad externa de AniList,
+  keyring real/OAuth y los contratos funcionales de progreso/sync siguen
+  pendientes o bloqueados.
+- Informe detallado y limitaciones: [validación F1.5–F1.12](docs/validation/2026-11-09-f1-5-f1-12-real-tests.md).
+
 ### F1.7 — Core result, errores y logging
 
 - Añadidos tipos de error de aplicación y `Result<T>` con transformaciones tipadas.

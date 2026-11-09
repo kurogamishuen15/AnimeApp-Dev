@@ -76,15 +76,21 @@ class SettingsStore {
     SettingDefinition<T> definition,
   ) async* {
     try {
+      String? lastValueJson;
+      bool hasLastValue = false;
       final query = database.select(database.settingsEntries)
         ..where((table) => table.settingKey.equals(definition.key));
       await for (final rows in query.watch()) {
-        if (rows.isEmpty) {
-          yield Success(definition.defaultValue);
-          continue;
-        }
         try {
-          yield Success(definition.decodeJson(rows.single.valueJson));
+          final T value = rows.isEmpty
+              ? definition.defaultValue
+              : definition.decodeJson(rows.single.valueJson);
+          final String encodedValue = definition.encodeJson(value);
+          if (!hasLastValue || encodedValue != lastValueJson) {
+            yield Success(value);
+            lastValueJson = encodedValue;
+            hasLastValue = true;
+          }
         } on Object {
           yield const Failure(StorageError('Could not decode the setting.'));
         }

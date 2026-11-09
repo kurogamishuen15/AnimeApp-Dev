@@ -19,6 +19,11 @@ Service keyring at runtime; build and distribution compatibility remain
 platform validation items. No credentials, OAuth callback flow, account
 session, or live API requests are included.
 
+The F1.5–F1.12 audit did not access or initialize a desktop keyring. Runtime
+CRUD is therefore **BLOCKED / NOT VERIFIED** in this environment; the fake
+tests and Linux compilation are not evidence of Secret Service runtime
+behavior.
+
 ## Portability
 
 The domain depends only on `SecureCredentialStore` and `Result`. The Flutter

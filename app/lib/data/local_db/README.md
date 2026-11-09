@@ -33,9 +33,12 @@ composición de aplicación crea y cierra la base.
 ## Pruebas y portabilidad
 
 `test/data/local_db/app_database_test.dart` comprueba creación, persistencia
-tras cierre y reapertura, migración de archivo v1 con datos existentes y
-rollback transaccional. Cada prueba crea y elimina su propio directorio dentro
-de `.ai-local/`; no usar la base de usuario de la aplicación en pruebas.
+tras cierre y reapertura, migración de archivo v1 con datos existentes a
+schema v3 (incluye la rama v1→v2 y luego v2→v3), migración v2→v3 y rollback
+transaccional. `test/core/f1_12_real_integration_test.dart` además verifica
+`PRAGMA integrity_check` luego de cierre/reapertura y una secuencia settings →
+SQLite → HTTP loopback → caché → desconexión/reinicio → recuperación. Cada prueba
+usa su propio directorio bajo `.ai-local/`; no usa la base real de aplicación.
 
 Drift/SQLite es una selección aprobada (ADR-005); la versión bloqueada y los
 archivos generados se revisan junto con el `pubspec.lock`. Licencia,

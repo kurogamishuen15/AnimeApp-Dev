@@ -14,15 +14,23 @@ not log request/response data.
   subsequent `X-RateLimit-Limit` headers adjust spacing across client
   instances. `429` and `Retry-After` become `RateLimitError`; the client never
   retries automatically.
+- HTTP and GraphQL 401 errors become `AuthAppError`. Redirects are disabled so
+  a search POST is not forwarded to another host.
 - Timeout, transport, server-unavailable, malformed GraphQL and empty search
   results remain distinguishable. Missing optional titles map to `null`.
-- Tests use a real local loopback HTTP server and never call AniList.
+- Tests use a real local loopback HTTP server and never call AniList. Injected
+  clock/delay tests cover the 90/minute and 30/minute windows without sleeping.
 
 `OfflineFirstAnimeCatalog` saves only the most recent explicit search in one
 replace-on-write database slot. It falls back only when the same query, page
 and result count match, and reports `localCache` plus the refresh error. It
-does not prefetch, crawl, or bulk retain catalogue data. Persistent use remains
-subject to owner review of current API terms.
+does not prefetch, crawl, or bulk retain catalogue data. The real integration
+test closes the loopback server, closes/reopens SQLite, confirms a refused
+connection and serves the persistent result offline, then reconnects to a
+second loopback server and verifies recovery. No TTL or freshness rule exists:
+`cachedAt` is metadata only, and staleness needs an approved product policy.
+Images are not cached. Persistent use remains subject to owner review of
+current API terms.
 
 ## Policy and release status
 

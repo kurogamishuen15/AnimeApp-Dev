@@ -1,40 +1,53 @@
 # AnimeApp — aplicación Linux
 
-Esqueleto Flutter que se implementa y valida primero en Fedora/Linux. F1.4 organiza el código existente por responsabilidades; no incorpora funciones de catálogo, ajustes, reproducción, red ni persistencia.
+Aplicación Flutter con ejecución inicial Fedora/Linux y lógica de dominio Dart
+reutilizable. El núcleo ya incluye Result/errores/logger, contratos de dominio,
+ajustes tipados, almacenamiento local SQLite, adaptadores AniList y secure
+storage, además de repositorios locales de progreso y un contrato de sync.
+Estos módulos no implican que los recorridos de producto estén conectados a la
+interfaz.
 
 ## Estructura activa
 
 ```text
 app/lib/
-├── main.dart
-├── app/
-│   ├── README.md
-│   └── anime_app.dart
-└── domain/
-    ├── README.md
-    └── app_identity.dart
+├── app/                 composición y UI inicial
+├── core/                Result, errores y logging seguro
+├── data/                SQLite, AniList y almacenamiento seguro
+├── domain/              modelos y puertos Dart puros
+├── settings/            registro y store de preferencias
+└── main.dart            punto de entrada Linux/Flutter
 ```
 
-`app/lib/app/` compone y presenta la aplicación. `app/lib/domain/` mantiene identidad Dart pura. `main.dart` es el único punto de entrada. No se crearon `core`, `shared`, `features`, `integrations` o `platform`: no hay consumidores/implementaciones que justifiquen esos directorios todavía. El runner actual vive en `app/linux/`.
+Cada módulo documenta responsabilidades, pruebas y portabilidad en su README.
+La composición visible aún presenta una pantalla inicial; no conecta ajustes,
+catálogo, progreso, autenticación ni sincronización al flujo de producto.
+Android, Android TV y Windows no forman parte de esta implementación.
 
 ## Límites de dependencias
 
-- Dominio puede usar Dart puro y otros contratos de dominio; no puede importar Flutter/UI, composición `app`, infraestructura, integraciones ni APIs de sistema.
-- Presentación depende de Flutter y `material_ui` y consume dominio/casos de uso. No accede directamente a almacenamiento, red, autenticación o motor multimedia.
-- Adaptadores e integraciones se añadirán solo en sus fases y cuando exista una necesidad concreta. No hay adaptadores anticipados para Android, Android TV o Windows.
-- Dependencias de producto actuales: Flutter SDK y el paquete oficial `material_ui` para widgets Material. No se añadieron servicios ni adaptadores.
+- El dominio usa Dart puro y contratos del dominio; no importa Flutter/UI,
+  composición, plugins, red ni base de datos.
+- UI y composición llaman a capacidades a través de puertos y adaptadores; la
+  integración del producto sigue pendiente.
+- Adaptadores multiplataforma futuros solo se incorporan cuando exista un
+  consumidor y una necesidad validada.
+- No hay motor de reproducción implementado.
 
-El checker recursivo protege cualquier carpeta llamada `domain` bajo `lib`, resuelve imports `package:` del paquete y relativos, y prohíbe dependencias de dominio a composición, presentación, infraestructura e integraciones de plataforma. Sus fixtures y limitaciones están en [`scripts/README.md`](../scripts/README.md).
+El checker recursivo protege cualquier carpeta `domain` bajo `lib`, resuelve
+imports package/relativos y aplica límites de arquitectura. Sus fixtures están
+en [`scripts/README.md`](../scripts/README.md).
 
 ## Comprobaciones
 
-Desde `app/`:
+Desde `app/`, con el SDK seleccionado según [`TESTING.md`](../TESTING.md):
 
 ```bash
 dart format --output=none --set-exit-if-changed lib test
 dart analyze lib test
+flutter analyze --no-pub
 flutter test --no-pub
-flutter run -d linux --no-pub
+flutter build linux --release --no-pub
 ```
 
 Desde la raíz del repositorio:
@@ -45,30 +58,19 @@ bash scripts/test_check_imports.sh
 bash scripts/ci.sh
 ```
 
-F0.4–F0.6 y el fallo conocido de `flutter analyze` se registran en [`PROGRESS.md`](../PROGRESS.md) y [`TESTING.md`](../TESTING.md). Los resultados de esta ejecución de F1.4 se anotan allí y en la sesión vinculada; no se considera exitoso un comando solo porque aparezca en esta lista.
+La suite integrada de F1.12 usa archivo SQLite real y servidores loopback. No
+usa las cuentas/keyring del usuario ni llama a AniList externo. Los resultados
+exactos y limitaciones están en [`docs/validation`](../docs/validation/2026-11-09-f1-5-f1-12-real-tests.md).
 
-## Toolchain de análisis en rutas Unicode
+## Herramientas y distribución
 
-La stable local Flutter 3.47.9/Dart 3.13.7 falla en `flutter analyze` cuando resuelve la raíz bajo `Vídeos`; la causa y evidencia están en [TESTING.md](../TESTING.md). La versión oficial 3.50.0-0.4.pre contiene el fix upstream, pero es beta y solo se usa como selección aislada de validación, no como requisito permanente. Para reproducir CI en una terminal con ese SDK instalado bajo `.ai-local/toolchains/flutter`:
+La stable Flutter local aún tiene el fallo LSP de Unicode documentado en
+[`TESTING.md`](../TESTING.md). La validación reproducible usó el SDK beta
+aislado de `.ai-local/toolchains/flutter`; no se cambió el SDK global. La
+compilación Linux comprueba el destino de desarrollo, no el empaquetado Flatpak
+ni rendimiento en hardware de 4 GB.
 
-```bash
-export PATH="$PWD/.ai-local/toolchains/flutter/bin:$PATH"
-export PUB_CACHE="$PWD/.ai-local/pub-cache"
-cd app
-flutter pub get
-dart analyze lib test
-flutter analyze --no-pub
-flutter test --no-pub
-```
-
-Desde la raíz, el CI completo se ejecuta con el mismo `PATH`: `bash scripts/ci.sh`. Sin esa selección explícita, los comandos usan el Flutter/Dart global. No cambies la ruta del proyecto para evitar la incidencia.
-
-## Rendimiento y ciclo de vida
-
-El arranque no crea servicios, procesos o tareas en segundo plano. Cada módulo debe cerrar recursos que cree y justificar cachés o inicialización costosa. El checker y los README no añaden dependencias de runtime.
-
-## Portabilidad y próximos módulos
-
-La composición Flutter y la identidad Dart son reutilizables; el runner y el empaquetado actuales son Linux. Cuando haya una función, se añadirá su módulo dentro de `features/` o `integrations/` según responsabilidad. Los tipos transversales irán a `core/` solo al tener varios consumidores; `shared/` exige reutilización real. `platform/` se reservará para adaptadores concretos. La inclusión futura de Android/TV/Windows requiere análisis de dependencias, adaptación de UI/host y pruebas de paridad; no se preparan ahora archivos vacíos.
-
-F1.5 definirá el catálogo de ajustes y sus tipos/defaults. F1.6 implementará la persistencia local aprobada. Ninguna de las dos subfases forma parte de este esqueleto.
+La composición Flutter y los contratos Dart son reutilizables. Linux es la
+única plataforma ejecutable validada aquí; el backend de keyring requiere
+prueba runtime autorizada. La elegibilidad de AniList y la integración de
+cuentas siguen pendientes.

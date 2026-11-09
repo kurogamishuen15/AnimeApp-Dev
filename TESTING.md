@@ -90,6 +90,9 @@ migración v1→v2 con datos, reapertura y rollback; F1.5 prueba defaults,
 validación, lectura/escritura, watch, errores tipados y reinicio. No se usa la
 base de la aplicación real. Las pruebas solo tienen definiciones sintéticas;
 no implican un catálogo de ajustes aprobado.
+La auditoría F1.12 añade aislamiento entre claves y evita notificaciones por
+escrituras equivalentes. El test detectó una emisión redundante causada por
+actualizaciones de otra fila; el store compara el JSON tipado validado.
 
 `sqlite3` 3.x carga un asset nativo; la configuración estándar lo obtiene del
 release oficial de su paquete y valida SHA-256. En el entorno de esta ejecución
@@ -105,9 +108,10 @@ documentada arriba; no se declara verde con esa versión.
 
 Desde `app/`, los tests de `test/data/anilist/` levantan un servidor HTTP solo
 en loopback. Cubren POST GraphQL de lectura, request variables, mapeo al modelo
-de dominio, campos ausentes, errores GraphQL/HTTP, timeout, 429/Retry-After,
-rate gate entre clientes, cache de una sola búsqueda, fallback offline y
-migración v2→v3. No hay prueba de carga ni request a `graphql.anilist.co`.
+de dominio, campos ausentes, errores GraphQL/HTTP (400/401/403/429/5xx),
+timeout, redirección rechazada, `Retry-After`, tasas 90/30 con reloj simulado,
+caché de una búsqueda, datos corruptos, fallback offline y migración v2→v3.
+No hay prueba de carga ni request a `graphql.anilist.co`.
 
 El uso en producción permanece desconectado hasta revisar los términos de
 AniList para el alcance de AnimeApp. La caché implementada reemplaza una sola
@@ -128,4 +132,11 @@ adaptador](app/lib/data/anilist/README.md).
 
 ## F1.12 — Núcleo integrado
 
-`flutter test --no-pub test/core/core_integration_test.dart` comprueba que, después de un submit que falla en `FakeSyncRemote`, un registro SQLite conserva su payload. Es una integración focalizada entre los adaptadores, no un flujo end-to-end: aún no existe coordinador de sincronización. `bash scripts/ci.sh` ejecuta la suite completa (40 pruebas IA, 36 pruebas Flutter, análisis, fixtures negativos del checker y validación global de imports). Para reproducir la ejecución actualmente validada, selecciona explícitamente Flutter 3.50.0-0.4.pre / Dart 3.14.0 desde `.ai-local/toolchains/flutter`; stable 3.47.9 todavía falla `flutter analyze` por la incidencia LSP de la ruta Unicode. No se declara CI verde con stable.
+`flutter test --no-pub test/core/f1_12_real_integration_test.dart` recorre
+ajustes → SQLite en archivo → HTTP loopback → caché persistente →
+cierre/reapertura → conexión rechazada offline → recuperación con un segundo
+servidor. Comprueba `PRAGMA integrity_check` después del cierre.
+`core_integration_test.dart` comprueba aparte que una falla de `FakeSyncRemote`
+no altera el progreso local; no existe coordinador de sincronización.
+
+El informe, comandos, códigos y límites están en [validación real F1.5–F1.12](docs/validation/2026-11-09-f1-5-f1-12-real-tests.md). La suite Flutter completa terminó con 44 pruebas en Flutter 3.50.0-0.4.pre / Dart 3.14.0 seleccionados explícitamente; el resultado de CI completa y build Linux consta en el informe. La stable 3.47.9 todavía falla `flutter analyze` por el defecto LSP de ruta Unicode; no se declara CI verde con stable.

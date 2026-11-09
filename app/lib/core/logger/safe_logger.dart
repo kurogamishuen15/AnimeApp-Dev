@@ -162,7 +162,13 @@ String _safeText(String value) {
   );
   result = result.replaceAllMapped(
     RegExp(r'[a-z][a-z0-9+.-]*://[^\s]+', caseSensitive: false),
-    (match) => _safeUri(Uri.parse(match.group(0)!)),
+    (match) {
+      try {
+        return _safeUri(Uri.parse(match.group(0)!));
+      } on FormatException {
+        return '[INVALID URL]';
+      }
+    },
   );
   return result;
 }

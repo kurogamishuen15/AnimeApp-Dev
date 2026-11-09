@@ -119,6 +119,45 @@ void main() {
     },
   );
 
+  test('does not emit a setting when a different key changes', () async {
+    final directory = await _temporaryDatabaseDirectory();
+    final database = AppDatabase.atFile(
+      File('${directory.path}/settings.sqlite'),
+    );
+    final watched = _integerSetting(key: 'test.watched');
+    final unrelated = _integerSetting(key: 'test.unrelated');
+    final registry = SettingsRegistry()
+      ..register(watched)
+      ..register(unrelated);
+    final store = SettingsStore(database: database, registry: registry);
+    final values = StreamIterator(store.watch(watched));
+
+    try {
+      expect(await values.moveNext(), isTrue);
+      expect((values.current as Success<int>).value, watched.defaultValue);
+      final Future<bool> nextValue = values.moveNext();
+      expect(await store.set(unrelated, 9), isA<Success<void>>());
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      var emitted = false;
+      unawaited(nextValue.then((_) => emitted = true));
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      expect(emitted, isFalse);
+      expect(
+        await store.set(watched, watched.defaultValue),
+        isA<Success<void>>(),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      expect(emitted, isFalse);
+      expect(await store.set(watched, 12), isA<Success<void>>());
+      expect(await nextValue, isTrue);
+      expect((values.current as Success<int>).value, 12);
+    } finally {
+      await values.cancel();
+      await database.close();
+      await directory.delete(recursive: true);
+    }
+  });
+
   test(
     'rejects invalid values, corrupt persisted types and unregistered keys',
     () async {

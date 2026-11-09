@@ -190,4 +190,63 @@ void main() {
       }
     },
   );
+
+  test(
+    'reports corrupt persistent cache instead of presenting empty success',
+    () async {
+      final HttpServer server = await HttpServer.bind(
+        InternetAddress.loopbackIPv4,
+        0,
+      );
+      server.listen((request) {
+        unawaited(() async {
+          await utf8.decoder.bind(request).join();
+          request.response.statusCode = HttpStatus.serviceUnavailable;
+          request.response.headers.set('X-RateLimit-Limit', '60000');
+          request.response.headers.contentType = ContentType.json;
+          request.response.write('{"errors":[{"status":503}]}');
+          await request.response.close();
+        }());
+      });
+      final Dio dio = Dio(
+        BaseOptions(baseUrl: 'http://${server.address.address}:${server.port}'),
+      );
+      final Directory directory = await _temporaryDatabaseDirectory();
+      final AppDatabase database = AppDatabase.atFile(
+        File('${directory.path}/anime.sqlite'),
+      );
+      final OfflineFirstAnimeCatalog repository = OfflineFirstAnimeCatalog(
+        remote: _createClient(dio),
+        database: database,
+      );
+
+      try {
+        await database
+            .into(database.latestAnimeSearch)
+            .insert(
+              LatestAnimeSearchCompanion.insert(
+                slot: 'latest_user_search',
+                searchQuery: 'corrupt query',
+                page: 1,
+                perPage: 20,
+                resultJson: '{not json',
+                cachedAt: DateTime.utc(2026, 11, 9),
+              ),
+            );
+        final Result<AnimeSearchResult> result = await repository.searchAnime(
+          'corrupt query',
+        );
+        expect(result, isA<Failure<AnimeSearchResult>>());
+        expect(
+          (result as Failure<AnimeSearchResult>).error,
+          isA<StorageError>(),
+        );
+      } finally {
+        await database.close();
+        dio.close(force: true);
+        await server.close(force: true);
+        await directory.delete(recursive: true);
+      }
+    },
+  );
 }

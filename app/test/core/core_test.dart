@@ -73,6 +73,24 @@ void main() {
       expect(output, contains('[PATH REDACTED]'));
     });
 
+    test('does not throw when sanitizing a malformed URL-like value', () {
+      final sink = MemoryLogSink();
+      final logger = SafeLogger(sink: sink.call);
+
+      expect(
+        () => logger.log(
+          LogLevel.warning,
+          'malformed url: https://[',
+          fields: const {'message': 'see https://[ for details'},
+        ),
+        returnsNormally,
+      );
+      expect(sink.records, hasLength(1));
+      expect(sink.records.single.fields['message'], contains('[INVALID URL]'));
+      logger.dispose();
+      sink.dispose();
+    });
+
     test('redacts URI user info and multiple sinks stop receiving records', () {
       final first = MemoryLogSink();
       final second = MemoryLogSink();

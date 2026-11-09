@@ -25,3 +25,7 @@ F1.1–F1.8 están completas técnicamente con validaciones externas visibles; F
 
 ## Restricciones
 Un especialista a la vez en sesiones nuevas; no rebajar el modelo para ahorrar tokens. Sin push, sin servicios residentes ni secretos. Ante aprobación necesaria, continuar tareas independientes y registrar bloqueo.
+
+### Auditoría de pruebas reales F1.5–F1.12 — 2026-11-09
+
+Se ejecutaron 44 pruebas Flutter, `flutter analyze`, Dart analyze, build Linux release y CI con Flutter `3.50.0-0.4.pre` / Dart `3.14.0-315.3.beta` aislado; todos los comandos obligatorios finalizaron exit 0. CI incluye 40 pruebas IA. SQLite real pasó persistencia, reopen, ruta migratoria v1→v2→v3, v2→v3, rollback e `integrity_check`. El test nuevo integra settings, HTTP loopback, cache, servidor cerrado, offline tras reopen y recuperación. La revisión detectó/corrigió eventos redundantes en `SettingsStore.watch`, redirect del POST AniList, mapeo de 401 y crash potencial al sanear URLs malformadas. AniList externo: 0 solicitudes por elegibilidad pendiente; keyring y OAuth reales no probados. F1.10 permanece JSON opaco; F1.11 carece de outbox/políticas. El flujo del producto sigue sin conectar estos adaptadores y no se inició F2. Evidencia en [`informe de validación`](../../docs/validation/2026-11-09-f1-5-f1-12-real-tests.md) y [`sesión`](sessions/2026-11-09-f1-5-f1-12-real-tests.md). La CI stable de Flutter 3.47.9 sigue bloqueada por LSP Unicode.

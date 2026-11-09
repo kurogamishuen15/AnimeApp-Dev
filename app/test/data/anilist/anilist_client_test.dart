@@ -57,10 +57,14 @@ void main() {
     () async {
       var requestCount = 0;
       String? requestMethod;
+      String? authorizationHeader;
       Map<String, Object?>? requestBody;
       final LoopbackServer server = await _startServer((request) async {
         requestCount++;
         requestMethod = request.method;
+        authorizationHeader = request.headers.value(
+          HttpHeaders.authorizationHeader,
+        );
         requestBody = _map(jsonDecode(await utf8.decoder.bind(request).join()));
         await _respond(
           request,
@@ -102,6 +106,7 @@ void main() {
         expect(anime.last.id, 22);
         expect(requestCount, 1);
         expect(requestMethod, 'POST');
+        expect(authorizationHeader, isNull);
         expect(requestBody?['query'], contains('query SearchAnime'));
         expect(requestBody?['query'], isNot(contains('mutation')));
         expect(_map(requestBody?['variables']), {
@@ -157,6 +162,140 @@ void main() {
       await server.close();
     }
   });
+
+  test('maps HTTP status classes without retrying', () async {
+    const cases = <(int, Type)>[
+      (HttpStatus.badRequest, NetworkError),
+      (HttpStatus.unauthorized, AuthAppError),
+      (HttpStatus.forbidden, UnavailableError),
+      (HttpStatus.internalServerError, UnavailableError),
+      (HttpStatus.serviceUnavailable, UnavailableError),
+    ];
+    for (final (int status, Type expectedType) in cases) {
+      var requestCount = 0;
+      final LoopbackServer server = await _startServer((request) async {
+        requestCount++;
+        await _respond(request, status: status, body: '{"errors":[]}');
+      });
+      final Dio dio = Dio(BaseOptions(baseUrl: server.baseUrl));
+      final AniListClient client = _createClient(dio);
+
+      try {
+        final Result<AnimeSearchResult> result = await client.searchAnime(
+          'status fixture',
+        );
+        expect(result, isA<Failure<AnimeSearchResult>>());
+        expect(
+          (result as Failure<AnimeSearchResult>).error.runtimeType,
+          expectedType,
+        );
+        expect(requestCount, 1, reason: 'status $status must not retry');
+      } finally {
+        dio.close(force: true);
+        await server.close();
+      }
+    }
+  });
+
+  test('maps GraphQL HTTP 200 authentication errors to AuthAppError', () async {
+    final LoopbackServer server = await _startServer(
+      (request) => _respond(
+        request,
+        body: '{"errors":[{"status":401}],"data":{"Page":{"media":[]}}}',
+      ),
+    );
+    final Dio dio = Dio(BaseOptions(baseUrl: server.baseUrl));
+    final AniListClient client = _createClient(dio);
+
+    try {
+      final Result<AnimeSearchResult> result = await client.searchAnime('auth');
+      expect(result, isA<Failure<AnimeSearchResult>>());
+      expect((result as Failure<AnimeSearchResult>).error, isA<AuthAppError>());
+    } finally {
+      dio.close(force: true);
+      await server.close();
+    }
+  });
+
+  test('does not forward search POSTs across a redirect', () async {
+    var redirectedRequests = 0;
+    final LoopbackServer destination = await _startServer((request) async {
+      redirectedRequests++;
+      await _respond(request, body: '{"data":{"Page":{"media":[]}}}');
+    });
+    final LoopbackServer redirect = await _startServer(
+      (request) => _respond(
+        request,
+        status: HttpStatus.temporaryRedirect,
+        headers: {'Location': '${destination.baseUrl}/capture'},
+        body: '{}',
+      ),
+    );
+    final Dio dio = Dio(BaseOptions(baseUrl: redirect.baseUrl));
+    final AniListClient client = _createClient(dio);
+
+    try {
+      final Result<AnimeSearchResult> result = await client.searchAnime(
+        'redirect fixture',
+      );
+      expect(result, isA<Failure<AnimeSearchResult>>());
+      expect((result as Failure<AnimeSearchResult>).error, isA<NetworkError>());
+      expect(redirectedRequests, 0);
+    } finally {
+      dio.close(force: true);
+      await redirect.close();
+      await destination.close();
+    }
+  });
+
+  test(
+    'uses injected clock and delay for dynamic 90 and 30 per minute limits',
+    () async {
+      var now = DateTime.utc(2026, 11, 9);
+      final List<Duration> waits = [];
+      final limiter = AniListRateLimiter(
+        clock: () => now,
+        delay: (duration) async {
+          waits.add(duration);
+          now = now.add(duration);
+        },
+      );
+
+      await limiter.waitForRequestSlot();
+      limiter.updateRateLimit(
+        Headers.fromMap({
+          'x-ratelimit-limit': ['90'],
+        }),
+      );
+      await limiter.waitForRequestSlot();
+      await limiter.waitForRequestSlot();
+      expect(waits, [
+        const Duration(seconds: 2),
+        const Duration(milliseconds: 667),
+      ]);
+
+      waits.clear();
+      limiter.updateRateLimit(
+        Headers.fromMap({
+          'x-ratelimit-limit': ['30'],
+        }),
+      );
+      await limiter.waitForRequestSlot();
+      await limiter.waitForRequestSlot();
+      expect(waits, [
+        const Duration(milliseconds: 667),
+        const Duration(seconds: 2),
+      ]);
+
+      limiter.updateRateLimit(
+        Headers.fromMap({
+          'retry-after': ['30'],
+        }),
+      );
+      await limiter.waitForRequestSlot();
+      expect(waits.last, const Duration(seconds: 30));
+    },
+  );
 
   test('maps service rate limiting and retry hint to a typed error', () async {
     final LoopbackServer server = await _startServer(
