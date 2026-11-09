@@ -12,10 +12,13 @@ Contiene identidad y, cuando existan, modelos, reglas y contratos propios del ne
 | `catalog/anime_summary.dart` | Resultado de búsqueda de dominio con fuente explícita, modelo anime minimal y error de refresco opcional. |
 | `catalog/anime_catalog_repository.dart` | Puerto Dart puro para búsqueda de catálogo, usando `Result` y modelos propios. |
 | `auth/secure_credential_store.dart` | Puerto Dart puro para leer, guardar y borrar localmente el token de acceso en un adaptador seguro. |
+| `progress/progress_document.dart` | Payload local opaco e identidad exacta del consumidor, sin campos de negocio de progreso. |
+| `synchronization/` | Contrato Dart puro de transporte sync con envelope opaco; políticas de réplica pendientes. |
+| `progress/progress_repository.dart` | Puerto local para guardar/recuperar un documento de progreso por identidad. |
 
 El dominio incluye los modelos de catálogo puros en `catalog/`, el puerto de
-credenciales en `auth/` y el repositorio AniList; sus adaptadores residen en
-`data/anilist` y `data/secure_storage`.
+credenciales en `auth/`, progreso en `progress/`, el límite remoto en `synchronization/` y el repositorio AniList; sus
+adaptadores residen en `data/anilist`, `data/secure_storage` y `data/local_db`.
 
 ## Dependencias permitidas y prohibidas
 

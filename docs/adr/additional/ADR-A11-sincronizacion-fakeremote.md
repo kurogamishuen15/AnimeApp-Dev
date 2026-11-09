@@ -29,3 +29,9 @@ F1.11 debe decidir identidad de cambios, idempotencia, orden, conflictos, borrad
 ## Aceptación y verificación
 
 Ejecutar los mismos tests de contrato contra fake local/remoto; probar repetición de petición, desconexión, conflicto concurrente y reinicio. Confirmar que el uso local no requiere red y que no existe código ni configuración de despliegue en esta fase.
+
+## Contrato F1.11 (sin política de réplica aprobada)
+
+Se añadió un puerto Dart puro `SyncRemote.submit(SyncEnvelope)` con un identificador y payload opacos provistos por el llamador. `FakeSyncRemote` permite respuesta tipada configurable y registra cada intento en memoria. El fake reconoce solicitudes vacías como inválidas, pero no retiene datos remotos, deduplica, fusiona, ordena, borra ni reintenta.
+
+Esto valida el límite de dependencia y el paso de resultados/errores; no completa idempotencia remota ni resolución de conflictos. Antes de implementar sincronización real, el propietario debe definir identidad persistente del cambio, semántica de repetición, conflictos, borrado, precedencia/orden, reintentos y carga permitida. No hay conexión Supabase, despliegue, configuración de Auth/RLS ni transferencia de video.
