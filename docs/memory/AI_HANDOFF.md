@@ -42,3 +42,7 @@ Causa upstream reproducida y confirmada por lectura de código del SDK estable y
 ### F1.7 — 2026-11-09
 
 Implementados `core/errors`, `core/result` y `core/logger`, con README y pruebas unitarias. Revisión estática seguridad sin bloqueos críticos; logger no registra `toString()` de objetos desconocidos, omite path/query/fragment/userinfo de URI y no persiste logs. `flutter test test/core`, analyze y CI beta pasan. F1.7 completada. Siguiente: F1.6 SQLite/Drift real y migración v1→v2, después F1.5. Flutter stable 3.47.9 sigue con LSP 255; no afirmar CI stable verde. Cambios concurrentes de `.codex/agents`, `AGENTS.md`, `docs/ai-system` permanecen sin commit.
+
+### F1.6 — 2026-11-09
+
+Implementado `data/local_db` con Drift/SQLite schema v2, snapshot v1 y migración real v1→v2; las pruebas verifican conservación de filas, archivo persistente tras cierre/reapertura y rollback. Tres pruebas específicas, `dart analyze` y Flutter analyze pasan al seleccionar Flutter beta aislado. El hook intentó bajar el binario oficial y recibió HTTP 504; se descargó el asset de release oficial y se verificó SHA-256 contra el hash publicado. El binario está en `.ai-local`/`.dart_tool`, ambos locales e ignorados. No hay dependencia global ni SDK modificado. Rendimiento/Flatpak/licencia pendiente; sin reglas funcionales de progreso. Commit y validación integral pendientes. Próximo paso: F1.5 store/catálogo tipado de ajustes. Mantener intactos cambios concurrentes.

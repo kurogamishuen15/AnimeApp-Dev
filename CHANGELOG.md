@@ -10,6 +10,12 @@ Cambios notables por versión y subfase. Sigue Conventional Commits para el hist
 - Añadido logger estructurado con sinks inyectables, timestamps UTC, correlation id y sanitización de estructuras, credenciales y URI. No persiste mensajes.
 - Pruebas unitarias y revisión estática de seguridad documentadas en [README core](app/lib/core/README.md) y [sesión F1.7](docs/memory/sessions/2026-11-09-f1-7-core-result-logger.md).
 
+### F1.6 — Persistencia local Drift
+
+- Añadido `AppDatabase` con Drift/SQLite, schema version 2, archivo en application support y migración v1→v2 no destructiva. El snapshot histórico y la implementación opaca de progreso no fijan reglas funcionales pendientes.
+- Tres pruebas verifican archivo real, conservación al migrar, cierre/reapertura y rollback. Paquete y código generado documentados en [README local_db](app/lib/data/local_db/README.md).
+- La versión de SQLite fue verificada por hash contra el paquete oficial y quedó en caché ignorada. Las pruebas pasaron con Flutter 3.50.0-0.4.pre/Dart 3.14.0; Flutter stable conserva la incidencia LSP registrada en TESTING.md.
+
 
 ### Reparación de análisis y CI (F0.4–F0.5)
 
