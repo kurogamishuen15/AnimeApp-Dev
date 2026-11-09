@@ -126,6 +126,14 @@ adaptador](app/lib/data/anilist/README.md).
 
 `flutter test --no-pub test/data/local_db/local_progress_repository_test.dart` ejecuta tres pruebas con SQLite temporal bajo `.ai-local/`: guardar y recuperar después de cierre/reapertura, reemplazo por identidad exacta, y ausencia de fila/validación JSON. No prueba campos de progreso de producto, reanudación, sincronización, escritura interrumpida ni rendimiento; esos contratos siguen pendientes de definición en ADR-A10/FR-03/FR-11.
 
+El progreso tipado F1.10 está en `app/lib/domain/progress/`. Suite focalizada:
+`flutter test --no-pub test/data/local_db/playback_progress_repository_test.dart`
+y `app_database_test.dart`: SQLite físico CRUD/reopen/integrity, 45:00,
+migraciones snapshot v1→v4 y v3→v4 preservando `progress_documents`, eventos
+de checkpoint y carrera 15:00→45:00 con barrera sobre el writer Drift. El reloj
+es inyectado para los checkpoints. Resultados completos y versión SDK se
+registran en `PROGRESS.md` y `docs/memory/sessions/2026-11-09-f1-10-typed-progress.md`.
+
 ## F1.11 — Contrato local-first
 
 `flutter test --no-pub test/data/testing/fake_sync_remote_test.dart` cubre ack, error configurable e ID vacío. El fake no tiene persistencia ni red. `dart scripts/check_imports.dart --root .` verifica que el dominio de sincronización no dependa de Flutter/infraestructura. Estas pruebas no acreditan idempotencia, conflicto, reintentos ni compatibilidad Supabase.

@@ -4,6 +4,15 @@ Cambios notables por versión y subfase. Sigue Conventional Commits para el hist
 
 ## Sin publicar
 
+### F1.10 — progreso tipado local
+
+- Schema Drift v4 agrega `playback_progress_entries` con clave de contenido y
+  episodio, conservando intactos los documentos JSON heredados.
+- Añadidos IDs estables, progreso validado, CRUD local y coordinador de
+  checkpoints con serialización de escrituras y reloj/writer inyectables.
+- Pruebas SQLite físicas para migraciones, 45:00, reopen, integridad y carrera
+  minuto 15→45; límites y evidencia en [`README de progreso`](app/lib/domain/progress/README.md).
+
 ### Auditoría de pruebas reales F1.5–F1.12
 
 - Añadida integración de settings, SQLite persistente, HTTP loopback, cache,

@@ -124,7 +124,7 @@ void main() {
         final version = await database
             .customSelect('PRAGMA user_version')
             .getSingle();
-        expect(version.read<int>('user_version'), 3);
+        expect(version.read<int>('user_version'), 4);
       } finally {
         await database.close();
         await directory.delete(recursive: true);
@@ -167,7 +167,7 @@ void main() {
         final version = await database
             .customSelect('PRAGMA user_version')
             .getSingle();
-        expect(version.read<int>('user_version'), 3);
+        expect(version.read<int>('user_version'), 4);
       } finally {
         await database.close();
         await directory.delete(recursive: true);

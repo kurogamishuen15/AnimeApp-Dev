@@ -5,12 +5,20 @@ import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'tables/latest_anime_search.dart';
+import 'tables/playback_progress_entries.dart';
 import 'tables/progress_documents.dart';
 import 'tables/settings_entries.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [SettingsEntries, ProgressDocuments, LatestAnimeSearch])
+@DriftDatabase(
+  tables: [
+    SettingsEntries,
+    ProgressDocuments,
+    LatestAnimeSearch,
+    PlaybackProgressEntries,
+  ],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
@@ -21,7 +29,7 @@ class AppDatabase extends _$AppDatabase {
   factory AppDatabase.atFile(File file) => AppDatabase(NativeDatabase(file));
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -34,6 +42,9 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 3) {
         await migrator.createTable(latestAnimeSearch);
+      }
+      if (from < 4) {
+        await migrator.createTable(playbackProgressEntries);
       }
     },
     beforeOpen: (details) async {

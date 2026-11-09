@@ -974,6 +974,489 @@ class LatestAnimeSearchCompanion
   }
 }
 
+class $PlaybackProgressEntriesTable extends PlaybackProgressEntries
+    with TableInfo<$PlaybackProgressEntriesTable, PlaybackProgressEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PlaybackProgressEntriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _contentIdMeta = const VerificationMeta(
+    'contentId',
+  );
+  @override
+  late final GeneratedColumn<String> contentId = GeneratedColumn<String>(
+    'content_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _episodeIdMeta = const VerificationMeta(
+    'episodeId',
+  );
+  @override
+  late final GeneratedColumn<String> episodeId = GeneratedColumn<String>(
+    'episode_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _positionMsMeta = const VerificationMeta(
+    'positionMs',
+  );
+  @override
+  late final GeneratedColumn<int> positionMs = GeneratedColumn<int>(
+    'position_ms',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _durationMsMeta = const VerificationMeta(
+    'durationMs',
+  );
+  @override
+  late final GeneratedColumn<int> durationMs = GeneratedColumn<int>(
+    'duration_ms',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _updatedAtUtcMeta = const VerificationMeta(
+    'updatedAtUtc',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAtUtc = GeneratedColumn<DateTime>(
+    'updated_at_utc',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _completionMeta = const VerificationMeta(
+    'completion',
+  );
+  @override
+  late final GeneratedColumn<String> completion = GeneratedColumn<String>(
+    'completion',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _revisionMeta = const VerificationMeta(
+    'revision',
+  );
+  @override
+  late final GeneratedColumn<int> revision = GeneratedColumn<int>(
+    'revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    contentId,
+    episodeId,
+    positionMs,
+    durationMs,
+    updatedAtUtc,
+    completion,
+    revision,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'playback_progress_entries';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PlaybackProgressEntry> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('content_id')) {
+      context.handle(
+        _contentIdMeta,
+        contentId.isAcceptableOrUnknown(data['content_id']!, _contentIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_contentIdMeta);
+    }
+    if (data.containsKey('episode_id')) {
+      context.handle(
+        _episodeIdMeta,
+        episodeId.isAcceptableOrUnknown(data['episode_id']!, _episodeIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_episodeIdMeta);
+    }
+    if (data.containsKey('position_ms')) {
+      context.handle(
+        _positionMsMeta,
+        positionMs.isAcceptableOrUnknown(data['position_ms']!, _positionMsMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_positionMsMeta);
+    }
+    if (data.containsKey('duration_ms')) {
+      context.handle(
+        _durationMsMeta,
+        durationMs.isAcceptableOrUnknown(data['duration_ms']!, _durationMsMeta),
+      );
+    }
+    if (data.containsKey('updated_at_utc')) {
+      context.handle(
+        _updatedAtUtcMeta,
+        updatedAtUtc.isAcceptableOrUnknown(
+          data['updated_at_utc']!,
+          _updatedAtUtcMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtUtcMeta);
+    }
+    if (data.containsKey('completion')) {
+      context.handle(
+        _completionMeta,
+        completion.isAcceptableOrUnknown(data['completion']!, _completionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_completionMeta);
+    }
+    if (data.containsKey('revision')) {
+      context.handle(
+        _revisionMeta,
+        revision.isAcceptableOrUnknown(data['revision']!, _revisionMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {contentId, episodeId};
+  @override
+  PlaybackProgressEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PlaybackProgressEntry(
+      contentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}content_id'],
+      )!,
+      episodeId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}episode_id'],
+      )!,
+      positionMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}position_ms'],
+      )!,
+      durationMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}duration_ms'],
+      ),
+      updatedAtUtc: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at_utc'],
+      )!,
+      completion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}completion'],
+      )!,
+      revision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}revision'],
+      )!,
+    );
+  }
+
+  @override
+  $PlaybackProgressEntriesTable createAlias(String alias) {
+    return $PlaybackProgressEntriesTable(attachedDatabase, alias);
+  }
+}
+
+class PlaybackProgressEntry extends DataClass
+    implements Insertable<PlaybackProgressEntry> {
+  final String contentId;
+  final String episodeId;
+  final int positionMs;
+  final int? durationMs;
+  final DateTime updatedAtUtc;
+  final String completion;
+  final int revision;
+  const PlaybackProgressEntry({
+    required this.contentId,
+    required this.episodeId,
+    required this.positionMs,
+    this.durationMs,
+    required this.updatedAtUtc,
+    required this.completion,
+    required this.revision,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['content_id'] = Variable<String>(contentId);
+    map['episode_id'] = Variable<String>(episodeId);
+    map['position_ms'] = Variable<int>(positionMs);
+    if (!nullToAbsent || durationMs != null) {
+      map['duration_ms'] = Variable<int>(durationMs);
+    }
+    map['updated_at_utc'] = Variable<DateTime>(updatedAtUtc);
+    map['completion'] = Variable<String>(completion);
+    map['revision'] = Variable<int>(revision);
+    return map;
+  }
+
+  PlaybackProgressEntriesCompanion toCompanion(bool nullToAbsent) {
+    return PlaybackProgressEntriesCompanion(
+      contentId: Value(contentId),
+      episodeId: Value(episodeId),
+      positionMs: Value(positionMs),
+      durationMs: durationMs == null && nullToAbsent
+          ? const Value.absent()
+          : Value(durationMs),
+      updatedAtUtc: Value(updatedAtUtc),
+      completion: Value(completion),
+      revision: Value(revision),
+    );
+  }
+
+  factory PlaybackProgressEntry.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PlaybackProgressEntry(
+      contentId: serializer.fromJson<String>(json['contentId']),
+      episodeId: serializer.fromJson<String>(json['episodeId']),
+      positionMs: serializer.fromJson<int>(json['positionMs']),
+      durationMs: serializer.fromJson<int?>(json['durationMs']),
+      updatedAtUtc: serializer.fromJson<DateTime>(json['updatedAtUtc']),
+      completion: serializer.fromJson<String>(json['completion']),
+      revision: serializer.fromJson<int>(json['revision']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'contentId': serializer.toJson<String>(contentId),
+      'episodeId': serializer.toJson<String>(episodeId),
+      'positionMs': serializer.toJson<int>(positionMs),
+      'durationMs': serializer.toJson<int?>(durationMs),
+      'updatedAtUtc': serializer.toJson<DateTime>(updatedAtUtc),
+      'completion': serializer.toJson<String>(completion),
+      'revision': serializer.toJson<int>(revision),
+    };
+  }
+
+  PlaybackProgressEntry copyWith({
+    String? contentId,
+    String? episodeId,
+    int? positionMs,
+    Value<int?> durationMs = const Value.absent(),
+    DateTime? updatedAtUtc,
+    String? completion,
+    int? revision,
+  }) => PlaybackProgressEntry(
+    contentId: contentId ?? this.contentId,
+    episodeId: episodeId ?? this.episodeId,
+    positionMs: positionMs ?? this.positionMs,
+    durationMs: durationMs.present ? durationMs.value : this.durationMs,
+    updatedAtUtc: updatedAtUtc ?? this.updatedAtUtc,
+    completion: completion ?? this.completion,
+    revision: revision ?? this.revision,
+  );
+  PlaybackProgressEntry copyWithCompanion(
+    PlaybackProgressEntriesCompanion data,
+  ) {
+    return PlaybackProgressEntry(
+      contentId: data.contentId.present ? data.contentId.value : this.contentId,
+      episodeId: data.episodeId.present ? data.episodeId.value : this.episodeId,
+      positionMs: data.positionMs.present
+          ? data.positionMs.value
+          : this.positionMs,
+      durationMs: data.durationMs.present
+          ? data.durationMs.value
+          : this.durationMs,
+      updatedAtUtc: data.updatedAtUtc.present
+          ? data.updatedAtUtc.value
+          : this.updatedAtUtc,
+      completion: data.completion.present
+          ? data.completion.value
+          : this.completion,
+      revision: data.revision.present ? data.revision.value : this.revision,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PlaybackProgressEntry(')
+          ..write('contentId: $contentId, ')
+          ..write('episodeId: $episodeId, ')
+          ..write('positionMs: $positionMs, ')
+          ..write('durationMs: $durationMs, ')
+          ..write('updatedAtUtc: $updatedAtUtc, ')
+          ..write('completion: $completion, ')
+          ..write('revision: $revision')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    contentId,
+    episodeId,
+    positionMs,
+    durationMs,
+    updatedAtUtc,
+    completion,
+    revision,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PlaybackProgressEntry &&
+          other.contentId == this.contentId &&
+          other.episodeId == this.episodeId &&
+          other.positionMs == this.positionMs &&
+          other.durationMs == this.durationMs &&
+          other.updatedAtUtc == this.updatedAtUtc &&
+          other.completion == this.completion &&
+          other.revision == this.revision);
+}
+
+class PlaybackProgressEntriesCompanion
+    extends UpdateCompanion<PlaybackProgressEntry> {
+  final Value<String> contentId;
+  final Value<String> episodeId;
+  final Value<int> positionMs;
+  final Value<int?> durationMs;
+  final Value<DateTime> updatedAtUtc;
+  final Value<String> completion;
+  final Value<int> revision;
+  final Value<int> rowid;
+  const PlaybackProgressEntriesCompanion({
+    this.contentId = const Value.absent(),
+    this.episodeId = const Value.absent(),
+    this.positionMs = const Value.absent(),
+    this.durationMs = const Value.absent(),
+    this.updatedAtUtc = const Value.absent(),
+    this.completion = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PlaybackProgressEntriesCompanion.insert({
+    required String contentId,
+    required String episodeId,
+    required int positionMs,
+    this.durationMs = const Value.absent(),
+    required DateTime updatedAtUtc,
+    required String completion,
+    this.revision = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : contentId = Value(contentId),
+       episodeId = Value(episodeId),
+       positionMs = Value(positionMs),
+       updatedAtUtc = Value(updatedAtUtc),
+       completion = Value(completion);
+  static Insertable<PlaybackProgressEntry> custom({
+    Expression<String>? contentId,
+    Expression<String>? episodeId,
+    Expression<int>? positionMs,
+    Expression<int>? durationMs,
+    Expression<DateTime>? updatedAtUtc,
+    Expression<String>? completion,
+    Expression<int>? revision,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (contentId != null) 'content_id': contentId,
+      if (episodeId != null) 'episode_id': episodeId,
+      if (positionMs != null) 'position_ms': positionMs,
+      if (durationMs != null) 'duration_ms': durationMs,
+      if (updatedAtUtc != null) 'updated_at_utc': updatedAtUtc,
+      if (completion != null) 'completion': completion,
+      if (revision != null) 'revision': revision,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PlaybackProgressEntriesCompanion copyWith({
+    Value<String>? contentId,
+    Value<String>? episodeId,
+    Value<int>? positionMs,
+    Value<int?>? durationMs,
+    Value<DateTime>? updatedAtUtc,
+    Value<String>? completion,
+    Value<int>? revision,
+    Value<int>? rowid,
+  }) {
+    return PlaybackProgressEntriesCompanion(
+      contentId: contentId ?? this.contentId,
+      episodeId: episodeId ?? this.episodeId,
+      positionMs: positionMs ?? this.positionMs,
+      durationMs: durationMs ?? this.durationMs,
+      updatedAtUtc: updatedAtUtc ?? this.updatedAtUtc,
+      completion: completion ?? this.completion,
+      revision: revision ?? this.revision,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (contentId.present) {
+      map['content_id'] = Variable<String>(contentId.value);
+    }
+    if (episodeId.present) {
+      map['episode_id'] = Variable<String>(episodeId.value);
+    }
+    if (positionMs.present) {
+      map['position_ms'] = Variable<int>(positionMs.value);
+    }
+    if (durationMs.present) {
+      map['duration_ms'] = Variable<int>(durationMs.value);
+    }
+    if (updatedAtUtc.present) {
+      map['updated_at_utc'] = Variable<DateTime>(updatedAtUtc.value);
+    }
+    if (completion.present) {
+      map['completion'] = Variable<String>(completion.value);
+    }
+    if (revision.present) {
+      map['revision'] = Variable<int>(revision.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PlaybackProgressEntriesCompanion(')
+          ..write('contentId: $contentId, ')
+          ..write('episodeId: $episodeId, ')
+          ..write('positionMs: $positionMs, ')
+          ..write('durationMs: $durationMs, ')
+          ..write('updatedAtUtc: $updatedAtUtc, ')
+          ..write('completion: $completion, ')
+          ..write('revision: $revision, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -984,6 +1467,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $ProgressDocumentsTable(this);
   late final $LatestAnimeSearchTable latestAnimeSearch =
       $LatestAnimeSearchTable(this);
+  late final $PlaybackProgressEntriesTable playbackProgressEntries =
+      $PlaybackProgressEntriesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -992,6 +1477,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     settingsEntries,
     progressDocuments,
     latestAnimeSearch,
+    playbackProgressEntries,
   ];
 }
 
@@ -1605,6 +2091,283 @@ typedef $$LatestAnimeSearchTableProcessedTableManager =
       LatestAnimeSearchData,
       PrefetchHooks Function()
     >;
+typedef $$PlaybackProgressEntriesTableCreateCompanionBuilder =
+    PlaybackProgressEntriesCompanion Function({
+      required String contentId,
+      required String episodeId,
+      required int positionMs,
+      Value<int?> durationMs,
+      required DateTime updatedAtUtc,
+      required String completion,
+      Value<int> revision,
+      Value<int> rowid,
+    });
+typedef $$PlaybackProgressEntriesTableUpdateCompanionBuilder =
+    PlaybackProgressEntriesCompanion Function({
+      Value<String> contentId,
+      Value<String> episodeId,
+      Value<int> positionMs,
+      Value<int?> durationMs,
+      Value<DateTime> updatedAtUtc,
+      Value<String> completion,
+      Value<int> revision,
+      Value<int> rowid,
+    });
+
+class $$PlaybackProgressEntriesTableFilterComposer
+    extends Composer<_$AppDatabase, $PlaybackProgressEntriesTable> {
+  $$PlaybackProgressEntriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get contentId => $composableBuilder(
+    column: $table.contentId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get episodeId => $composableBuilder(
+    column: $table.episodeId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get positionMs => $composableBuilder(
+    column: $table.positionMs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get durationMs => $composableBuilder(
+    column: $table.durationMs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAtUtc => $composableBuilder(
+    column: $table.updatedAtUtc,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get completion => $composableBuilder(
+    column: $table.completion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PlaybackProgressEntriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $PlaybackProgressEntriesTable> {
+  $$PlaybackProgressEntriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get contentId => $composableBuilder(
+    column: $table.contentId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get episodeId => $composableBuilder(
+    column: $table.episodeId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get positionMs => $composableBuilder(
+    column: $table.positionMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get durationMs => $composableBuilder(
+    column: $table.durationMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAtUtc => $composableBuilder(
+    column: $table.updatedAtUtc,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get completion => $composableBuilder(
+    column: $table.completion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PlaybackProgressEntriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PlaybackProgressEntriesTable> {
+  $$PlaybackProgressEntriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get contentId =>
+      $composableBuilder(column: $table.contentId, builder: (column) => column);
+
+  GeneratedColumn<String> get episodeId =>
+      $composableBuilder(column: $table.episodeId, builder: (column) => column);
+
+  GeneratedColumn<int> get positionMs => $composableBuilder(
+    column: $table.positionMs,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get durationMs => $composableBuilder(
+    column: $table.durationMs,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get updatedAtUtc => $composableBuilder(
+    column: $table.updatedAtUtc,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get completion => $composableBuilder(
+    column: $table.completion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get revision =>
+      $composableBuilder(column: $table.revision, builder: (column) => column);
+}
+
+class $$PlaybackProgressEntriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PlaybackProgressEntriesTable,
+          PlaybackProgressEntry,
+          $$PlaybackProgressEntriesTableFilterComposer,
+          $$PlaybackProgressEntriesTableOrderingComposer,
+          $$PlaybackProgressEntriesTableAnnotationComposer,
+          $$PlaybackProgressEntriesTableCreateCompanionBuilder,
+          $$PlaybackProgressEntriesTableUpdateCompanionBuilder,
+          (
+            PlaybackProgressEntry,
+            BaseReferences<
+              _$AppDatabase,
+              $PlaybackProgressEntriesTable,
+              PlaybackProgressEntry
+            >,
+          ),
+          PlaybackProgressEntry,
+          PrefetchHooks Function()
+        > {
+  $$PlaybackProgressEntriesTableTableManager(
+    _$AppDatabase db,
+    $PlaybackProgressEntriesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PlaybackProgressEntriesTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$PlaybackProgressEntriesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$PlaybackProgressEntriesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> contentId = const Value.absent(),
+                Value<String> episodeId = const Value.absent(),
+                Value<int> positionMs = const Value.absent(),
+                Value<int?> durationMs = const Value.absent(),
+                Value<DateTime> updatedAtUtc = const Value.absent(),
+                Value<String> completion = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PlaybackProgressEntriesCompanion(
+                contentId: contentId,
+                episodeId: episodeId,
+                positionMs: positionMs,
+                durationMs: durationMs,
+                updatedAtUtc: updatedAtUtc,
+                completion: completion,
+                revision: revision,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String contentId,
+                required String episodeId,
+                required int positionMs,
+                Value<int?> durationMs = const Value.absent(),
+                required DateTime updatedAtUtc,
+                required String completion,
+                Value<int> revision = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PlaybackProgressEntriesCompanion.insert(
+                contentId: contentId,
+                episodeId: episodeId,
+                positionMs: positionMs,
+                durationMs: durationMs,
+                updatedAtUtc: updatedAtUtc,
+                completion: completion,
+                revision: revision,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<
+                    $PlaybackProgressEntriesTable,
+                    PlaybackProgressEntry
+                  >(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $PlaybackProgressEntriesTable,
+                    PlaybackProgressEntry
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PlaybackProgressEntriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PlaybackProgressEntriesTable,
+      PlaybackProgressEntry,
+      $$PlaybackProgressEntriesTableFilterComposer,
+      $$PlaybackProgressEntriesTableOrderingComposer,
+      $$PlaybackProgressEntriesTableAnnotationComposer,
+      $$PlaybackProgressEntriesTableCreateCompanionBuilder,
+      $$PlaybackProgressEntriesTableUpdateCompanionBuilder,
+      (
+        PlaybackProgressEntry,
+        BaseReferences<
+          _$AppDatabase,
+          $PlaybackProgressEntriesTable,
+          PlaybackProgressEntry
+        >,
+      ),
+      PlaybackProgressEntry,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -1615,4 +2378,9 @@ class $AppDatabaseManager {
       $$ProgressDocumentsTableTableManager(_db, _db.progressDocuments);
   $$LatestAnimeSearchTableTableManager get latestAnimeSearch =>
       $$LatestAnimeSearchTableTableManager(_db, _db.latestAnimeSearch);
+  $$PlaybackProgressEntriesTableTableManager get playbackProgressEntries =>
+      $$PlaybackProgressEntriesTableTableManager(
+        _db,
+        _db.playbackProgressEntries,
+      );
 }
