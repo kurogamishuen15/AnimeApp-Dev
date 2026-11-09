@@ -12,6 +12,13 @@ Future<Directory> _temporaryDatabaseDirectory() async {
     );
   }
   final projectDirectory = appDirectory.parent;
+  if (!File('${appDirectory.path}/pubspec.yaml').existsSync() ||
+      !File('${projectDirectory.path}/AGENTS.md').existsSync() ||
+      !Directory('${projectDirectory.path}/.git').existsSync()) {
+    throw StateError(
+      'Could not verify the project root for F1.6 test cleanup.',
+    );
+  }
   final root = Directory(
     '${projectDirectory.path}${Platform.pathSeparator}.ai-local'
     '${Platform.pathSeparator}test-db${Platform.pathSeparator}f1_6',

@@ -2,7 +2,7 @@
 
 Fecha: 2026-11-09
 Estado: completada; validaciones de plataforma/rendimiento aún pendientes
-Commit: pendiente de registrar
+Commit: `09b9f75`
 Fuente: implementación y validaciones locales de F1.6
 Módulo: data/local_db
 Decisión: Drift/SQLite schema v2, con migración no destructiva desde v1
@@ -15,6 +15,7 @@ Evidencia: `app/lib/data/local_db`, tests, `scripts/ci.sh`
 - Schema v1 conserva ajustes en envelopes JSON. La migración no destructiva v1→v2 agrega documentos opacos de progreso; no define semántica funcional que corresponde a F1.10/F1.11.
 - Se versionó el snapshot histórico [schema_v1.sql](../../../app/drift_schemas/schema_v1.sql).
 - Tres pruebas usan SQLite sobre archivo real y comprueban CRUD tipado, migración con datos existentes, persistencia tras cerrar/reabrir y rollback transaccional. El cleanup está limitado a `.ai-local/test-db/f1_6` bajo el proyecto y exige ejecutar desde `app/`.
+- La validación del cleanup también confirma `app/pubspec.yaml`, la metadata `AGENTS.md` y `.git` de la raíz antes de tocar el fixture.
 - README de módulo registra portabilidad Linux, codegen, ciclo de vida pendiente de integración y validaciones futuras.
 
 ## Evidencia de validación
