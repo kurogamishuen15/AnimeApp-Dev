@@ -4,6 +4,13 @@ Cambios notables por versión y subfase. Sigue Conventional Commits para el hist
 
 ## Sin publicar
 
+### F1.7 — Core result, errores y logging
+
+- Añadidos tipos de error de aplicación y `Result<T>` con transformaciones tipadas.
+- Añadido logger estructurado con sinks inyectables, timestamps UTC, correlation id y sanitización de estructuras, credenciales y URI. No persiste mensajes.
+- Pruebas unitarias y revisión estática de seguridad documentadas en [README core](app/lib/core/README.md) y [sesión F1.7](docs/memory/sessions/2026-11-09-f1-7-core-result-logger.md).
+
+
 ### Reparación de análisis y CI (F0.4–F0.5)
 
 - Causa LSP confirmada en Flutter 3.47.9: longitud de contenido en caracteres en vez de bytes UTF-8. El arreglo upstream está en PR #191377; la stable publicada sigue sin incluirlo.

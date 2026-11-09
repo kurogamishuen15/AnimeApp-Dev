@@ -21,7 +21,7 @@ F1.1 fue aprobada formalmente el 2026-11-08: baseline final 18 FR + 13 NFR, con 
 Herramientas en tools/ai, pruebas en tests/ai, políticas en docs/ai-system. Ejecutar index, check y unittest; las métricas de recuperación se registran con evaluate.py.
 
 ## Siguiente paso
-F1.1–F1.4 están cerradas según sus criterios documentales/de estructura; validaciones tecnológicas se ejecutan en su fase. F1.5 es el siguiente paso: catálogo tipado de ajustes, defaults, validación y comportamiento de store; persistencia durable y migraciones pertenecen a F1.6. No se inició ninguna de esas subfases. F0.4/F0.5 siguen parciales por `flutter analyze`; F0.6 sigue parcial hasta la prueba en 4 GB y cargas de reproducción/fugas. F1.4 no cambia la evidencia de F0.
+F1.1–F1.4 están cerradas según sus criterios documentales/de estructura; validaciones tecnológicas se ejecutan en su fase. F1.5 es el siguiente paso: catálogo tipado de ajustes, defaults, validación y comportamiento de store; persistencia durable y migraciones pertenecen a F1.6. F1.7 se completó el 2026-11-09 con Result, errores tipados y logger sanitizado; ver sesión `sessions/2026-11-09-f1-7-core-result-logger.md`. F1.6 continúa como siguiente subfase de implementación y F1.5 depende de ella. F0.4/F0.5 siguen parciales por `flutter analyze`; F0.6 sigue parcial hasta la prueba en 4 GB y cargas de reproducción/fugas. F1.4 no cambia la evidencia de F0.
 
 ## Restricciones
 Un especialista a la vez en sesiones nuevas; no rebajar el modelo para ahorrar tokens. Sin push, sin servicios residentes ni secretos. Ante aprobación necesaria, continuar tareas independientes y registrar bloqueo.

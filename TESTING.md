@@ -58,3 +58,14 @@ Resultados posteriores con el SDK beta seleccionado: `flutter pub get`, format, 
 La [línea base release final](docs/perf/measure-20261108T133341Z-15982.tsv) registra tres primeras tramas rasterizadas (mediana 462 ms), RSS (140096 KiB tras frame; 145284 KiB tras reposo a 5 s) y CPU media en reposo de 0.60% de un núcleo. Su método y límites están en [docs/perf/README.md](docs/perf/README.md). La ventana tiene evidencia visual, pero no latencia numérica; la app no reproduce medios y la prueba no cubre fugas prolongadas.
 
 Registrar entorno, modo, repeticiones y limitaciones para cada nueva línea base. RSS del proceso no equivale a memoria total del sistema. Los checklists manuales por plataforma se incorporarán cuando existan esas plataformas.
+
+## F1.7 — Result, errores y logger
+
+Desde `app/`, con el SDK Flutter beta aislado seleccionado según la sección anterior:
+
+```bash
+flutter test test/core
+dart analyze lib/core test/core
+```
+
+La suite comprueba transformaciones/propagación de `Result`, redacción anidada, bearer, cabeceras, query/path/fragment/userinfo de URI, múltiples sinks y dispose. El análisis de seguridad fue estático; no equivale a un pentest ni garantiza detección de cadenas secretas arbitrarias que no estén etiquetadas como sensibles. La CI completa actual se ejecuta mediante `bash scripts/ci.sh` con el SDK aislado en PATH; la stable global sigue fallando en `flutter analyze` por el defecto LSP ya documentado.
