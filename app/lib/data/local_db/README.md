@@ -8,7 +8,7 @@ composición de aplicación crea y cierra la base.
 
 - Schema version 2.
 - `settings_entries` conserva envelopes JSON por clave estable; catálogo,
-  validación y semántica siguen en `settings/` (F1.5).
+  validación y semántica tipada están en [`settings`](../../settings/README.md).
 - `progress_documents` conserva un documento opaco. No define reglas de
   progreso, conflictos ni semántica temporal; esos contratos pertenecen a
   F1.10/F1.11.

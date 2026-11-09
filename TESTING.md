@@ -69,3 +69,34 @@ dart analyze lib/core test/core
 ```
 
 La suite comprueba transformaciones/propagación de `Result`, redacción anidada, bearer, cabeceras, query/path/fragment/userinfo de URI, múltiples sinks y dispose. El análisis de seguridad fue estático; no equivale a un pentest ni garantiza detección de cadenas secretas arbitrarias que no estén etiquetadas como sensibles. La CI completa actual se ejecuta mediante `bash scripts/ci.sh` con el SDK aislado en PATH; la stable global sigue fallando en `flutter analyze` por el defecto LSP ya documentado.
+
+## F1.5–F1.6 — Ajustes y persistencia
+
+Desde `app/`, con el SDK Flutter aislado seleccionado según la sección de
+toolchain:
+
+```bash
+dart run build_runner build
+dart format lib test
+dart analyze lib/settings test/settings lib/data/local_db test/data/local_db
+flutter test --no-pub test/settings/settings_store_test.dart
+flutter test --no-pub test/data/local_db/app_database_test.dart
+```
+
+Los tests de storage usan archivos SQLite reales solo en
+`../.ai-local/test-db/`, verifican el marcador de raíz antes de crear/borrar y
+requieren ejecutarse desde `app/`. F1.6 prueba el snapshot v1 versionado, la
+migración v1→v2 con datos, reapertura y rollback; F1.5 prueba defaults,
+validación, lectura/escritura, watch, errores tipados y reinicio. No se usa la
+base de la aplicación real. Las pruebas solo tienen definiciones sintéticas;
+no implican un catálogo de ajustes aprobado.
+
+`sqlite3` 3.x carga un asset nativo; la configuración estándar lo obtiene del
+release oficial de su paquete y valida SHA-256. En el entorno de esta ejecución
+el hook recibió HTTP 504, por lo que se obtuvo el mismo asset oficial y se
+comparó con el hash que fija el paquete; la caché permanece en `.ai-local/` y
+no está versionada. Una instalación limpia necesita acceso al release oficial.
+
+El análisis y la CI completa de estas subfases pasaron con Flutter 3.50.0-0.4.pre
+/ Dart 3.14.0 beta aislado. Flutter stable 3.47.9 mantiene la incidencia LSP
+documentada arriba; no se declara verde con esa versión.

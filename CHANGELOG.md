@@ -16,6 +16,11 @@ Cambios notables por versión y subfase. Sigue Conventional Commits para el hist
 - Tres pruebas verifican archivo real, conservación al migrar, cierre/reapertura y rollback. Paquete y código generado documentados en [README local_db](app/lib/data/local_db/README.md).
 - La versión de SQLite fue verificada por hash contra el paquete oficial y quedó en caché ignorada. Las pruebas pasaron con Flutter 3.50.0-0.4.pre/Dart 3.14.0; Flutter stable conserva la incidencia LSP registrada en TESTING.md.
 
+### F1.5 — Registro y store tipado de ajustes
+
+- Añadidos contratos de definición/registro con valor por defecto, propietario, codec JSON y validador; store SQLite local-first con `get`, `set` y `watch` reactivo. Resultados y errores usan los tipos de F1.7.
+- Cinco pruebas reales cubren defaults, validación, tipo corrupto, registro único, actualización reactiva, errores del stream y persistencia al reabrir. No se inventaron claves/defaults de producto ausentes en los documentos aprobados; el registro productivo continúa vacío. Ver [README settings](app/lib/settings/README.md).
+
 
 ### Reparación de análisis y CI (F0.4–F0.5)
 

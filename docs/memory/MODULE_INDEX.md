@@ -12,6 +12,7 @@ Evidencia: Rutas de herramientas y sus tests
 | Inicio y composición Flutter Linux | app/lib/main.dart, app/lib/app/anime_app.dart; [README](../../app/lib/app/README.md) | tests Flutter; `dart analyze lib test` |
 | Resultados, errores tipados y logging sanitizado | app/lib/core; [README](../../app/lib/core/README.md) | tests/core y `dart analyze lib/core test/core` |
 | Persistencia local SQLite/Drift | app/lib/data/local_db; [README](../../app/lib/data/local_db/README.md) | archivo real, migración v1→v2, reapertura y rollback |
+| Definición, catálogo y store local de ajustes | app/lib/settings; [README](../../app/lib/settings/README.md) | defaults, codec/validación, get/set/watch y reinicio |
 | Identidad independiente del toolkit | app/lib/domain/app_identity.dart; [README](../../app/lib/domain/README.md) | test widget y checker recursivo de imports |
 | Runner nativo Linux | app/linux | `flutter build linux --release` |
 | CI local y límites de imports | scripts/ci.sh, scripts/check_imports.dart | prueba sintética y ejecución CI |
