@@ -112,11 +112,16 @@ List<String> _importUris(String source) {
         (token.value != 'import' && token.value != 'export')) {
       continue;
     }
-    var uriIndex = index + 1;
-    if (tokens[uriIndex].value == 'deferred') uriIndex++;
-    if (uriIndex < tokens.length && tokens[uriIndex].kind == 'string') {
-      imports.add(tokens[uriIndex].value);
+    var cursor = index + 1;
+    while (cursor < tokens.length && tokens[cursor].value != ';') {
+      final candidate = tokens[cursor];
+      if (candidate.kind == 'string' &&
+          !candidate.value.startsWith('dart.library.')) {
+        imports.add(candidate.value);
+      }
+      cursor++;
     }
+    index = cursor;
   }
   return imports;
 }
@@ -131,29 +136,148 @@ String _packageName(Directory root) {
   return match?.group(1) ?? 'anime_app';
 }
 
-String? _violation(String uri, String packageName) {
-  if (uri == 'dart:ui' || uri.startsWith('package:flutter/')) {
+const _forbiddenLayerSegments = {
+  'presentation',
+  'ui',
+  'widgets',
+  'screens',
+  'data',
+  'providers',
+  'adapters',
+  'infrastructure',
+  'integrations',
+  'platform',
+  'downloads',
+  'sync',
+};
+
+const _platformPackages = {
+  'connectivity_plus',
+  'cupertino_icons',
+  'device_info_plus',
+  'dio',
+  'drift',
+  'firebase_core',
+  'file_picker',
+  'flutter_localizations',
+  'flutter_riverpod',
+  'flutter_secure_storage',
+  'flutter_svg',
+  'google_fonts',
+  'graphql',
+  'go_router',
+  'http',
+  'image_picker',
+  'media_kit',
+  'media_kit_video',
+  'mobile_scanner',
+  'path_provider',
+  'permission_handler',
+  'qr_flutter',
+  'riverpod',
+  'shared_preferences',
+  'sqlite3',
+  'sqlite3_flutter_libs',
+  'sqflite',
+  'supabase',
+  'supabase_flutter',
+  'url_launcher',
+  'window_manager',
+};
+
+String _normalizedPath(String path) =>
+    Uri.file(path).normalizePath().toFilePath();
+
+String? _relativePath(String path, Directory root) {
+  final normalizedPath = _normalizedPath(path);
+  final normalizedRoot = _normalizedPath(root.absolute.path)
+      .replaceFirst(RegExp(r'[/\\]+$'), '');
+  final prefix = '$normalizedRoot${Platform.pathSeparator}';
+  final comparablePath = Platform.isWindows
+      ? normalizedPath.toLowerCase()
+      : normalizedPath;
+  final comparableRoot = Platform.isWindows
+      ? normalizedRoot.toLowerCase()
+      : normalizedRoot;
+  final comparablePrefix = Platform.isWindows ? prefix.toLowerCase() : prefix;
+  if (comparablePath == comparableRoot) return '';
+  if (!comparablePath.startsWith(comparablePrefix)) return null;
+  return normalizedPath.substring(prefix.length);
+}
+
+bool _isDomainSource(File source, Directory libRoot) {
+  final relative = _relativePath(source.path, libRoot);
+  if (relative == null) return false;
+  final segments = relative.replaceAll('\\', '/').split('/');
+  return segments.length > 1 &&
+      segments.sublist(0, segments.length - 1).contains('domain');
+}
+
+String? _localTargetPath(
+  String uri,
+  File source,
+  Directory libRoot,
+  String packageName,
+) {
+  if (uri.startsWith('package:')) {
+    final packageUri = uri.substring('package:'.length);
+    final separator = packageUri.indexOf('/');
+    final targetPackage = separator < 0
+        ? packageUri
+        : packageUri.substring(0, separator);
+    if (targetPackage != packageName) return null;
+    final targetPath = separator < 0 ? '' : packageUri.substring(separator + 1);
+    return libRoot.uri.resolve(targetPath).toFilePath();
+  }
+  if (uri.startsWith('dart:') || uri.startsWith('dart.library.')) return null;
+  final parsed = Uri.tryParse(uri);
+  if (parsed == null) return null;
+  if (parsed.scheme == 'file') return parsed.toFilePath();
+  if (parsed.hasScheme) return null;
+  return source.absolute.uri.resolveUri(parsed).toFilePath();
+}
+
+String? _violation(
+  String uri,
+  File source,
+  Directory libRoot,
+  String packageName,
+) {
+  if (uri == 'dart:ui' || uri == 'dart:io' || uri == 'dart:ffi') {
+    return 'dominio no puede depender de APIs de UI o sistema operativo';
+  }
+  if (uri.startsWith('package:flutter/')) {
     return 'dominio no puede depender de Flutter/UI';
   }
-  final normalized = uri.replaceAll('\\', '/').toLowerCase();
-  final packagePrefix = 'package:${packageName.toLowerCase()}/';
-  final relativeOrPackage = normalized.startsWith(packagePrefix)
-      ? normalized.substring(packagePrefix.length)
-      : normalized;
-  final segments = relativeOrPackage.split('/');
-  const forbiddenSegments = {
-    'presentation',
-    'ui',
-    'data',
-    'providers',
-    'adapters',
-    'infrastructure',
-    'platform',
-    'downloads',
-    'sync',
-  };
-  if (segments.any(forbiddenSegments.contains)) {
-    return 'dominio no puede depender de presentación o infraestructura';
+  if (uri.startsWith('package:')) {
+    final packageUri = uri.substring('package:'.length);
+    final separator = packageUri.indexOf('/');
+    final importedPackage =
+        (separator < 0 ? packageUri : packageUri.substring(0, separator))
+            .toLowerCase();
+    if (_platformPackages.contains(importedPackage) ||
+        importedPackage.endsWith('_linux') ||
+        importedPackage.endsWith('_android') ||
+        importedPackage.endsWith('_windows') ||
+        importedPackage.endsWith('_macos') ||
+        importedPackage.endsWith('_platform_interface')) {
+      return 'dominio no puede depender de plugins, infraestructura o paquetes de plataforma';
+    }
+  }
+
+  final targetPath = _localTargetPath(uri, source, libRoot, packageName);
+  if (targetPath == null) return null;
+  final relativeTarget = _relativePath(targetPath, libRoot);
+  if (relativeTarget == null) {
+    return 'dominio no puede importar archivos fuera de app/lib';
+  }
+  final segments = relativeTarget
+      .replaceAll('\\', '/')
+      .toLowerCase()
+      .split('/');
+  if (segments.contains('app') ||
+      segments.any(_forbiddenLayerSegments.contains)) {
+    return 'dominio no puede depender de composición, presentación o infraestructura';
   }
   return null;
 }
@@ -169,18 +293,41 @@ Future<void> main(List<String> args) async {
     }
   }
   final root = Directory(rootPath).absolute;
-  final domain = Directory('${root.path}/app/lib/domain');
-  if (!domain.existsSync()) {
-    stdout.writeln('Sin violaciones: todavía no existe app/lib/domain.');
+  final appRoot = Directory('${root.path}/app');
+  final libRoot = Directory('${root.path}/app/lib');
+  for (final directory in [appRoot, libRoot]) {
+    if (FileSystemEntity.typeSync(directory.path, followLinks: false) ==
+        FileSystemEntityType.link) {
+      stderr.writeln(
+        '${directory.path}: directorio raíz no puede ser un enlace simbólico',
+      );
+      exit(1);
+    }
+  }
+  if (!libRoot.existsSync()) {
+    stdout.writeln('Sin violaciones: todavía no existe app/lib.');
     return;
   }
   final packageName = _packageName(root);
   var violationCount = 0;
-  await for (final entity in domain.list(recursive: true, followLinks: false)) {
+  var domainFileCount = 0;
+  await for (final entity in libRoot.list(
+    recursive: true,
+    followLinks: false,
+  )) {
+    if (entity is Link) {
+      stderr.writeln(
+        '${entity.path}: enlace simbólico bajo app/lib no permitido; se rechaza para no omitir código de dominio',
+      );
+      violationCount++;
+      continue;
+    }
     if (entity is! File || !entity.path.endsWith('.dart')) continue;
+    if (!_isDomainSource(entity, libRoot)) continue;
+    domainFileCount++;
     final source = await entity.readAsString(encoding: utf8);
     for (final uri in _importUris(source)) {
-      final reason = _violation(uri, packageName);
+      final reason = _violation(uri, entity, libRoot, packageName);
       if (reason == null) continue;
       stderr.writeln('${entity.path}: import "$uri" prohibido: $reason');
       violationCount++;
@@ -190,5 +337,7 @@ Future<void> main(List<String> args) async {
     stderr.writeln('Se encontraron $violationCount violaciones de imports.');
     exit(1);
   }
-  stdout.writeln('Imports de dominio válidos.');
+  stdout.writeln(
+    'Imports de dominio válidos ($domainFileCount archivos en todos los módulos domain de app/lib).',
+  );
 }
