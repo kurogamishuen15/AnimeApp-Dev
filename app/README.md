@@ -20,9 +20,9 @@ app/lib/
 ## Límites de dependencias
 
 - Dominio puede usar Dart puro y otros contratos de dominio; no puede importar Flutter/UI, composición `app`, infraestructura, integraciones ni APIs de sistema.
-- Presentación depende de Flutter y consume dominio/casos de uso. No accede directamente a almacenamiento, red, autenticación o motor multimedia.
+- Presentación depende de Flutter y `material_ui` y consume dominio/casos de uso. No accede directamente a almacenamiento, red, autenticación o motor multimedia.
 - Adaptadores e integraciones se añadirán solo en sus fases y cuando exista una necesidad concreta. No hay adaptadores anticipados para Android, Android TV o Windows.
-- Dependencias de producto actuales: solo Flutter SDK; no se añadieron paquetes.
+- Dependencias de producto actuales: Flutter SDK y el paquete oficial `material_ui` para widgets Material. No se añadieron servicios ni adaptadores.
 
 El checker recursivo protege cualquier carpeta llamada `domain` bajo `lib`, resuelve imports `package:` del paquete y relativos, y prohíbe dependencias de dominio a composición, presentación, infraestructura e integraciones de plataforma. Sus fixtures y limitaciones están en [`scripts/README.md`](../scripts/README.md).
 
@@ -46,6 +46,22 @@ bash scripts/ci.sh
 ```
 
 F0.4–F0.6 y el fallo conocido de `flutter analyze` se registran en [`PROGRESS.md`](../PROGRESS.md) y [`TESTING.md`](../TESTING.md). Los resultados de esta ejecución de F1.4 se anotan allí y en la sesión vinculada; no se considera exitoso un comando solo porque aparezca en esta lista.
+
+## Toolchain de análisis en rutas Unicode
+
+La stable local Flutter 3.47.9/Dart 3.13.7 falla en `flutter analyze` cuando resuelve la raíz bajo `Vídeos`; la causa y evidencia están en [TESTING.md](../TESTING.md). La versión oficial 3.50.0-0.4.pre contiene el fix upstream, pero es beta y solo se usa como selección aislada de validación, no como requisito permanente. Para reproducir CI en una terminal con ese SDK instalado bajo `.ai-local/toolchains/flutter`:
+
+```bash
+export PATH="$PWD/.ai-local/toolchains/flutter/bin:$PATH"
+export PUB_CACHE="$PWD/.ai-local/pub-cache"
+cd app
+flutter pub get
+dart analyze lib test
+flutter analyze --no-pub
+flutter test --no-pub
+```
+
+Desde la raíz, el CI completo se ejecuta con el mismo `PATH`: `bash scripts/ci.sh`. Sin esa selección explícita, los comandos usan el Flutter/Dart global. No cambies la ruta del proyecto para evitar la incidencia.
 
 ## Rendimiento y ciclo de vida
 

@@ -17,35 +17,41 @@ Los controles integrados se describen en [scripts/README.md](scripts/README.md);
 
 ## Aplicación Flutter
 
-### SDK y alcance del arreglo LSP
+### SDK, causa y estado del arreglo LSP
 
-La versión instalada se volvió a verificar como Flutter 3.47.9 stable, revisión `c197ca5199e9ee5661e865596c9c07294dfab51c`, Dart 3.13.7. El manifest oficial de releases lista esa revisión como stable vigente al 2026-11-08 y 3.50.0-0.4.pre en beta con Dart 3.14; el changelog 3.47.9 no lista #191377. No se identificó una versión estable publicada que incluya ese arreglo; la versión instalada sigue reproduciendo el fallo.
+Diagnóstico repetido el 2026-11-08 desde `app/`: Flutter 3.47.9 stable (`c197ca5199e9ee5661e865596c9c07294dfab51c`), Dart 3.13.7. `dart analyze lib test` pasa; `flutter analyze --no-pub` falla con exit 255 y `FormatException: Unexpected end of input` en `LspByteStreamServerChannel._readMessage`, leyendo truncado el mensaje LSP `initialize`. `flutter doctor -v` confirma toolchain Linux; Android SDK falta y no forma parte del destino F0.
 
-La beta 3.50.0-0.4.pre sería compatible con `sdk: ^3.13.7`, pero no se completó la prueba aislada: el bundle oficial Linux pesa 1,516,903,176 bytes y la transferencia observada rondó 0.3 MiB/s (más de una hora estimada). Se canceló tras unos 7.7 MiB y se eliminó el archivo parcial creado para esa prueba. El SDK global quedó intacto. No se afirma que la beta pase el análisis ni que contenga el arreglo sin probarla. Fuentes: [manifest oficial de releases](https://storage.googleapis.com/flutter_infra_release/releases/releases_linux.json), [changelog Flutter](https://github.com/flutter/flutter/blob/master/CHANGELOG.md), [PR #191377](https://github.com/flutter/flutter/pull/191377).
+La causa quedó confirmada en el código, no inferida solo del estado de las incidencias: el SDK instalado contiene `Content-Length: ${message.length}` en `packages/flutter_tools/lib/src/dart/analysis.dart`. La longitud de caracteres no equivale a la longitud de bytes UTF-8 exigida por LSP. El PR oficial #191377 cambia el cálculo a `utf8.encode(message).length`; la stable 3.47.9 conserva el código anterior. El manifiesto oficial consultado el 2026-11-08 identifica 3.47.9 como stable y 3.50.0-0.4.pre como beta. Fuentes: [issue #191309](https://github.com/flutter/flutter/issues/191309), [issue #192079](https://github.com/flutter/flutter/issues/192079), [PR #191377](https://github.com/flutter/flutter/pull/191377), [manifiesto de releases](https://storage.googleapis.com/flutter_infra_release/releases/releases_linux.json).
 
-La base de entorno comprobada está en [F0.1 Fedora](docs/environment/F0.1-FEDORA.md); reporta versiones y límites de plataforma.
+Reproducción controlada en dos proyectos mínimos bajo `.ai-local/diagnostics/`: stable 3.47.9 devuelve 255 en ambas carpetas; Dart analyze pasa. La carpeta llamada `ascii` aún hereda el ancestro Unicode `Vídeos`, así que no representa una ruta absoluta ASCII y no se afirma que sea un control ASCII válido. Con beta 3.50.0-0.4.pre ambos proyectos pasan `flutter analyze --no-pub`; la ruta Unicode incluida en AnimeApp también pasa. La causa queda respaldada además por la reproducción del proyecto y por el código fuente exacto.
 
-F0.4 creó un esqueleto Linux dentro de `app/` y conservó `pubspec.lock`. Desde esa carpeta:
+La beta se clonó del tag oficial en `.ai-local/toolchains/flutter` (revisión `368ac9e40bad0566927cc9428a42461152652c12`, Dart 3.14.0). Es una herramienta de validación aislada temporal; no sustituye ni modifica la stable global. A la fecha de esta verificación no hay stable publicada con el fix, por lo que el entorno stable predeterminado aún reproduce el fallo y **la incidencia no se declara resuelta de forma permanente**.
+
+Para repetir la validación con ese tag (requiere red para bootstrap de Dart y artefactos Linux):
 
 ```bash
-cd app
-flutter pub get
-flutter analyze
-flutter test
-flutter run -d linux
+git clone --depth 1 --branch 3.50.0-0.4.pre https://github.com/flutter/flutter.git .ai-local/toolchains/flutter
+export PATH="$PWD/.ai-local/toolchains/flutter/bin:$PATH"
+export PUB_CACHE="$PWD/.ai-local/pub-cache"
+bash scripts/ci.sh
 ```
 
-Resultados observados en esta sesión:
+La selección del SDK es explícita y local a esa terminal; `scripts/ci.sh` sigue usando `flutter` y `dart` del `PATH`, sin rutas personales ni saltos de validación. La ejecución normal con la stable actual continúa fallando hasta que una stable oficial incluya el arreglo.
 
-- `flutter pub get`: pasó usando caché en `.ai-local/pub-cache`.
-- `dart analyze lib test`: pasó, sin issues.
-- `flutter test`: pasó (1 widget test).
-- `flutter run -d linux`: compiló y lanzó la app; hubo warnings GTK/ATK del entorno. No quedaron procesos de AnimeApp abiertos.
-- `flutter analyze`: **bloqueado en Flutter 3.47.9/Dart 3.13.7**. `flutter analyze --no-pub` y `flutter analyze --no-pub .` reproducen exit 255 en `LspByteStreamServerChannel._readMessage`, con un `initialize` JSON truncado. `dart analyze lib test` pasa en la misma ruta. La ruta incluye el carácter no ASCII `í` en `Vídeos`; el caso coincide con la regresión de Flutter que calcula `Content-Length` en caracteres en vez de bytes UTF-8. La causa es consistente con la incidencia oficial y su corrección [Flutter #191309](https://github.com/flutter/flutter/issues/191309), [PR #191377](https://github.com/flutter/flutter/pull/191377). No se hizo un control ASCII local porque el proyecto no debe moverse ni copiarse fuera de la raíz; espacios solos no se han demostrado como causa. No se desactivó el análisis ni se reemplazó permanentemente `flutter analyze`.
+La base del entorno y sus límites están en [F0.1 Fedora](docs/environment/F0.1-FEDORA.md). El scaffold Linux y sus pruebas son mínimos; desde `app/`, con el SDK seleccionado:
 
-`flutter run -d linux` compiló e inició la app. Spectacle con captura `--activewindow` en la sesión KDE Wayland guardó [evidencia visual](docs/perf/wayland-window-20261108.png) (1280×768): muestra la barra GTK, título `anime_app`, título de pantalla AnimeApp, icono y texto inicial. Esto confirma que el compositor presenta el scaffold visible; la pantalla aún no tiene controles interactivos que probar. `xdotool` no observa superficies Wayland, así que la latencia numérica de ventana queda NA. La captura visual no es medición de arranque.
+```bash
+flutter pub get
+dart format --output=none --set-exit-if-changed lib test
+dart analyze lib test
+flutter analyze --no-pub
+flutter test --no-pub
+flutter build linux --release --no-pub
+```
 
-`flutter screenshot --type=skia` falló con Impeller (`Cannot capture SKP screenshot with Impeller enabled`); se descartó ese método y se usó captura de ventana activa por Spectacle. El log temporal generado por Flutter se retiró después de registrar el resultado.
+Para esta reparación se corrigió `analysis_options.yaml` moviendo `strict-casts`, `strict-inference` y `strict-raw-types` a `analyzer.language`, su ubicación documentada. También se cambió el scaffold a la librería oficial `material_ui` 1.10.0: el analyzer de Flutter 3.50 reportaba como issue import el API `flutter/material.dart` deprecado y `flutter analyze` devolvía 1. Esta migración no debilita lints y fue comprobada tanto con Flutter 3.50 beta como con Flutter 3.47.9 stable en test/build; el análisis Flutter stable sigue bloqueado antes por el fallo LSP.
+
+Resultados posteriores con el SDK beta seleccionado: `flutter pub get`, format, Dart analyze, Flutter analyze (sin issues), widget test, build Linux release, checker y CI completa pasan. La compilación y test también pasan con la stable global; solo `flutter analyze` stable continúa en exit 255. La prueba negativa temporal introdujo un import Flutter dentro de `domain`; CI salió 1 por el fixture de arquitectura y por los límites de imports, y el archivo se retiró. `pubspec.lock` conserva una resolución obtenida con Flutter stable, evitando pins transitorios exclusivos de la beta.
 
 ## Rendimiento y pruebas manuales
 

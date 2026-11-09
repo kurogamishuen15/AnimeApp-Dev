@@ -1,5 +1,5 @@
 import 'package:anime_app/domain/app_identity.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class AnimeApp extends StatelessWidget {
   const AnimeApp({super.key});

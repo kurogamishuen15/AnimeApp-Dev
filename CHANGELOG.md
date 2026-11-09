@@ -4,6 +4,14 @@ Cambios notables por versión y subfase. Sigue Conventional Commits para el hist
 
 ## Sin publicar
 
+### Reparación de análisis y CI (F0.4–F0.5)
+
+- Causa LSP confirmada en Flutter 3.47.9: longitud de contenido en caracteres en vez de bytes UTF-8. El arreglo upstream está en PR #191377; la stable publicada sigue sin incluirlo.
+- Validación aislada con Flutter 3.50.0-0.4.pre/Dart 3.14.0: probes Unicode, Flutter analyze, widget tests, build Linux release y CI pasan con selección explícita de SDK. La CI continúa fallando con stable 3.47.9 por el error LSP; estado parcial hasta que exista stable corregida.
+- Se ubicaron correctamente los modos strict en `analyzer.language` y se migró el scaffold a `material_ui` oficial para eliminar issues reales bajo el analyzer actualizado. `pubspec.lock` queda resuelto con stable.
+- Detalle, limitaciones y reproducción: [TESTING.md](TESTING.md) y [sesión de memoria](docs/memory/sessions/2026-11-08-flutter-analyze-ci-repair.md).
+
+
 ### F0.1 Entorno Fedora
 
 - Se verificaron Flutter/Dart, compiladores, GTK3, libsecret y libmpv sin instalar ni modificar configuración del sistema.
