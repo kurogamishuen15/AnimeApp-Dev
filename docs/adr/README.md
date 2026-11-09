@@ -55,6 +55,10 @@ La aprobación es de **selección arquitectónica**, no de instalación inmediat
 
 Los ADR originales están aceptados como selección; cada uno conserva sus validaciones por fase. Los 13 ADR adicionales son documentación complementaria y no se aprobaron automáticamente.
 
+## Decisión arquitectónica F1.3
+
+El propietario aprobó para F1.3 la estrategia **núcleo compartido + Fedora/Linux primero + adaptadores progresivos por plataforma**. Se registra como [ADR-015](ADR-015-arquitectura-core-linux-first.md), separado de los 14 ADR originales de tecnología y sin sobrescribir la colección adicional. La decisión mantiene Android, Android TV y Windows como destinos futuros; no autoriza código ni carpetas anticipadas. La propuesta y diagramas están en [ARCHITECTURE.md](../../ARCHITECTURE.md). En F1.4 se implementará solo el esqueleto Linux mínimo que sus criterios justifiquen.
+
 ## Criterio de cierre de F1.2
 
 La conciliación documental queda completa cuando cada fila 1–14 tiene un ADR coincidente con el plan, diferencias explícitas, aprobación formal y verificación para su fase. La aprobación no autoriza instalar todas las dependencias ni adelantar implementación. Los ADR adicionales no sustituyen el conjunto original.

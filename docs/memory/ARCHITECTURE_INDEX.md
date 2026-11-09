@@ -14,7 +14,7 @@ Evidencia: tools/ai/memory.py y pruebas de recuperación
 - [Permisos y autonomía](../ai-system/AUTONOMY_POLICY.md).
 
 ## AnimeApp
-La arquitectura del producto está documentada en [ARCHITECTURE.md](../../ARCHITECTURE.md). El scaffold Flutter Linux tiene composición UI, identidad de dominio Dart puro y runner Linux; no hay reproductor ni catálogo implementados. La auditoría del entorno está en [F0.1 Fedora](../environment/F0.1-FEDORA.md).
+La arquitectura F1.3 aprobada (núcleo Dart compartido, Fedora/Linux primero, adaptadores progresivos) está documentada en [ARCHITECTURE.md](../../ARCHITECTURE.md) y [ADR-015](../adr/ADR-015-arquitectura-core-linux-first.md). El scaffold Flutter Linux tiene composición UI, identidad de dominio Dart puro y runner Linux; no hay reproductor ni catálogo implementados. Android, Android TV y Windows son destinos futuros sin código específico. La auditoría del entorno está en [F0.1 Fedora](../environment/F0.1-FEDORA.md).
 
 Requisitos y trazabilidad del MVP/núcleo, aprobados formalmente el 2026-11-08: [F1.1](../requirements/F1.1-CORE-REQUIREMENTS.md). Las 14 selecciones de referencia aprobadas y sus validaciones pendientes, además de ADR adicionales preservados: [ADR de F1.2](../adr/README.md). La aprobación documental no implica implementación.
 

@@ -29,7 +29,9 @@ La guía original sitúa el MVP después de integrar el núcleo, el reproductor 
 
 ## F1 Núcleo
 
-F1.1 requisitos (aprobados: [18 FR, 13 NFR y trazabilidad](docs/requirements/F1.1-CORE-REQUIREMENTS.md)) → F1.2 decisiones tecnológicas (14 selecciones aprobadas como referencia; validaciones pendientes: [ADR](docs/adr/README.md)) → F1.3 arquitectura → F1.4 estructura modular → F1.5 registro de ajustes → F1.6 Drift → F1.7 errores/logs → F1.8 cliente AniList GraphQL de lectura → F1.9 OAuth/almacén seguro → F1.10 progreso local → F1.11 contrato de sincronización/FakeRemote → F1.12 pruebas del núcleo.
+F1.1 requisitos (aprobados: [18 FR, 13 NFR y trazabilidad](docs/requirements/F1.1-CORE-REQUIREMENTS.md)) → F1.2 decisiones tecnológicas (14 selecciones aprobadas como referencia; validaciones pendientes: [ADR](docs/adr/README.md)) → F1.3 arquitectura (**completada documentalmente**, [diagramas, módulos, flujos y estrategia Linux-first](ARCHITECTURE.md), [ADR-015](docs/adr/ADR-015-arquitectura-core-linux-first.md)) → F1.4 estructura modular → F1.5 registro tipado de ajustes → F1.6 persistencia Drift → F1.7 errores/logs → F1.8 cliente AniList GraphQL de lectura → F1.9 OAuth/almacén seguro → F1.10 progreso local → F1.11 contrato de sincronización/FakeRemote → F1.12 pruebas del núcleo.
+
+F1.4 no debe crear anticipadamente código, carpetas, servicios, interfaces o dependencias para Android, Android TV o Windows. La estructura candidata y las rutas existentes están documentadas en `ARCHITECTURE.md`; al ejecutar F1.4 deben concretarse los archivos mínimos contra sus criterios y el scaffold actual. Las plataformas futuras se incorporarán con adaptadores solo tras identificar diferencias y consumidores reales.
 
 ## F2 Reproductor
 

@@ -23,5 +23,6 @@ Evidencia: Rutas de herramientas y sus tests
 | Políticas de coordinación | AGENTS.md y .codex/agents | AGENT_REGISTRY.md |
 | Requisitos, aceptación y trazabilidad del núcleo | docs/requirements/F1.1-CORE-REQUIREMENTS.md | Verificar por subfase al implementar |
 | Decisiones tecnológicas originales y complementarias | docs/adr/ADR-001–ADR-014.md; docs/adr/additional/ | Correspondencia exacta del plan maestro y estado formal individual |
+| Arquitectura compartida Linux-first de F1.3 | ARCHITECTURE.md; docs/adr/ADR-015-arquitectura-core-linux-first.md | Revisión documental; límites/modularidad se comprueban al implementar F1.4 |
 
 El módulo responsable de reproducción de anime, catálogo o autenticación del producto se desconoce: no hay código de aplicación en este alcance.

@@ -14,4 +14,6 @@ Evidencia: ADR locales y evaluaciones
 
 Las 14 selecciones tecnológicas de la sección 3 fueron aprobadas por el propietario el 2026-11-08 como arquitectura de referencia; validaciones y límites de integración están en [ADR F1.2](../adr/README.md). El baseline de [requisitos F1.1](../requirements/F1.1-CORE-REQUIREMENTS.md) también fue aprobado formalmente. La aprobación documental no autoriza implementar fuera de fase ni convierte ADR complementarios en decisiones aprobadas.
 
+F1.3: estrategia aprobada **núcleo Dart compartido + Fedora/Linux primero + adaptadores progresivos por necesidad real**, registrada independientemente en [ADR-015](../adr/ADR-015-arquitectura-core-linux-first.md) y desarrollada en [ARCHITECTURE.md](../../ARCHITECTURE.md). Android, Android TV y Windows son destinos futuros; no crear scaffolding anticipado. F1.3 se completó documentalmente; F1.4 no está iniciada.
+
 Las decisiones de investigación no se aprueban automáticamente. Los ADR de producto no están disponibles aquí.

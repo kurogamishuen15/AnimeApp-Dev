@@ -5,6 +5,8 @@ AnimeApp será una aplicación cliente multiplataforma para descubrir, organizar
 ## Objetivos y límites
 
 - Comenzar en Fedora Linux y adaptarse después a Android, Android TV y Windows.
+- Arquitectura F1.3 aprobada: núcleo compartido Dart, Linux primero y adaptadores progresivos solo ante necesidades reales. Las plataformas futuras no se implementan ni reciben scaffolding anticipado.
+- Mantener módulos granulares por responsabilidad; documentar módulos importantes junto con su implementación, incluyendo contrato, flujo, ciclo de vida, errores, pruebas, rendimiento y guía de portabilidad.
 - Mantener el trabajo offline y el progreso local como base; la sincronización remota es posterior.
 - Mantener proveedores de contenido fuera del núcleo y activados solo tras evaluación técnica y legal. El MVP usa un proveedor mock.
 - No alojar video en el backend de sincronización.
