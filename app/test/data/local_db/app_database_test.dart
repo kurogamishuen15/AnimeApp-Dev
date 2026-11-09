@@ -92,39 +92,88 @@ void main() {
     },
   );
 
-  test('migrates v1 settings data to v2 without losing it', () async {
-    final directory = await _temporaryDatabaseDirectory();
-    final file = File('${directory.path}/anime_app.sqlite');
-    final oldDatabase = sqlite.sqlite3.open(file.path);
-    final historicalSchema = File(
-      '${Directory.current.path}/drift_schemas/schema_v1.sql',
-    );
-    oldDatabase.execute(historicalSchema.readAsStringSync());
-    oldDatabase.execute('INSERT INTO settings_entries VALUES (?, ?, ?)', [
-      'theme.mode',
-      '"system"',
-      DateTime.utc(2026, 11, 9).millisecondsSinceEpoch,
-    ]);
-    oldDatabase.execute('PRAGMA user_version = 1');
-    oldDatabase.close();
+  test(
+    'migrates v1 settings data to the current schema without losing it',
+    () async {
+      final directory = await _temporaryDatabaseDirectory();
+      final file = File('${directory.path}/anime_app.sqlite');
+      final oldDatabase = sqlite.sqlite3.open(file.path);
+      final historicalSchema = File(
+        '${Directory.current.path}/drift_schemas/schema_v1.sql',
+      );
+      oldDatabase.execute(historicalSchema.readAsStringSync());
+      oldDatabase.execute('INSERT INTO settings_entries VALUES (?, ?, ?)', [
+        'theme.mode',
+        '"system"',
+        DateTime.utc(2026, 11, 9).millisecondsSinceEpoch,
+      ]);
+      oldDatabase.execute('PRAGMA user_version = 1');
+      oldDatabase.close();
 
-    final database = AppDatabase.atFile(file);
-    try {
-      final setting = await database
-          .select(database.settingsEntries)
-          .getSingle();
-      expect(setting.settingKey, 'theme.mode');
-      expect(setting.valueJson, '"system"');
-      expect(await database.select(database.progressDocuments).get(), isEmpty);
-      final version = await database
-          .customSelect('PRAGMA user_version')
-          .getSingle();
-      expect(version.read<int>('user_version'), 2);
-    } finally {
-      await database.close();
-      await directory.delete(recursive: true);
-    }
-  });
+      final database = AppDatabase.atFile(file);
+      try {
+        final setting = await database
+            .select(database.settingsEntries)
+            .getSingle();
+        expect(setting.settingKey, 'theme.mode');
+        expect(setting.valueJson, '"system"');
+        expect(
+          await database.select(database.progressDocuments).get(),
+          isEmpty,
+        );
+        final version = await database
+            .customSelect('PRAGMA user_version')
+            .getSingle();
+        expect(version.read<int>('user_version'), 3);
+      } finally {
+        await database.close();
+        await directory.delete(recursive: true);
+      }
+    },
+  );
+
+  test(
+    'migrates v2 to v3 and creates the bounded search-cache table',
+    () async {
+      final directory = await _temporaryDatabaseDirectory();
+      final file = File('${directory.path}/anime_app.sqlite');
+      final oldDatabase = sqlite.sqlite3.open(file.path);
+      final snapshot = File(
+        '${Directory.current.path}/drift_schemas/schema_v2.sql',
+      );
+      for (final String statement in snapshot.readAsStringSync().split(';')) {
+        if (statement.trim().isNotEmpty) {
+          oldDatabase.execute(statement);
+        }
+      }
+      oldDatabase.execute('INSERT INTO settings_entries VALUES (?, ?, ?)', [
+        'theme.mode',
+        '"system"',
+        DateTime.utc(2026, 11, 9).millisecondsSinceEpoch,
+      ]);
+      oldDatabase.execute('PRAGMA user_version = 2');
+      oldDatabase.close();
+
+      final database = AppDatabase.atFile(file);
+      try {
+        final setting = await database
+            .select(database.settingsEntries)
+            .getSingle();
+        expect(setting.settingKey, 'theme.mode');
+        expect(
+          await database.select(database.latestAnimeSearch).get(),
+          isEmpty,
+        );
+        final version = await database
+            .customSelect('PRAGMA user_version')
+            .getSingle();
+        expect(version.read<int>('user_version'), 3);
+      } finally {
+        await database.close();
+        await directory.delete(recursive: true);
+      }
+    },
+  );
 
   test('rolls back a failed multi-write transaction', () async {
     final directory = await _temporaryDatabaseDirectory();

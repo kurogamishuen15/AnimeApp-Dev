@@ -6,18 +6,24 @@ composición de aplicación crea y cierra la base.
 
 ## Estado actual
 
-- Schema version 2.
+- Schema version 3. F1.8 agrega `latest_anime_search` mediante migración v2→v3;
+  la ruta desde v1 se prueba encadenando migraciones.
 - `settings_entries` conserva envelopes JSON por clave estable; catálogo,
   validación y semántica tipada están en [`settings`](../../settings/README.md).
 - `progress_documents` conserva un documento opaco. No define reglas de
   progreso, conflictos ni semántica temporal; esos contratos pertenecen a
   F1.10/F1.11.
+- `latest_anime_search` es un único slot reemplazable para la última búsqueda
+  explícita del usuario; no conserva un historial o lote de respuestas. La
+  consulta, página y tamaño deben coincidir antes de usarla offline.
+  `cached_at` es un instante UTC técnico de recepción, no una regla de negocio.
 - Migración v1→v2 no destructiva. El snapshot histórico v1 está en
   [`app/drift_schemas/schema_v1.sql`](../../../drift_schemas/schema_v1.sql).
 - Apertura de producto usa el directorio de soporte de la aplicación. Las
   pruebas inyectan una ruta SQLite real bajo `.ai-local/test-db/`.
 - Integración del ciclo de vida con el composition root y responsable de
-  cierre aún pendientes de F1.5; por ahora el consumidor debe cerrar la base.
+  cierre siguen pendientes de la integración de aplicación; el consumidor debe
+  cerrar la base explícitamente.
 - `NativeDatabase.createInBackground` mantiene el acceso al archivo fuera del
   isolate de UI. No se ha medido rendimiento en hardware objetivo.
 

@@ -554,6 +554,426 @@ class ProgressDocumentsCompanion extends UpdateCompanion<ProgressDocument> {
   }
 }
 
+class $LatestAnimeSearchTable extends LatestAnimeSearch
+    with TableInfo<$LatestAnimeSearchTable, LatestAnimeSearchData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LatestAnimeSearchTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _slotMeta = const VerificationMeta('slot');
+  @override
+  late final GeneratedColumn<String> slot = GeneratedColumn<String>(
+    'slot',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _searchQueryMeta = const VerificationMeta(
+    'searchQuery',
+  );
+  @override
+  late final GeneratedColumn<String> searchQuery = GeneratedColumn<String>(
+    'search_query',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _pageMeta = const VerificationMeta('page');
+  @override
+  late final GeneratedColumn<int> page = GeneratedColumn<int>(
+    'page',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _perPageMeta = const VerificationMeta(
+    'perPage',
+  );
+  @override
+  late final GeneratedColumn<int> perPage = GeneratedColumn<int>(
+    'per_page',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _resultJsonMeta = const VerificationMeta(
+    'resultJson',
+  );
+  @override
+  late final GeneratedColumn<String> resultJson = GeneratedColumn<String>(
+    'result_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _cachedAtMeta = const VerificationMeta(
+    'cachedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> cachedAt = GeneratedColumn<DateTime>(
+    'cached_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    slot,
+    searchQuery,
+    page,
+    perPage,
+    resultJson,
+    cachedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'latest_anime_search';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LatestAnimeSearchData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('slot')) {
+      context.handle(
+        _slotMeta,
+        slot.isAcceptableOrUnknown(data['slot']!, _slotMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_slotMeta);
+    }
+    if (data.containsKey('search_query')) {
+      context.handle(
+        _searchQueryMeta,
+        searchQuery.isAcceptableOrUnknown(
+          data['search_query']!,
+          _searchQueryMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_searchQueryMeta);
+    }
+    if (data.containsKey('page')) {
+      context.handle(
+        _pageMeta,
+        page.isAcceptableOrUnknown(data['page']!, _pageMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_pageMeta);
+    }
+    if (data.containsKey('per_page')) {
+      context.handle(
+        _perPageMeta,
+        perPage.isAcceptableOrUnknown(data['per_page']!, _perPageMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_perPageMeta);
+    }
+    if (data.containsKey('result_json')) {
+      context.handle(
+        _resultJsonMeta,
+        resultJson.isAcceptableOrUnknown(data['result_json']!, _resultJsonMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_resultJsonMeta);
+    }
+    if (data.containsKey('cached_at')) {
+      context.handle(
+        _cachedAtMeta,
+        cachedAt.isAcceptableOrUnknown(data['cached_at']!, _cachedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_cachedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {slot};
+  @override
+  LatestAnimeSearchData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LatestAnimeSearchData(
+      slot: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}slot'],
+      )!,
+      searchQuery: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}search_query'],
+      )!,
+      page: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}page'],
+      )!,
+      perPage: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}per_page'],
+      )!,
+      resultJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}result_json'],
+      )!,
+      cachedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}cached_at'],
+      )!,
+    );
+  }
+
+  @override
+  $LatestAnimeSearchTable createAlias(String alias) {
+    return $LatestAnimeSearchTable(attachedDatabase, alias);
+  }
+}
+
+class LatestAnimeSearchData extends DataClass
+    implements Insertable<LatestAnimeSearchData> {
+  final String slot;
+  final String searchQuery;
+  final int page;
+  final int perPage;
+  final String resultJson;
+  final DateTime cachedAt;
+  const LatestAnimeSearchData({
+    required this.slot,
+    required this.searchQuery,
+    required this.page,
+    required this.perPage,
+    required this.resultJson,
+    required this.cachedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['slot'] = Variable<String>(slot);
+    map['search_query'] = Variable<String>(searchQuery);
+    map['page'] = Variable<int>(page);
+    map['per_page'] = Variable<int>(perPage);
+    map['result_json'] = Variable<String>(resultJson);
+    map['cached_at'] = Variable<DateTime>(cachedAt);
+    return map;
+  }
+
+  LatestAnimeSearchCompanion toCompanion(bool nullToAbsent) {
+    return LatestAnimeSearchCompanion(
+      slot: Value(slot),
+      searchQuery: Value(searchQuery),
+      page: Value(page),
+      perPage: Value(perPage),
+      resultJson: Value(resultJson),
+      cachedAt: Value(cachedAt),
+    );
+  }
+
+  factory LatestAnimeSearchData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LatestAnimeSearchData(
+      slot: serializer.fromJson<String>(json['slot']),
+      searchQuery: serializer.fromJson<String>(json['searchQuery']),
+      page: serializer.fromJson<int>(json['page']),
+      perPage: serializer.fromJson<int>(json['perPage']),
+      resultJson: serializer.fromJson<String>(json['resultJson']),
+      cachedAt: serializer.fromJson<DateTime>(json['cachedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'slot': serializer.toJson<String>(slot),
+      'searchQuery': serializer.toJson<String>(searchQuery),
+      'page': serializer.toJson<int>(page),
+      'perPage': serializer.toJson<int>(perPage),
+      'resultJson': serializer.toJson<String>(resultJson),
+      'cachedAt': serializer.toJson<DateTime>(cachedAt),
+    };
+  }
+
+  LatestAnimeSearchData copyWith({
+    String? slot,
+    String? searchQuery,
+    int? page,
+    int? perPage,
+    String? resultJson,
+    DateTime? cachedAt,
+  }) => LatestAnimeSearchData(
+    slot: slot ?? this.slot,
+    searchQuery: searchQuery ?? this.searchQuery,
+    page: page ?? this.page,
+    perPage: perPage ?? this.perPage,
+    resultJson: resultJson ?? this.resultJson,
+    cachedAt: cachedAt ?? this.cachedAt,
+  );
+  LatestAnimeSearchData copyWithCompanion(LatestAnimeSearchCompanion data) {
+    return LatestAnimeSearchData(
+      slot: data.slot.present ? data.slot.value : this.slot,
+      searchQuery: data.searchQuery.present
+          ? data.searchQuery.value
+          : this.searchQuery,
+      page: data.page.present ? data.page.value : this.page,
+      perPage: data.perPage.present ? data.perPage.value : this.perPage,
+      resultJson: data.resultJson.present
+          ? data.resultJson.value
+          : this.resultJson,
+      cachedAt: data.cachedAt.present ? data.cachedAt.value : this.cachedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LatestAnimeSearchData(')
+          ..write('slot: $slot, ')
+          ..write('searchQuery: $searchQuery, ')
+          ..write('page: $page, ')
+          ..write('perPage: $perPage, ')
+          ..write('resultJson: $resultJson, ')
+          ..write('cachedAt: $cachedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(slot, searchQuery, page, perPage, resultJson, cachedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LatestAnimeSearchData &&
+          other.slot == this.slot &&
+          other.searchQuery == this.searchQuery &&
+          other.page == this.page &&
+          other.perPage == this.perPage &&
+          other.resultJson == this.resultJson &&
+          other.cachedAt == this.cachedAt);
+}
+
+class LatestAnimeSearchCompanion
+    extends UpdateCompanion<LatestAnimeSearchData> {
+  final Value<String> slot;
+  final Value<String> searchQuery;
+  final Value<int> page;
+  final Value<int> perPage;
+  final Value<String> resultJson;
+  final Value<DateTime> cachedAt;
+  final Value<int> rowid;
+  const LatestAnimeSearchCompanion({
+    this.slot = const Value.absent(),
+    this.searchQuery = const Value.absent(),
+    this.page = const Value.absent(),
+    this.perPage = const Value.absent(),
+    this.resultJson = const Value.absent(),
+    this.cachedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LatestAnimeSearchCompanion.insert({
+    required String slot,
+    required String searchQuery,
+    required int page,
+    required int perPage,
+    required String resultJson,
+    required DateTime cachedAt,
+    this.rowid = const Value.absent(),
+  }) : slot = Value(slot),
+       searchQuery = Value(searchQuery),
+       page = Value(page),
+       perPage = Value(perPage),
+       resultJson = Value(resultJson),
+       cachedAt = Value(cachedAt);
+  static Insertable<LatestAnimeSearchData> custom({
+    Expression<String>? slot,
+    Expression<String>? searchQuery,
+    Expression<int>? page,
+    Expression<int>? perPage,
+    Expression<String>? resultJson,
+    Expression<DateTime>? cachedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (slot != null) 'slot': slot,
+      if (searchQuery != null) 'search_query': searchQuery,
+      if (page != null) 'page': page,
+      if (perPage != null) 'per_page': perPage,
+      if (resultJson != null) 'result_json': resultJson,
+      if (cachedAt != null) 'cached_at': cachedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LatestAnimeSearchCompanion copyWith({
+    Value<String>? slot,
+    Value<String>? searchQuery,
+    Value<int>? page,
+    Value<int>? perPage,
+    Value<String>? resultJson,
+    Value<DateTime>? cachedAt,
+    Value<int>? rowid,
+  }) {
+    return LatestAnimeSearchCompanion(
+      slot: slot ?? this.slot,
+      searchQuery: searchQuery ?? this.searchQuery,
+      page: page ?? this.page,
+      perPage: perPage ?? this.perPage,
+      resultJson: resultJson ?? this.resultJson,
+      cachedAt: cachedAt ?? this.cachedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (slot.present) {
+      map['slot'] = Variable<String>(slot.value);
+    }
+    if (searchQuery.present) {
+      map['search_query'] = Variable<String>(searchQuery.value);
+    }
+    if (page.present) {
+      map['page'] = Variable<int>(page.value);
+    }
+    if (perPage.present) {
+      map['per_page'] = Variable<int>(perPage.value);
+    }
+    if (resultJson.present) {
+      map['result_json'] = Variable<String>(resultJson.value);
+    }
+    if (cachedAt.present) {
+      map['cached_at'] = Variable<DateTime>(cachedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LatestAnimeSearchCompanion(')
+          ..write('slot: $slot, ')
+          ..write('searchQuery: $searchQuery, ')
+          ..write('page: $page, ')
+          ..write('perPage: $perPage, ')
+          ..write('resultJson: $resultJson, ')
+          ..write('cachedAt: $cachedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -562,6 +982,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final $ProgressDocumentsTable progressDocuments =
       $ProgressDocumentsTable(this);
+  late final $LatestAnimeSearchTable latestAnimeSearch =
+      $LatestAnimeSearchTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -569,6 +991,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     settingsEntries,
     progressDocuments,
+    latestAnimeSearch,
   ];
 }
 
@@ -935,6 +1358,253 @@ typedef $$ProgressDocumentsTableProcessedTableManager =
       ProgressDocument,
       PrefetchHooks Function()
     >;
+typedef $$LatestAnimeSearchTableCreateCompanionBuilder =
+    LatestAnimeSearchCompanion Function({
+      required String slot,
+      required String searchQuery,
+      required int page,
+      required int perPage,
+      required String resultJson,
+      required DateTime cachedAt,
+      Value<int> rowid,
+    });
+typedef $$LatestAnimeSearchTableUpdateCompanionBuilder =
+    LatestAnimeSearchCompanion Function({
+      Value<String> slot,
+      Value<String> searchQuery,
+      Value<int> page,
+      Value<int> perPage,
+      Value<String> resultJson,
+      Value<DateTime> cachedAt,
+      Value<int> rowid,
+    });
+
+class $$LatestAnimeSearchTableFilterComposer
+    extends Composer<_$AppDatabase, $LatestAnimeSearchTable> {
+  $$LatestAnimeSearchTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get slot => $composableBuilder(
+    column: $table.slot,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get searchQuery => $composableBuilder(
+    column: $table.searchQuery,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get page => $composableBuilder(
+    column: $table.page,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get perPage => $composableBuilder(
+    column: $table.perPage,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get resultJson => $composableBuilder(
+    column: $table.resultJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get cachedAt => $composableBuilder(
+    column: $table.cachedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LatestAnimeSearchTableOrderingComposer
+    extends Composer<_$AppDatabase, $LatestAnimeSearchTable> {
+  $$LatestAnimeSearchTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get slot => $composableBuilder(
+    column: $table.slot,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get searchQuery => $composableBuilder(
+    column: $table.searchQuery,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get page => $composableBuilder(
+    column: $table.page,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get perPage => $composableBuilder(
+    column: $table.perPage,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get resultJson => $composableBuilder(
+    column: $table.resultJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get cachedAt => $composableBuilder(
+    column: $table.cachedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LatestAnimeSearchTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LatestAnimeSearchTable> {
+  $$LatestAnimeSearchTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get slot =>
+      $composableBuilder(column: $table.slot, builder: (column) => column);
+
+  GeneratedColumn<String> get searchQuery => $composableBuilder(
+    column: $table.searchQuery,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get page =>
+      $composableBuilder(column: $table.page, builder: (column) => column);
+
+  GeneratedColumn<int> get perPage =>
+      $composableBuilder(column: $table.perPage, builder: (column) => column);
+
+  GeneratedColumn<String> get resultJson => $composableBuilder(
+    column: $table.resultJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get cachedAt =>
+      $composableBuilder(column: $table.cachedAt, builder: (column) => column);
+}
+
+class $$LatestAnimeSearchTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LatestAnimeSearchTable,
+          LatestAnimeSearchData,
+          $$LatestAnimeSearchTableFilterComposer,
+          $$LatestAnimeSearchTableOrderingComposer,
+          $$LatestAnimeSearchTableAnnotationComposer,
+          $$LatestAnimeSearchTableCreateCompanionBuilder,
+          $$LatestAnimeSearchTableUpdateCompanionBuilder,
+          (
+            LatestAnimeSearchData,
+            BaseReferences<
+              _$AppDatabase,
+              $LatestAnimeSearchTable,
+              LatestAnimeSearchData
+            >,
+          ),
+          LatestAnimeSearchData,
+          PrefetchHooks Function()
+        > {
+  $$LatestAnimeSearchTableTableManager(
+    _$AppDatabase db,
+    $LatestAnimeSearchTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LatestAnimeSearchTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LatestAnimeSearchTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LatestAnimeSearchTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> slot = const Value.absent(),
+                Value<String> searchQuery = const Value.absent(),
+                Value<int> page = const Value.absent(),
+                Value<int> perPage = const Value.absent(),
+                Value<String> resultJson = const Value.absent(),
+                Value<DateTime> cachedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LatestAnimeSearchCompanion(
+                slot: slot,
+                searchQuery: searchQuery,
+                page: page,
+                perPage: perPage,
+                resultJson: resultJson,
+                cachedAt: cachedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String slot,
+                required String searchQuery,
+                required int page,
+                required int perPage,
+                required String resultJson,
+                required DateTime cachedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => LatestAnimeSearchCompanion.insert(
+                slot: slot,
+                searchQuery: searchQuery,
+                page: page,
+                perPage: perPage,
+                resultJson: resultJson,
+                cachedAt: cachedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$LatestAnimeSearchTable, LatestAnimeSearchData>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $LatestAnimeSearchTable,
+                    LatestAnimeSearchData
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LatestAnimeSearchTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LatestAnimeSearchTable,
+      LatestAnimeSearchData,
+      $$LatestAnimeSearchTableFilterComposer,
+      $$LatestAnimeSearchTableOrderingComposer,
+      $$LatestAnimeSearchTableAnnotationComposer,
+      $$LatestAnimeSearchTableCreateCompanionBuilder,
+      $$LatestAnimeSearchTableUpdateCompanionBuilder,
+      (
+        LatestAnimeSearchData,
+        BaseReferences<
+          _$AppDatabase,
+          $LatestAnimeSearchTable,
+          LatestAnimeSearchData
+        >,
+      ),
+      LatestAnimeSearchData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -943,4 +1613,6 @@ class $AppDatabaseManager {
       $$SettingsEntriesTableTableManager(_db, _db.settingsEntries);
   $$ProgressDocumentsTableTableManager get progressDocuments =>
       $$ProgressDocumentsTableTableManager(_db, _db.progressDocuments);
+  $$LatestAnimeSearchTableTableManager get latestAnimeSearch =>
+      $$LatestAnimeSearchTableTableManager(_db, _db.latestAnimeSearch);
 }

@@ -9,8 +9,11 @@ Contiene identidad y, cuando existan, modelos, reglas y contratos propios del ne
 | Archivo | Función |
 | --- | --- |
 | `app_identity.dart` | `AppIdentity.name`, constante pública con el nombre de la aplicación. |
+| `catalog/anime_summary.dart` | Resultado de búsqueda de dominio con fuente explícita, modelo anime minimal y error de refresco opcional. |
+| `catalog/anime_catalog_repository.dart` | Puerto Dart puro para búsqueda de catálogo, usando `Result` y modelos propios. |
 
-No se declaran todavía repositorios, casos de uso, ajustes ni contratos multimedia porque no existen en el código actual.
+El dominio incluye los modelos de catálogo puros en `catalog/`; el repositorio
+AniList se declara aquí y el adaptador reside en `data/anilist`.
 
 ## Dependencias permitidas y prohibidas
 
@@ -20,8 +23,8 @@ Puede depender de bibliotecas Dart puras que se justifiquen y de otros contratos
 
 ## Flujo, pruebas y rendimiento
 
-El widget raíz usa `AppIdentity.name`; no hay ciclo de vida, estado mutable ni recursos. No existen tests unitarios del dominio todavía; la prueba widget actual solo valida la pantalla inicial. La constante no requiere inicialización adicional ni tiene impacto material de recursos.
+El widget raíz usa `AppIdentity.name`. Los modelos de catálogo no ejecutan I/O; los tests HTTP están en el adapter y usan loopback. El domain no inicializa servicios ni mantiene estado mutable.
 
 ## Portabilidad y trabajo pendiente
 
-El módulo es Dart puro y reutilizable en todas las plataformas objetivo. Crear modelos/reglas/puertos solo cuando un requisito aprobado tenga consumidor; probar cada regla con tests Dart puros. No añadir ajustes ni persistencia aquí por adelantado: el registro tipado pertenece a F1.5 y su almacenamiento durable a F1.6.
+El módulo es Dart puro y reutilizable en todas las plataformas objetivo. El checker de imports impide acoplarlo a Flutter/Drift/Dio/plugins. El adapter AniList y su cache son infraestructura externos y no son necesarios para analizar o usar capacidades locales.

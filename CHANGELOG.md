@@ -21,6 +21,11 @@ Cambios notables por versión y subfase. Sigue Conventional Commits para el hist
 - Añadidos contratos de definición/registro con valor por defecto, propietario, codec JSON y validador; store SQLite local-first con `get`, `set` y `watch` reactivo. Resultados y errores usan los tipos de F1.7.
 - Cinco pruebas reales cubren defaults, validación, tipo corrupto, registro único, actualización reactiva, errores del stream y persistencia al reabrir. No se inventaron claves/defaults de producto ausentes en los documentos aprobados; el registro productivo continúa vacío. Ver [README settings](app/lib/settings/README.md).
 
+### F1.8 — AniList GraphQL de lectura
+
+- Añadido cliente propio Dio sin codegen ni mutaciones, mapeo GraphQL a dominio, errores tipados, rate gate compartido y cache local replace-on-write limitada a una búsqueda solicitada. Drift migra v2→v3 y conserva snapshots históricos.
+- Ocho pruebas de cliente y dos de cache usan un servidor HTTP loopback; no se hicieron requests externos. La integración productiva queda desconectada hasta revisar elegibilidad de AnimeApp frente a los términos actuales de AniList. Detalle en [README AniList](app/lib/data/anilist/README.md).
+
 
 ### Reparación de análisis y CI (F0.4–F0.5)
 

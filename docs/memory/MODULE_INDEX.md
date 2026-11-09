@@ -13,6 +13,8 @@ Evidencia: Rutas de herramientas y sus tests
 | Resultados, errores tipados y logging sanitizado | app/lib/core; [README](../../app/lib/core/README.md) | tests/core y `dart analyze lib/core test/core` |
 | Persistencia local SQLite/Drift | app/lib/data/local_db; [README](../../app/lib/data/local_db/README.md) | archivo real, migración v1→v2, reapertura y rollback |
 | Definición, catálogo y store local de ajustes | app/lib/settings; [README](../../app/lib/settings/README.md) | defaults, codec/validación, get/set/watch y reinicio |
+| Contrato catálogo puro | app/lib/domain/catalog; [README](../../app/lib/domain/README.md) | import checker; modelos sin Flutter/SQL/HTTP |
+| AniList GraphQL y cache acotada | app/lib/data/anilist; [README](../../app/lib/data/anilist/README.md) | transporte HTTP loopback, errores, rate limiter y migración v2→v3 |
 | Identidad independiente del toolkit | app/lib/domain/app_identity.dart; [README](../../app/lib/domain/README.md) | test widget y checker recursivo de imports |
 | Runner nativo Linux | app/linux | `flutter build linux --release` |
 | CI local y límites de imports | scripts/ci.sh, scripts/check_imports.dart | prueba sintética y ejecución CI |

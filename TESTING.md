@@ -100,3 +100,16 @@ no está versionada. Una instalación limpia necesita acceso al release oficial.
 El análisis y la CI completa de estas subfases pasaron con Flutter 3.50.0-0.4.pre
 / Dart 3.14.0 beta aislado. Flutter stable 3.47.9 mantiene la incidencia LSP
 documentada arriba; no se declara verde con esa versión.
+
+## F1.8 — Cliente AniList local
+
+Desde `app/`, los tests de `test/data/anilist/` levantan un servidor HTTP solo
+en loopback. Cubren POST GraphQL de lectura, request variables, mapeo al modelo
+de dominio, campos ausentes, errores GraphQL/HTTP, timeout, 429/Retry-After,
+rate gate entre clientes, cache de una sola búsqueda, fallback offline y
+migración v2→v3. No hay prueba de carga ni request a `graphql.anilist.co`.
+
+El uso en producción permanece desconectado hasta revisar los términos de
+AniList para el alcance de AnimeApp. La caché implementada reemplaza una sola
+búsqueda explícita y nunca hace scraping/prefetch/bulk. Ver [documentación del
+adaptador](app/lib/data/anilist/README.md).

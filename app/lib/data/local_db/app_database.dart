@@ -4,12 +4,13 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'tables/latest_anime_search.dart';
 import 'tables/progress_documents.dart';
 import 'tables/settings_entries.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [SettingsEntries, ProgressDocuments])
+@DriftDatabase(tables: [SettingsEntries, ProgressDocuments, LatestAnimeSearch])
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
@@ -20,7 +21,7 @@ class AppDatabase extends _$AppDatabase {
   factory AppDatabase.atFile(File file) => AppDatabase(NativeDatabase(file));
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -30,6 +31,9 @@ class AppDatabase extends _$AppDatabase {
     onUpgrade: (migrator, from, to) async {
       if (from < 2) {
         await migrator.createTable(progressDocuments);
+      }
+      if (from < 3) {
+        await migrator.createTable(latestAnimeSearch);
       }
     },
     beforeOpen: (details) async {
