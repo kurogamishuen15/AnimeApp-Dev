@@ -11,7 +11,10 @@ composición de aplicación crea y cierra la base.
 - `settings_entries` conserva envelopes JSON por clave estable; catálogo,
   validación y semántica tipada están en [`settings`](../../settings/README.md).
 - `progress_documents` conserva un documento opaco. No define reglas de
-  progreso, conflictos ni semántica temporal; esos contratos pertenecen a
+  progreso, conflictos ni semántica temporal. `LocalProgressRepository`
+  persiste y recupera payloads JSON por una identidad exacta suministrada por
+  su consumidor; su `updatedAt` es un instante técnico UTC. Campos de negocio,
+  formación de la identidad, reanudación y conflictos siguen pendientes en
   F1.10/F1.11.
 - `latest_anime_search` es un único slot reemplazable para la última búsqueda
   explícita del usuario; no conserva un historial o lote de respuestas. La

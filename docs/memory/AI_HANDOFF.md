@@ -58,3 +58,7 @@ Cliente propio Dio GraphQL read-only, query de búsqueda mínima, parsing a domi
 ### F1.9 — 2026-11-09
 
 Puerto Dart puro `SecureCredentialStore` y adaptador `flutter_secure_storage 11.2.0` (Linux backend 3.0.3); CRUD, token vacío y error sanitizado pasan cuatro pruebas fake. Build Linux debug compila plugin. No se accedió al keyring. OAuth grant/callback/scope/expiración-refresh/revocación y runtime Secret Service pendientes; revisa sesión F1.9. No usar AniList en producto hasta revisión de elegibilidad.
+
+### F1.10 — 2026-11-09
+
+`ProgressDraft`/`ProgressDocument`/`ProgressRepository` puros; `LocalProgressRepository` persiste JSON opaco en Drift, por identidad caller-owned y timestamp técnico UTC generado al guardar. 3 tests SQLite cubren cierre/reapertura, reemplazo exact-key, ausencia/JSON inválido. Revisión de datos pidió separar draft del read model y corregir el nombre de prueba; quedó atendida. F1.10 parcial: FR-03/FR-18 requieren definición propietaria de identidad anime/episodio y campos; no inventar posición, duración, porcentaje, finalización o precedencia. Ver sesión F1.10. Próximo F1.11 contract/FakeRemote; no real Supabase.

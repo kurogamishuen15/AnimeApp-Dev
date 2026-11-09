@@ -117,3 +117,7 @@ adaptador](app/lib/data/anilist/README.md).
 ## F1.9 — Almacenamiento seguro
 
 `flutter test --no-pub test/data/secure_storage` ejecuta cuatro pruebas contra un fake manual: guardar/leer/borrar, rechazo de token vacío, ausencia de token y errores genéricos que no revelan excepciones del backend. No contactan el keyring. `flutter build linux --debug` comprueba compilación del plugin Linux `flutter_secure_storage_linux`; no ejecuta operaciones de runtime. La prueba real de Secret Service debe realizarse en un entorno autorizado y aislado antes de habilitar cuentas. OAuth sigue pendiente de decisión y no tiene pruebas de flujo/callback.
+
+## F1.10 — Progreso local
+
+`flutter test --no-pub test/data/local_db/local_progress_repository_test.dart` ejecuta tres pruebas con SQLite temporal bajo `.ai-local/`: guardar y recuperar después de cierre/reapertura, reemplazo por identidad exacta, y ausencia de fila/validación JSON. No prueba campos de progreso de producto, reanudación, sincronización, escritura interrumpida ni rendimiento; esos contratos siguen pendientes de definición en ADR-A10/FR-03/FR-11.

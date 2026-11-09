@@ -33,6 +33,8 @@ F1.1 requisitos (aprobados: [18 FR, 13 NFR y trazabilidad](docs/requirements/F1.
 
 F1.5 (infraestructura de registro tipado/store local), F1.6 (schema Drift y migración SQLite), F1.7 (errores/Result/logger), F1.8 (cliente AniList de lectura y caché acotada) y la infraestructura de almacenamiento seguro de F1.9 están implementadas técnicamente. F1.9 no define ni ejecuta OAuth: callback, grant, scope, expiración y revocación requieren una decisión; el runtime real del keyring y la elegibilidad de AniList siguen sin verificar. No se usaron credenciales ni llamadas externas. Estado y aplazamientos: [PROGRESS.md](PROGRESS.md).
 
+F1.10 aporta persistencia local genérica de documentos opacos por identidad exacta, sin decidir campos de progreso, identidad anime/episodio, reanudación ni semántica temporal funcional. FR-03 y FR-18 siguen pendientes de definición de producto; FR-11 no se interpreta automáticamente. Ver [ADR-A10](docs/adr/additional/ADR-A10-progreso-local.md) y [PROGRESS.md](PROGRESS.md).
+
 F1.4 conserva solo el scaffold Linux y el dominio Dart puro existentes; no crea carpetas vacías ni código, servicios, interfaces o dependencias para Android, Android TV o Windows. El checker de imports protege todos los subdirectorios `domain` de `app/lib`. Las plataformas futuras se incorporarán con adaptadores solo tras identificar diferencias y consumidores reales. F1.5 define el catálogo y contrato funcional de ajustes; F1.6 aporta persistencia durable Drift, migraciones y verificación tras reinicio.
 
 ## F2 Reproductor
