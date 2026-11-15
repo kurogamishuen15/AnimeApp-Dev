@@ -59,6 +59,16 @@ EOF
 expect_pass 'import Dart y contrato de dominio permitidos'
 
 reset_fixture
+mkdir -p "$FIXTURE_ROOT/app/lib/domain/player/providers"
+cat >"$FIXTURE_ROOT/app/lib/domain/player/providers/playback_source.dart" <<'EOF'
+class PlaybackSource {}
+EOF
+cat >"$FIXTURE_ROOT/app/lib/domain/player/providers/playback_provider_contract.dart" <<'EOF'
+import 'playback_source.dart';
+EOF
+expect_pass 'contratos de proveedor pueden importar modelos hermanos del dominio'
+
+reset_fixture
 cat >"$FIXTURE_ROOT/app/lib/domain/invalid_flutter.dart" <<'EOF'
 import 'package:flutter/widgets.dart';
 EOF
@@ -130,9 +140,23 @@ mv "$FIXTURE_ROOT/app" "$FIXTURE_ROOT/app_target"
 ln -s app_target "$FIXTURE_ROOT/app"
 expect_fail 'raíz app enlazada simbólicamente se rechaza'
 
+reset_fixture
+mkdir -p "$FIXTURE_ROOT/app/lib/app/player"
+cat >"$FIXTURE_ROOT/app/lib/app/player/server_panel.dart" <<'EOF'
+import 'package:dio/dio.dart';
+EOF
+expect_fail 'panel player no importa clientes HTTP'
+
+reset_fixture
+mkdir -p "$FIXTURE_ROOT/app/lib/application/player" "$FIXTURE_ROOT/app/lib/data/player"
+cat >"$FIXTURE_ROOT/app/lib/application/player/session.dart" <<'EOF'
+import '../../data/player/engine.dart';
+EOF
+expect_fail 'aplicación player no importa adaptadores'
+
 if ! "$DART_BIN" "$ROOT/scripts/check_imports.dart" --root "$ROOT"; then
   echo 'ERROR: el código actual del proyecto debía pasar el checker.' >&2
   exit 1
 fi
 printf 'PASS (exit 0): árbol real del proyecto\n'
-echo 'Casos del checker: positivo y diez negativos pasaron.'
+echo 'Casos del checker: dos positivos y doce negativos pasaron.'

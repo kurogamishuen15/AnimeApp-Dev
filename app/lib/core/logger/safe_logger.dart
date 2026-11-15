@@ -131,15 +131,16 @@ Map<String, Object?> _sanitizeMap(Map<String, Object?> source) {
 
 Object? _sanitizeValue(Object? value) => switch (value) {
   null => null,
-  String text => _safeText(text),
+  final String text => _safeText(text),
   num _ || bool _ => value,
-  Map<Object?, Object?> map => _sanitizeMap(
+  final Map<Object?, Object?> map => _sanitizeMap(
     map.map((key, value) => MapEntry(key?.toString() ?? 'null', value)),
   ),
-  Iterable<Object?> items => items.map(_sanitizeValue).toList(growable: false),
-  Uri uri => _safeUri(uri),
-  AppError error => '[AppError:${error.code}]',
-  Object object => '[${object.runtimeType}]',
+  final Iterable<Object?> items =>
+    items.map(_sanitizeValue).toList(growable: false),
+  final Uri uri => _safeUri(uri),
+  final AppError error => '[AppError:${error.code}]',
+  final Object object => '[${object.runtimeType}]',
 };
 
 String _safeUri(Uri uri) {

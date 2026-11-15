@@ -4,6 +4,40 @@ Cambios notables por versión y subfase. Sigue Conventional Commits para el hist
 
 ## Sin publicar
 
+### F2.2 — spike local media_kit/libmpv
+
+- Añadidos el puerto temporal de reproducción, coordinador FIFO, adaptador
+  media_kit, superficie de video y entrypoint opt-in independiente.
+- Añadido fixture MP4 sintético local en `.ai-local/` y tests con fake y libmpv
+  real para open, avance, pause, seek, stop y dispose.
+- El spike no altera `main.dart`, catálogo, Drift ni progreso. Presentación
+  visible y auditoría de distribución/licencias siguen pendientes. Ver
+  [informe técnico](docs/player/F2.2-spike-report.md).
+
+### Integración local del catálogo (sin numeración nueva de fase)
+
+- Conectada una UI mínima a `CatalogService`: búsqueda y detalles con tres
+  fixtures sintéticos, alta local idempotente, estado provisional y progreso
+  F1.10 reutilizado. El recorrido funciona sin login ni HTTP externo.
+- Ampliado Drift v5→v6 con campo de status provisional y constraint; se
+  corrigieron expectativas obsoletas v5 de pruebas de progreso.
+- Prueba widget sobre SQLite físico confirma búsqueda, ficha, no duplicados,
+  estado, 2700 s, cierre/reapertura y recuperación. La suite completa terminó
+  con 62 tests; análisis, checker y build Linux documentados en la sesión.
+- ADR-A14 permanece propuesto/no aceptado. No se conectan providers reales,
+  OAuth, sincronización de cuenta, player ni plataformas futuras.
+
+### Arquitectura incremental de catálogo e identidad local
+
+- Añadidos contratos Dart puros para providers, errores/capacidades,
+  procedencia, IDs internos/externos y resolución conservadora.
+- Añadidos Drift schema v5 (ahora v6), crosswalk de IDs, relaciones tipadas y
+  membership local. Quitar membership no borra progreso; no se persisten
+  nuevas respuestas externas.
+- AniList/TMDB/Kitsu siguen deshabilitados: elegibilidad, términos/retención,
+  credenciales y atribución no están confirmados. Ver [auditoría](docs/architecture/catalog-system-audit.md)
+  y [ADR-A14 propuesta](docs/adr/additional/ADR-A14-catalog-providers-identity.md).
+
 ### F1.10 — progreso tipado local
 
 - Schema Drift v4 agrega `playback_progress_entries` con clave de contenido y

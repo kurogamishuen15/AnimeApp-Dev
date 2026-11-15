@@ -1,0 +1,817 @@
+# KONGROO — OPERACIÓN DE CIERRE F2.2
+## Corrección definitiva del reproductor, control autónomo de pruebas en Fedora y auditoría profunda
+
+Proyecto: Kongroo
+Subfase autorizada: F2.2 — Spike e integración de media_kit/libmpv
+Sistema principal: Fedora Linux
+Prioridad: Calidad, estabilidad y modularización
+Estado: F2.2 ABIERTA — NO ACEPTADA
+Modalidad: Ejecución autónoma con pruebas y auditoría
+Prohibido: Avanzar a F2.3 sin autorización del propietario
+
+---
+
+# 0. ORDEN PRINCIPAL
+
+Quiero terminar de manera rigurosa la subfase F2.2 de Kongroo.
+
+Hemos invertido demasiado tiempo en sucesivas correcciones y auditorías. Esta vez necesito que lleves a cabo un ciclo completo y autónomo:
+
+Investigar → Inspeccionar → Corregir → Probar → Auditar → Resolver defectos → Verificar → Documentar → Entregar.
+
+No quiero que te limites a modificar una línea y declarar el problema resuelto.
+
+Tampoco quiero que amplíes indefinidamente la subfase con funcionalidades de etapas futuras.
+
+Tu responsabilidad consiste en dejar F2.2 técnicamente preparada para mi aceptación, con pruebas reproducibles y evidencia verificable.
+
+Si detectas nuevos defectos dentro de F2.2, corrígelos sin pedirme instrucciones adicionales cuando estén dentro de las autorizaciones existentes.
+
+No declares éxito si un requisito no pudo comprobarse.
+
+# 1. CONTEXTO ACTUAL
+
+El reproductor utiliza:
+
+- Flutter/Dart.
+- media_kit.
+- media_kit_video.
+- libmpv.
+- Fedora Linux.
+- Un adaptador multimedia.
+- Un coordinador de reproducción.
+- Una superficie de video.
+- Controles personalizados.
+- Un entrypoint de pruebas independiente.
+
+Ya se ha confirmado manualmente en Fedora que:
+
+1. Se muestra imagen de video.
+2. Se reproduce sonido.
+3. Existe una interfaz de controles personalizada.
+
+Sin embargo, detecté un defecto grave de interfaz:
+
+APARECEN DOS SISTEMAS DE CONTROLES DE REPRODUCCIÓN.
+
+Al colocar el cursor sobre el video aparece una barra automática de media_kit y, debajo del video, aparece la barra personalizada de Kongroo.
+
+No acepto esta experiencia visual.
+
+Kongroo debe presentar un único sistema de controles coherente, estable y profesional.
+
+También existen trabajos anteriores relacionados con cierre GTK, concurrencia, fixture reproducible, estado de VideoController y pruebas nativas.
+
+Debes comprobar su estado real antes de modificar nada.
+
+# 2. REGLAS DE EJECUCIÓN
+
+Raíz autorizada:
+
+/home/kyouma/Vídeos/PROYECTO ANIME/
+
+Respeta íntegramente AGENTS.md, los ADR aprobados, la arquitectura, la memoria y las políticas del proyecto.
+
+No accedas a directorios personales externos.
+No modifiques otros proyectos.
+No cambies la configuración de los agentes.
+No hagas commit ni push.
+No modifiques catálogo, Drift, AniList o Supabase.
+No implementes funcionalidades reservadas para F2.3 y fases posteriores.
+Preserva los cambios existentes en Git.
+
+Puedes utilizar los agentes especializados ya configurados, únicamente cuando aporten valor y de forma secuencial.
+
+Aplica obligatoriamente:
+
+.agents/skills/kongroo-deep-audit/SKILL.md
+
+No dupliques sistemas de auditoría.
+
+# 3. AUTORIZACIÓN PARA REALIZAR PRUEBAS AUTÓNOMAS EN MI PC
+
+Autorizo expresamente que realices las pruebas técnicas y gráficas necesarias en mi equipo Fedora mediante las herramientas de automatización disponibles y permitidas.
+
+Actualmente estoy trabajando en el mismo computador.
+
+Por tanto, debes automatizar las pruebas sin interrumpir mi trabajo.
+
+## 3.1. Reglas de convivencia con mi escritorio
+
+No debes:
+
+- Mover mi cursor en la sesión principal.
+- Escribir mediante mi teclado.
+- Cambiar mi ventana activa.
+- Cerrar mis aplicaciones.
+- Reiniciar la sesión.
+- Cerrar sesión.
+- Bloquear el escritorio.
+- Apagar o reiniciar el computador.
+- Modificar configuraciones globales de Fedora.
+- Interferir con mis archivos personales.
+- Capturar ni transmitir contenido de mis ventanas personales.
+- Instalar programas globalmente sin autorización.
+- Ejecutar comandos destructivos para liberar recursos.
+
+## 3.2. Estrategia preferida: entorno gráfico aislado
+
+Investiga las herramientas ya disponibles en Fedora para ejecutar pruebas del reproductor en un entorno gráfico separado.
+
+Considera, según compatibilidad:
+
+- Xvfb.
+- Sesión gráfica virtual aislada.
+- Compositor anidado.
+- Flutter integration_test para Linux.
+- Automatización de la propia ventana del reproductor.
+- Capturas únicamente de la ventana o display de prueba.
+- Inspección de logs y eventos del compositor.
+- Herramientas de diagnóstico GTK disponibles.
+
+Prioriza herramientas instaladas y permitidas.
+Utiliza directorios temporales dentro del proyecto.
+No instales paquetes de Fedora ni modifiques servicios del sistema.
+Si una técnica requiere acceder a recursos prohibidos por AGENTS.md, no la utilices.
+
+## 3.3. Política de pruebas gráficas
+
+Primero intenta realizar la validación en un entorno aislado que no afecte a mi escritorio.
+
+Comprueba si dicho entorno soporta correctamente el renderizado del plugin Linux de media_kit_video.
+
+Un entorno Xvfb que no soporte adecuadamente el renderizado gráfico no debe utilizarse como prueba de que el reproductor falla en Fedora.
+
+Si la prueba requiere el compositor real y no puedes interactuar con él de forma aislada:
+
+1. Conserva la evidencia automática disponible.
+2. Documenta la limitación concreta.
+3. Utiliza mi confirmación manual previa como evidencia histórica de video y audio visibles.
+4. Deja claramente separado cualquier criterio que aún requiera una observación nueva.
+
+No interrumpas mi escritorio para intentar demostrar que una prueba ha pasado.
+
+La autorización para automatizar pruebas no significa autorización para controlar mis aplicaciones personales.
+
+# 4. PREPARACIÓN DEL ENTORNO
+
+Desde la raíz del repositorio:
+
+```bash
+cd "/home/kyouma/Vídeos/PROYECTO ANIME"
+git rev-parse --show-toplevel
+git status --short --branch
+unset FLUTTER_ROOT
+export PATH="$PWD/.ai-local/toolchains/flutter/bin:$PATH"
+export PUB_CACHE="$PWD/.ai-local/pub-cache"
+```
+
+Comprueba la versión real de Flutter, Dart, media_kit, media_kit_video y libmpv.
+
+No presupongas que flutter resuelto por el PATH corresponde al SDK aislado del proyecto.
+
+Usa el SDK verificado de Kongroo.
+
+Revisa:
+
+- ROADMAP y criterio F2.2.
+- ADR-002.
+- Arquitectura del reproductor.
+- Estado de memoria.
+- Código fuente.
+- README.
+- Tests.
+- Informes anteriores.
+- Cambios Git.
+- Comandos y herramientas de pruebas existentes.
+
+No dependas de encontrar un archivo externo de auditoría que todavía no exista dentro del proyecto.
+
+La matriz de hallazgos incluida en esta instrucción también es una referencia válida para iniciar el trabajo.
+
+# 5. INVESTIGACIÓN OFICIAL OBLIGATORIA
+
+Consulta documentación oficial actualizada sobre:
+
+1. media_kit Player.
+2. media_kit_video Video.
+3. VideoController.
+4. AdaptiveVideoControls.
+5. NoVideoControls.
+6. Ciclo de vida de Flutter.
+7. Flutter integration_test en Linux.
+8. GTK y cierre de la ventana.
+
+Referencias iniciales:
+
+- https://pub.dev/packages/media_kit
+- https://pub.dev/packages/media_kit_video
+- https://pub.dev/documentation/media_kit_video/latest/media_kit_video/Video-class.html
+- https://pub.dev/documentation/media_kit_video/latest/media_kit_video/VideoController-class.html
+- https://docs.flutter.dev/testing/integration-tests
+- https://api.flutter.dev/flutter/widgets/WidgetsBindingObserver/didRequestAppExit.html
+- https://mpv.io/manual/stable/
+
+Contrasta las APIs con las versiones reales del lockfile y el código instalado.
+
+No actualices dependencias solo porque existen versiones nuevas.
+
+Documenta las fuentes que realmente consultaste.
+
+# 6. PRIORIDAD MÁXIMA — ELIMINAR LOS CONTROLES DUPLICADOS
+
+Este es el defecto visual que he observado personalmente.
+
+Investiga:
+
+app/lib/app/player/media_kit_video_surface.dart
+
+y sus componentes relacionados.
+
+La documentación oficial establece que Video utiliza controles adaptativos por defecto.
+
+Para una superficie que solo renderice imagen, investiga y aplica una configuración equivalente a:
+
+```dart
+Video(
+  controller: controller,
+  controls: NoVideoControls,
+)
+```
+
+Adapta la importación y el uso a la API real instalada.
+
+## Resultado obligatorio
+
+Debe existir:
+
+UN motor multimedia.
+UNA superficie de video.
+UN sistema de controles: el de Kongroo.
+
+No debe aparecer una segunda barra al mover el cursor.
+No deben existir controles invisibles del paquete que sigan interceptando clics o gestos.
+No debe duplicarse el manejo de play/pause, seek o fullscreen.
+
+## Validaciones obligatorias
+
+Comprueba:
+
+- Cursor fuera del video.
+- Cursor sobre el video.
+- Clic sobre la superficie.
+- Reproducción.
+- Pausa.
+- Arrastre del slider.
+- Reanudación.
+- Reconstrucción del widget.
+- Cambio de tamaño de ventana.
+- Cierre de ventana.
+
+Añade una prueba de regresión que verifique que la superficie se construye sin controles automáticos.
+
+No aceptes como prueba únicamente la ausencia de una segunda barra en una captura estática.
+
+Investiga el árbol de widgets y los eventos de interacción cuando corresponda.
+
+# 7. CALIDAD DE LA INTERFAZ
+
+No quiero simplemente esconder una barra y dejar una interfaz visualmente deficiente.
+
+Revisa la composición de los controles de Kongroo.
+
+La experiencia debe ser coherente y funcional.
+
+## Requisitos
+
+- Una única zona de controles claramente identificable.
+- Botones sin duplicaciones.
+- Estados visuales consistentes.
+- Play y pause sincronizados con el estado real.
+- Slider sincronizado con la posición.
+- Tiempo transcurrido y duración correctamente representados.
+- Estados de carga y error comprensibles.
+- Sin desbordamientos.
+- Sin saltos inesperados de layout.
+- Controles utilizables mediante ratón.
+- Comportamiento razonable con teclado y foco.
+- Superficie de video sin elementos superpuestos involuntariamente.
+- Legibilidad y contraste adecuados.
+
+Si mantener la barra personalizada debajo del video proporciona una interfaz limpia y coherente para este spike, puede conservarse.
+
+Si resulta claramente mejor integrarla como una única capa sobre el video, estudia el cambio y sus riesgos antes de implementarlo.
+
+No rediseñes toda la aplicación ni introduzcas el reproductor definitivo de fases futuras.
+
+El objetivo es una interfaz del spike profesional y sin defectos evidentes.
+
+## Atajos y fullscreen
+
+Eliminar AdaptiveVideoControls puede retirar funciones proporcionadas automáticamente por la librería.
+
+Audita esos cambios.
+
+Conserva los comportamientos ya implementados y requeridos en F2.2.
+
+Si una función pertenece a una fase posterior, no la implementes por adelantado; documenta la dependencia.
+
+# 8. ARQUITECTURA Y MODULARIZACIÓN
+
+La estructura principal debe permanecer separada.
+
+## Infraestructura
+
+app/lib/data/player/engine/
+
+Responsable de:
+
+- Player.
+- media_kit.
+- Integración con libmpv.
+- Apertura de medios.
+- Eventos multimedia.
+- Errores nativos.
+- Gestión de recursos.
+
+## Aplicación
+
+app/lib/application/player/
+
+Responsable de:
+
+- Coordinación.
+- Comandos.
+- Estados.
+- Concurrencia.
+- Serialización o conflación cuando sea necesaria.
+- Manejo de resultados.
+
+## Presentación
+
+app/lib/app/player/
+
+Responsable de:
+
+- Widgets.
+- Video visible.
+- Controles.
+- Foco.
+- Estados visuales.
+- Interacciones del usuario.
+
+No introduzcas acceso directo a Player desde los controles de la UI.
+No mezcles lógica de libmpv con widgets.
+No crees abstracciones innecesarias.
+Mantén el contrato temporal del spike separado del contrato definitivo reservado para fases posteriores.
+
+# 9. REVISIÓN COMPLETA DE HALLAZGOS ANTERIORES
+
+Antes de concluir, comprueba la siguiente matriz.
+
+| ID | Requisito que debe quedar verificado |
+|---|---|
+| A1 | No se crea otro Player durante dispose |
+| A2 | Los errores nativos no desaparecen accidentalmente |
+| A3 | El slider no genera una cola ilimitada de seeks |
+| A4 | El cierre gráfico de ventana libera correctamente los recursos |
+| A5 | El fixture puede reproducirse desde un entorno limpio |
+| A6 | Stop permite reapertura controlada |
+| A7 | Existen pruebas negativas y evidencia de integración visual |
+| A8 | El adaptador valida correctamente fuentes locales |
+| A9 | Las operaciones pendientes no provocan cierre inseguro |
+| A10 | Se gestionan fallos de liberación y streams |
+| A11 | Código y README no se contradicen |
+| A12 | La ruta del fixture no depende del directorio actual |
+| R1 | Las rutas y symlinks del launcher se gestionan correctamente |
+| R2 | Controller, textura y primer frame tienen estados diferenciados |
+| R3 | Informes y memoria reflejan el estado real |
+
+Según el informe más reciente, muchos de estos problemas ya fueron corregidos.
+
+No los vuelvas a implementar sin necesidad.
+
+Verifica que las correcciones existan, que los tests correspondientes sean adecuados y que no haya regresiones.
+
+Da prioridad especial a:
+
+- A4: cierre GTK.
+- A7: VideoController nativo y renderizado.
+- El nuevo defecto de controles duplicados.
+
+## Revisión del runner GTK
+
+Inspecciona cuidadosamente:
+
+app/linux/runner/my_application.cc
+
+Determina qué modificaciones se introdujeron para gestionar el cierre.
+
+Verifica que:
+
+1. No afecten incorrectamente al arranque normal de Kongroo.
+2. El cierre del spike sea ordenado.
+3. No exista una espera indefinida.
+4. No se destruya el motor mientras una operación nativa continúa en condiciones inseguras.
+5. No se interprete un timeout como prueba de liberación.
+
+No reescribas el runner si el código actual ya cumple sus obligaciones.
+
+# 10. CICLO DE VIDA NATIVO
+
+Audita las relaciones entre:
+
+- Player.
+- VideoController.
+- Textura.
+- Superficie.
+- Widget.
+- Coordinador.
+- Runner GTK.
+
+Necesito que quede claro:
+
+- Quién crea Player.
+- Quién crea VideoController.
+- Cuándo comienza el renderizado.
+- Quién observa el primer frame.
+- Qué ocurre cuando se desmonta el widget.
+- Qué sucede al cerrar la ventana.
+- Cuándo termina el dispose nativo.
+- Qué sucede si dispose falla.
+- Qué estado impide crear una segunda instancia.
+
+## Pruebas relevantes
+
+Comprueba:
+
+- Apertura y cierre normal.
+- Cierre durante reproducción.
+- Cierre mientras está pausado.
+- Cierre tras seek.
+- Cierre después de stop.
+- Dispose repetido.
+- Creación durante cierre.
+- Fallo simulado de liberación.
+- Recursos nativos después del cierre.
+- Ausencia de operaciones Dart pendientes que interfieran con la terminación.
+
+Si no puedes probar un fallo interno real de libmpv, declara que la cobertura se limita a simulación.
+
+No inventes garantías sobre el comportamiento del plugin nativo.
+
+# 11. AUTOMATIZACIÓN GRÁFICA EN FEDORA
+
+Desarrolla o adapta una prueba reproducible de la interfaz, siempre dentro del alcance de F2.2.
+
+Busca la solución menos invasiva.
+
+Utiliza integration_test si resulta compatible con la configuración real del proyecto y el entorno Linux.
+
+Evita nuevas dependencias salvo necesidad justificada.
+
+## Secuencia deseada
+
+1. Preparar fixture sintético.
+2. Iniciar entorno gráfico aislado.
+3. Ejecutar el entrypoint del spike.
+4. Comprobar inicialización del Player.
+5. Abrir el video.
+6. Esperar evidencia de primer frame.
+7. Comprobar progresión de reproducción.
+8. Interactuar con los controles.
+9. Comprobar que no existe barra automática.
+10. Pausar.
+11. Ejecutar seek.
+12. Reanudar.
+13. Detener.
+14. Cerrar la ventana mediante el mecanismo disponible.
+15. Comprobar salida del proceso y liberar recursos.
+16. Guardar logs, resultados y evidencias.
+
+Cuando sea técnicamente viable, realizar capturas del display de prueba aislado.
+
+No capturar el escritorio principal.
+
+Si el sistema virtual no ofrece renderizado compatible, documenta qué verificaciones siguen siendo posibles y qué parte necesita el compositor real.
+
+## Evidencia de imagen
+
+Distingue:
+
+- Medio abierto.
+- Posición avanzando.
+- Textura inicializada.
+- Primer frame procesado.
+- Imagen capturada o presentada por el entorno gráfico.
+- Video visible para el usuario.
+
+No son pruebas equivalentes.
+
+Mi observación anterior confirma imagen y audio en Fedora, pero no sustituye una nueva validación del comportamiento tras las correcciones.
+
+# 12. PRUEBAS DE REGRESIÓN
+
+Ejecuta pruebas de:
+
+## Motor
+
+- Open.
+- Play.
+- Pause.
+- Seek.
+- Stop.
+- Reopen.
+- Dispose.
+- Comandos después de dispose.
+- Archivos inexistentes.
+- Archivos inválidos.
+- Errores y recuperación.
+
+## Concurrencia
+
+- Dispose simultáneo.
+- Creación durante cierre.
+- Comandos rápidos.
+- Seek durante reproducción.
+- Seek durante pausa.
+- Cierre durante comando pendiente.
+- Operaciones que terminan con error.
+
+## Presentación
+
+- Una superficie.
+- Un sistema de controles.
+- Sin AdaptiveVideoControls.
+- Estados del slider.
+- Sin seeks duplicados por arrastre.
+- Botones funcionales.
+- Manejo de errores.
+- Widget desmontado.
+- Ausencia de errores posteriores al cierre.
+
+## Integración real
+
+- libmpv inicializado.
+- Reproducción nativa.
+- VideoController con plugin Linux real cuando sea viable.
+- Primera textura/frame.
+- Ventana GTK.
+- Salida de proceso.
+- Recursos liberados.
+
+No te limites a verificar que los Future terminan sin lanzar excepciones.
+
+Utiliza aserciones de estado, eventos y resultados observables.
+
+# 13. COMANDOS Y ENTORNO
+
+Verifica primero las rutas y scripts reales.
+
+El launcher actual esperado es:
+
+```bash
+bash tools/player/run_f2_2_spike.sh
+```
+
+El SDK correcto está dentro del proyecto.
+
+Ejecuta las pruebas desde app/ cuando corresponda.
+
+Comandos de referencia:
+
+```bash
+flutter test --no-pub test/player
+flutter analyze --no-pub
+flutter build linux --release --no-pub -t lib/main_player_spike.dart
+```
+
+Adapta los comandos a la versión instalada y al proyecto real.
+
+No confundas build de lib/main.dart con build de lib/main_player_spike.dart.
+
+Si scripts/ci.sh requiere acceso a red o modificaciones de dependencias, evalúa su ejecución según las restricciones vigentes.
+
+Registra por separado las verificaciones equivalentes que sí puedas ejecutar.
+
+No presentes una CI parcial como si fuera la CI completa.
+
+# 14. RENDIMIENTO Y ESTABILIDAD
+
+Realiza una comprobación básica, acotada y reproducible.
+
+Mide cuando sea posible:
+
+- Memoria antes de abrir video.
+- Memoria durante reproducción.
+- CPU durante reproducción.
+- Tiempo de apertura.
+- Tiempo hasta primer frame.
+- Comportamiento tras stop.
+- Comportamiento tras cierre.
+
+No conviertas F2.2 en un proyecto de optimización avanzada.
+
+No establezcas umbrales arbitrarios.
+
+Identifica consumos anómalos solo cuando exista evidencia.
+
+Nuestro objetivo sigue siendo que Kongroo funcione bien en equipos modestos, pero las optimizaciones especializadas se abordarán en su fase correspondiente.
+
+# 15. DOCUMENTACIÓN OBLIGATORIA
+
+Actualiza los archivos afectados.
+
+Como mínimo, revisa:
+
+- README del motor.
+- README del coordinador.
+- README de la UI.
+- Informe F2.2.
+- TESTING.md.
+- PROGRESS.md.
+- ROADMAP.md.
+- Índices y estado de memoria.
+- AI_HANDOFF.md.
+
+Cada README debe explicar:
+
+1. Propósito.
+2. Responsabilidades.
+3. Límites.
+4. Inventario real de archivos.
+5. Dependencias.
+6. Contratos.
+7. Inicialización.
+8. Ciclo de vida.
+9. Concurrencia.
+10. Errores.
+11. Pruebas.
+12. Extensibilidad.
+13. Limitaciones.
+
+Explica expresamente por qué se desactivaron los controles predeterminados de media_kit y por qué la interfaz de Kongroo tiene la responsabilidad exclusiva de mostrar controles.
+
+Documenta cualquier comportamiento perdido por esa modificación y cómo se resolvió o clasificó para fases posteriores.
+
+No copies documentación extensa en múltiples archivos.
+
+Mantén un documento canónico y enlaces coherentes.
+
+# 16. AUDITORÍA PROFUNDA FINAL
+
+Una vez realizados los cambios y ejecutadas las pruebas, utiliza:
+
+.agents/skills/kongroo-deep-audit/SKILL.md
+
+Ejecuta una revisión adversarial posterior.
+
+Utiliza auditor_codigo u otros especialistas cuando sean realmente necesarios.
+
+Los agentes deben ejecutarse secuencialmente.
+
+El auditor debe buscar especialmente:
+
+- Controles duplicados todavía montados.
+- Eventos ocultos que interfieren con la UI.
+- Segundo Player accidental.
+- Controlador visual huérfano.
+- Fugas nativas.
+- Operaciones pendientes.
+- Errores ignorados.
+- Tests que pasan sin comprobar el comportamiento.
+- Fallos de GTK.
+- Dependencias incorrectas.
+- Documentación desactualizada.
+
+Clasifica hallazgos P0–P3.
+
+Si detectas defectos corregibles dentro del alcance, corrígelos y repite las pruebas relevantes.
+
+No des por finalizada la tarea solo porque una primera auditoría no encontró nuevos defectos.
+
+Tampoco entres en un ciclo interminable de refactorizaciones cosméticas.
+
+Cuando no existan defectos bloqueantes conocidos, termina la revisión y entrega evidencia.
+
+# 17. CRITERIOS DE PREPARACIÓN PARA ACEPTACIÓN
+
+Para recomendar F2.2 como lista para aceptación deben cumplirse:
+
+| Requisito | Criterio |
+|---|---|
+| Motor | Un único Player activo |
+| Superficie | Un único Video asociado al Player correspondiente |
+| Controles | Solo controles propios de Kongroo |
+| Reproducción | Open/Play/Pause/Seek verificados |
+| Stop | Descarga y reapertura comprobadas |
+| Dispose | Política segura y pruebas de concurrencia |
+| Errores | Propagación y recuperación documentadas |
+| Linux | Build del entrypoint específico |
+| Video | Evidencia real identificada |
+| Audio | Evidencia real identificada |
+| GTK | Cierre y liberación verificables |
+| Pruebas | Unitarias e integración pertinentes |
+| Documentación | Actualizada y coherente |
+| Auditoría | Sin P0/P1 conocidos sin resolver |
+
+No confundas «listo para aceptación» con «aceptado».
+
+Si queda una prueba manual indispensable que no puedas automatizar, debes indicarla explícitamente y mantener el estado pendiente.
+
+# 18. LIMITACIONES Y BLOQUEOS
+
+Solo solicita mi intervención si existe un bloqueo real que impide continuar de manera segura, como:
+
+- Falta un permiso obligatorio.
+- Se requiere instalar un paquete del sistema.
+- Una herramienta no permite realizar una prueba esencial.
+- Existe un riesgo de afectar mi escritorio.
+- El problema requiere una decisión arquitectónica fuera de F2.2.
+
+Antes de informar un bloqueo, termina todas las tareas independientes que sí puedas ejecutar.
+
+No pidas autorización repetidamente para acciones que ya están claramente permitidas.
+
+No te detengas después de una corrección menor.
+
+Completa todo el alcance autorizado.
+
+# 19. INFORME FINAL OBLIGATORIO
+
+Al terminar, entrega:
+
+## A. Resumen ejecutivo
+
+Qué se corrigió y cuál es el estado de F2.2.
+
+## B. Defecto de controles duplicados
+
+- Causa real.
+- Archivo responsable.
+- Corrección aplicada.
+- Prueba de regresión.
+- Evidencia del resultado.
+
+## C. Matriz completa
+
+Estado de A1–A12, R1–R3 y cualquier hallazgo nuevo.
+
+## D. Archivos modificados
+
+Ruta y justificación de cada modificación relevante.
+
+## E. Pruebas
+
+Comandos exactos, resultados, número de tests, fecha y entorno.
+
+## F. Validación gráfica
+
+- Entorno utilizado.
+- Método de automatización.
+- Evidencia de imagen.
+- Evidencia de controles.
+- Cierre GTK.
+- Limitaciones.
+
+## G. Rendimiento
+
+Mediciones obtenidas y condiciones.
+
+## H. Auditoría independiente
+
+Hallazgos P0–P3 y correcciones adicionales.
+
+## I. Documentación
+
+README y documentos actualizados.
+
+## J. Estado final
+
+Una sola recomendación:
+
+- LISTA PARA ACEPTACIÓN: todos los criterios esenciales verificados y sin bloqueantes conocidos.
+- PENDIENTE: indicar exactamente qué impide aceptarla.
+
+Si queda pendiente, describe la mínima acción necesaria para terminar F2.2.
+
+No solicites una nueva ronda general de investigación salvo evidencia de un problema real.
+
+# 20. INSTRUCCIÓN FINAL
+
+Quiero que realices el trabajo técnico, no solamente que me expliques cómo realizarlo.
+
+Tienes autorización para corregir el reproductor dentro de F2.2, ejecutar las pruebas disponibles en Fedora, usar herramientas de automatización compatibles, auditar el código y actualizar la documentación.
+
+Hazlo de manera autónoma, secuencial y segura.
+
+Respeta mi trabajo en el computador.
+No interfieras con mi sesión gráfica principal.
+No modifiques los agentes.
+No expandas el alcance.
+No hagas commit ni push.
+No avances a F2.3.
+
+El objetivo es entregar F2.2 técnicamente preparada para mi aprobación y eliminar definitivamente la duplicación de controles.
+
+Cuando termines, entrega el informe y detente.

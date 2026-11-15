@@ -2,7 +2,7 @@
 
 ## Política aplicada
 
-Optimizar recuperación y duplicación antes que reducir capacidad. Se conservan por defecto modelo y razonamiento heredados. La misión permite modelos económicos en tareas sencillas; no hay selección automática configurada porque no se ha validado un catálogo/coste/calidad y la preferencia anterior exige conservar capacidad. Una comparación futura debe medir calidad antes de cambiar ese criterio.
+Optimizar recuperación, duplicación y razonamiento por tarea. Los perfiles del proyecto y la configuración local no fijan modelo ni esfuerzo; Codex los hereda del chat principal según la precedencia documentada. No reducir capacidad por una cuota fija: ahorrar mediante contexto conciso, búsquedas dirigidas, delegación pertinente y reutilización de resultados. Fuente: [configuración de subagentes](https://learn.chatgpt.com/docs/agent-configuration/subagents).
 
 - Instrucciones raíz compactas; políticas detalladas se leen bajo demanda.
 - Búsqueda inicial: hasta 5 fragmentos y 4000 caracteres; ampliar por evidencia, no por rutina.

@@ -1,51 +1,56 @@
+import 'package:anime_app/application/catalog/catalog_service.dart';
 import 'package:anime_app/domain/app_identity.dart';
 import 'package:material_ui/material_ui.dart';
 
-class AnimeApp extends StatelessWidget {
-  const AnimeApp({super.key});
+import '../data/player/providers/playback_providers_module.dart';
+import 'catalog/catalog_home_page.dart';
+import 'home/home_appearance.dart';
+
+class AnimeApp extends StatefulWidget {
+  const AnimeApp({
+    required this.catalogService,
+    this.playbackModule,
+    super.key,
+  });
+
+  final CatalogService catalogService;
+  final PlaybackProvidersModule? playbackModule;
+
+  @override
+  State<AnimeApp> createState() => _AnimeAppState();
+}
+
+final class _AnimeAppState extends State<AnimeApp> {
+  @override
+  void dispose() {
+    widget.playbackModule?.close();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: AppIdentity.name,
+      debugShowCheckedModeBanner: false,
+      restorationScopeId: 'kongroo',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
       ),
-      home: const _WelcomePage(),
-    );
-  }
-}
-
-class _WelcomePage extends StatelessWidget {
-  const _WelcomePage();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text(AppIdentity.name)),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 640),
-          child: const Padding(
-            padding: EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.video_library_outlined,
-                  size: 56,
-                  semanticLabel: 'Biblioteca',
-                ),
-                SizedBox(height: 16),
-                Text(
-                  AppIdentity.name,
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 8),
-                Text('Base de la aplicación lista para Linux.'),
-              ],
-            ),
+      home: Theme(
+        data: ThemeData(
+          scaffoldBackgroundColor: HomeAppearance.background,
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color(0xffa69aff),
+            brightness: Brightness.dark,
           ),
+          extensions: const [HomeAppearance()],
+          appBarTheme: const AppBarThemeData(
+            backgroundColor: HomeAppearance.background,
+          ),
+        ),
+        child: CatalogHomePage(
+          service: widget.catalogService,
+          playbackProviders: widget.playbackModule?.manager,
         ),
       ),
     );

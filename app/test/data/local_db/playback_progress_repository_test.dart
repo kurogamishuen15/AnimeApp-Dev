@@ -51,7 +51,7 @@ void main() {
   });
 
   test(
-    'SQLite v4 CRUD, 45:00 reopen, episode isolation and integrity',
+    'SQLite v7 CRUD, 45:00 reopen, episode isolation and integrity',
     () async {
       final dir = await tempDir();
       final file = File('${dir.path}/progress.sqlite');
@@ -94,7 +94,7 @@ void main() {
         await db.close();
         final raw = sqlite.sqlite3.open(file.path);
         expect(raw.select('PRAGMA integrity_check').single.values.single, 'ok');
-        expect(raw.select('PRAGMA user_version').single.values.single, 4);
+        expect(raw.select('PRAGMA user_version').single.values.single, 8);
         raw.close();
       } finally {
         await db.close();
@@ -104,43 +104,49 @@ void main() {
   );
 
   test(
-    'v3 to v4 migration preserves settings, legacy docs and cache',
+    'v3 to current migration preserves settings, legacy docs and cache',
     () async {
       final dir = await tempDir();
       final file = File('${dir.path}/v3.sqlite');
-      var db = AppDatabase.atFile(file);
-      await db
-          .into(db.settingsEntries)
-          .insert(
-            SettingsEntriesCompanion.insert(
-              settingKey: 'legacy',
-              valueJson: '"ok"',
-              updatedAt: DateTime.utc(2026),
-            ),
-          );
-      await db
-          .into(db.progressDocuments)
-          .insert(
-            ProgressDocumentsCompanion.insert(
-              documentKey: 'legacy-progress',
-              payloadJson: '{"opaque":true}',
-              updatedAt: DateTime.utc(2026),
-            ),
-          );
-      await db.close();
       final sqlite.Database raw = sqlite.sqlite3.open(file.path);
-      raw.execute('DROP TABLE playback_progress_entries');
+      final File snapshot = File(
+        '${Directory.current.path}/drift_schemas/schema_v3.sql',
+      );
+      for (final String statement in snapshot.readAsStringSync().split(';')) {
+        if (statement.trim().isNotEmpty) raw.execute(statement);
+      }
+      raw.execute('INSERT INTO settings_entries VALUES (?, ?, ?)', [
+        'legacy',
+        '"ok"',
+        DateTime.utc(2026).millisecondsSinceEpoch,
+      ]);
+      raw.execute('INSERT INTO progress_documents VALUES (?, ?, ?)', [
+        'legacy-progress',
+        '{"opaque":true}',
+        DateTime.utc(2026).millisecondsSinceEpoch,
+      ]);
+      raw.execute('INSERT INTO latest_anime_search VALUES (?, ?, ?, ?, ?, ?)', [
+        'latest_user_search',
+        'series',
+        1,
+        20,
+        '[]',
+        1794182400000,
+      ]);
       raw.execute('PRAGMA user_version=3');
       raw.close();
-      db = AppDatabase.atFile(file);
+      final db = AppDatabase.atFile(file);
       try {
         expect(await db.select(db.settingsEntries).get(), hasLength(1));
         expect(await db.select(db.progressDocuments).get(), hasLength(1));
+        expect(await db.select(db.latestAnimeSearch).get(), hasLength(1));
+        expect(await db.select(db.playbackProgressEntries).get(), isEmpty);
+        expect(await db.select(db.animeIdentityEntries).get(), isEmpty);
         expect(
           (await db.customSelect('PRAGMA user_version').getSingle()).read<int>(
             'user_version',
           ),
-          4,
+          8,
         );
       } finally {
         await db.close();

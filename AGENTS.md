@@ -2,9 +2,11 @@
 
 ## Alcance obligatorio: solo esta carpeta
 
-La única ubicación autorizada para inspeccionar, leer, buscar, ejecutar, crear o modificar archivos es la carpeta actual `PROYECTO ANIME` dentro de `Vídeos`, y sus subcarpetas. Antes de cada tarea, confirma que el directorio de trabajo es esta raíz. No recorras el directorio padre ni otras rutas. No inspecciones, listes, abras ni busques archivos en otras carpetas, incluidas Imágenes, Documentos, Descargas, otras carpetas de proyectos, el hogar del usuario o unidades externas. No sigas enlaces simbólicos que salgan del proyecto. Si una tarea parece depender de algo fuera de esta raíz, detente en esa dependencia, documenta el bloqueo y solicita que el material se coloque dentro del proyecto; no lo busques por tu cuenta.
+La ubicación autorizada para inspeccionar, buscar, ejecutar, crear o modificar archivos del proyecto es la raíz Git `PROYECTO ANIME` dentro de `Vídeos` y sus subcarpetas. Antes de cada tarea, confirma esa raíz. No recorras el directorio padre ni busques archivos por cuenta propia en otras carpetas, incluidos Imágenes, Documentos, Descargas, otros proyectos, el hogar del usuario o unidades externas. No sigas enlaces simbólicos que salgan del proyecto. Los cambios de código y documentación del proyecto deben permanecer dentro de esta raíz.
 
-No accedas a otro repositorio ni a documentos personales. Esta misión configura infraestructura de IA; no autoriza funciones de producto. No infieras tecnologías o pruebas de AnimeApp a partir del nombre del proyecto.
+Los mensajes del chat del usuario son instrucciones directas y deben ejecutarse según su alcance, sin exigir una copia como archivo del repositorio. Los adjuntos enviados expresamente por el usuario pueden leerse directamente desde la ruta que la plataforma proporciona, en modo de solo lectura; esto no autoriza explorar archivos vecinos ni otros documentos personales. Respeta siempre los permisos reales del sandbox. No inventes rutas ni presupongas que un mensaje de instrucciones corresponde a un archivo. Si falta material realmente necesario y no fue proporcionado en el chat ni como adjunto, explica la dependencia concreta sin buscar fuera de las ubicaciones autorizadas.
+
+No accedas a otro repositorio ni a documentos personales no autorizados. No infieras tecnologías o pruebas de AnimeApp a partir del nombre del proyecto.
 
 ## Inicio y memoria
 
@@ -42,8 +44,18 @@ El usuario autoriza delegación automática pertinente. El coordinador es el orq
 | seguridad | Permisos, secretos, datos sensibles y entradas no confiables. |
 | devops | Entornos, CI, aislamiento y compilación. |
 | documentacion | Memoria, instalación, uso, contratos y traspasos. |
+| monitoreo | Solicitud de resumen de métricas, CI o reportes de ejecución; nunca daemon. |
+| investigador | Datos cambiantes, investigación externa o verificación de fuente primaria. |
+| auditor_dependencias | Cambios o revisión de versiones, licencias y cadena de suministro. |
+| auditor_rendimiento | Perfilado, CPU/RAM, latencia o recursos que no se liberan. |
+| auditor_arquitectura | Revisión independiente de límites modulares y ADRs. |
+| auditor_contratos | APIs y compatibilidad entre módulos o servicios. |
+| auditor_accesibilidad | Auditoría de navegación, foco, semántica y accesibilidad. |
+| auditor_release | Preparación de empaquetado, avisos, licencias y publicación. |
+| diagnostico_logs | Logs o fallos que necesiten clasificación y reproducción. |
+| gestor_cola | Solicitud de priorizar tareas, dependencias y criterios de cierre. |
 
-Concurrencia conservadora: un especialista simultáneo en sesiones nuevas; respetar límites administrados y RAM disponible. Sin subdelegación. Cada encargo lleva contexto mínimo autosuficiente, objetivo, archivos de propiedad exclusiva, restricciones y validación. No reenviar conversaciones completas. No sobrescribir ni revertir trabajo ajeno. Auditorías independientes en solo lectura.
+Concurrencia conservadora: un especialista simultáneo en sesiones nuevas; respetar límites administrados y RAM disponible. Los perfiles omiten `model` y `model_reasoning_effort`, y `.codex/config.toml` no fija valores predeterminados; Codex hereda el modelo y esfuerzo del chat principal/coordinador. Sin subdelegación. Cada encargo lleva contexto mínimo autosuficiente, objetivo, archivos de propiedad exclusiva, restricciones y validación. No reenviar conversaciones completas. No sobrescribir ni revertir trabajo ajeno. Auditorías independientes en solo lectura. Los perfiles son bajo demanda, no procesos residentes.
 
 ## Capacidad, seguridad y cierre
 
@@ -52,3 +64,14 @@ Heredar modelo, razonamiento y permisos; no reducir capacidad solo para ahorrar 
 No usar permisos irrestrictos, modificar Fedora, instalar servicios residentes, leer/transmitir credenciales ni hacer push/publicar sin autorización específica. No interpretar ausencia como aprobación. Un modo nocturno solo está listo tras prueba real de aislamiento y proveedor. Si falta un prerrequisito, registrar bloqueo y continuar tareas independientes seguras. Seguir el procedimiento de Git/commits locales del runbook, incluyendo comprobación de cambios previos.
 
 La memoria es persistente en archivos; los agentes solo se activan durante solicitudes o ejecuciones explícitas. No prometer procesos residentes ni supervivencia a reinicios.
+
+## KONGROO — Mandatory Quality and Audit Gates
+
+These gates apply to every module and phase across this repository.
+
+- Before implementing material technical uncertainty, inspect existing code/architecture and current primary documentation; compare claims with installed versions. Respect approved layer boundaries and keep affected READMEs/contracts synchronized.
+- After substantial implementation, on audit request, before recommending subphase closure, and for media, public-contract, dependency, persistence, concurrency, or resource-lifecycle changes, follow `.agents/skills/kongroo-deep-audit/SKILL.md`.
+- Audit critically with relevant tests and negative/concurrent cases. Distinguish compilation from behavior, fakes from real integrations, historical evidence from checks run now, and verified findings from risks. Never claim an unrun check.
+- Do not recommend acceptance with unresolved P0/P1 findings, unmet criteria, missing essential evidence, confirmed regressions, or critical documentation gaps. The owner makes the final acceptance decision. Do not mark a phase complete or advance automatically.
+- Use an independent `auditor_codigo` review sequentially when useful; otherwise make a separate second pass and disclose its limits. No unnecessary parallel auditors.
+- No commit or push without explicit authorization.

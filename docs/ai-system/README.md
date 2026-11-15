@@ -22,6 +22,8 @@ python3 tools/ai/autonomy.py doctor
 | [ENVIRONMENT_AUDIT.md](ENVIRONMENT_AUDIT.md) | Inventario inicial y riesgos. |
 | [MEMORY_ARCHITECTURE.md](MEMORY_ARCHITECTURE.md) | Fuentes canónicas y recuperación. |
 | [AGENT_REGISTRY.md](AGENT_REGISTRY.md) | Selección automática y responsabilidades. |
+| [Protocolo KONGROO](../../.agents/skills/kongroo-deep-audit/SKILL.md) | Auditoría profunda obligatoria y puerta de calidad para todo el repositorio. |
+| [Auditorías](audits/) | Informes de revisión por fase, evidencia y recomendación. |
 | [MCP_REGISTRY.md](MCP_REGISTRY.md) | Integraciones seleccionadas y descartadas. |
 | [TOKEN_POLICY.md](TOKEN_POLICY.md) | Presupuestos, métricas y comparación. |
 | [AUTONOMY_POLICY.md](AUTONOMY_POLICY.md) | Autorizaciones, aislamiento y límites. |

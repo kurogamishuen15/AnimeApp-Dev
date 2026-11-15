@@ -1,0 +1,11 @@
+diff --git a/packages/flutter_tools/lib/src/dart/analysis.dart b/packages/flutter_tools/lib/src/dart/analysis.dart
+index 055bf42..c37b0b1 100644
+--- a/packages/flutter_tools/lib/src/dart/analysis.dart
++++ b/packages/flutter_tools/lib/src/dart/analysis.dart
+@@ -156,3 +156,5 @@ class AnalysisServer {
+   void _writeMessage({required String message}) {
+-    _process?.stdin.write('Content-Length: ${message.length}\r\n\r\n$message');
++    final List<int> encodedMessage = utf8.encode(message);
++    _process?.stdin.add(utf8.encode('Content-Length: ${encodedMessage.length}\r\n\r\n'));
++    _process?.stdin.add(encodedMessage);
+   }

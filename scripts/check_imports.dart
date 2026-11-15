@@ -142,7 +142,6 @@ const _forbiddenLayerSegments = {
   'widgets',
   'screens',
   'data',
-  'providers',
   'adapters',
   'infrastructure',
   'integrations',
@@ -282,6 +281,47 @@ String? _violation(
   return null;
 }
 
+String? _playerViolation(
+  String relative,
+  String uri,
+  File source,
+  Directory libRoot,
+  String packageName,
+) {
+  final bool presentation = relative.startsWith('app/player/');
+  final bool application = relative.startsWith('application/player/');
+  if (!presentation && !application) return null;
+  final bool composition = relative == 'app/player/spike_player_module.dart';
+  final bool surface = relative == 'app/player/media_kit_video_surface.dart';
+  final String? target = _localTargetPath(uri, source, libRoot, packageName);
+  final String? local = target == null
+      ? null
+      : _relativePath(target, libRoot)?.replaceAll('\\', '/');
+  if (application &&
+      (local?.startsWith('data/') == true ||
+          local?.startsWith('app/') == true ||
+          uri.startsWith('package:flutter/') ||
+          uri.startsWith('package:material_ui/') ||
+          const {'dart:io', 'dart:ui', 'dart:ffi'}.contains(uri))) {
+    return 'aplicación player no puede depender de presentación o infraestructura';
+  }
+  if (!composition && local?.startsWith('data/') == true) {
+    return 'los paneles player no acceden a adaptadores';
+  }
+  if (uri.startsWith('package:dio/') ||
+      uri.startsWith('package:http/') ||
+      uri == 'dart:ffi' ||
+      (uri.startsWith('package:media_kit/') && !composition) ||
+      (uri.startsWith('package:media_kit_video/') && !surface) ||
+      (uri == 'dart:io' &&
+          presentation &&
+          !composition &&
+          relative != 'app/player/player_nerd_panel.dart')) {
+    return 'red y motor nativo deben pasar por los contratos de player';
+  }
+  return null;
+}
+
 Future<void> main(List<String> args) async {
   var rootPath = Directory.current.path;
   for (var index = 0; index < args.length; index++) {
@@ -311,6 +351,7 @@ Future<void> main(List<String> args) async {
   final packageName = _packageName(root);
   var violationCount = 0;
   var domainFileCount = 0;
+  var playerFileCount = 0;
   await for (final entity in libRoot.list(
     recursive: true,
     followLinks: false,
@@ -323,16 +364,28 @@ Future<void> main(List<String> args) async {
       continue;
     }
     if (entity is! File || !entity.path.endsWith('.dart')) continue;
-    if (!_isDomainSource(entity, libRoot)) continue;
-    domainFileCount++;
+    final bool domain = _isDomainSource(entity, libRoot);
+    final String relative = _relativePath(
+      entity.path,
+      libRoot,
+    )!.replaceAll('\\', '/');
+    final bool player =
+        relative.startsWith('app/player/') ||
+        relative.startsWith('application/player/');
+    if (!domain && !player) continue;
+    if (domain) domainFileCount++;
+    if (player) playerFileCount++;
     final source = await entity.readAsString(encoding: utf8);
     for (final uri in _importUris(source)) {
-      final reason = _violation(uri, entity, libRoot, packageName);
+      final reason = domain
+          ? _violation(uri, entity, libRoot, packageName)
+          : _playerViolation(relative, uri, entity, libRoot, packageName);
       if (reason == null) continue;
       stderr.writeln('${entity.path}: import "$uri" prohibido: $reason');
       violationCount++;
     }
   }
+  stdout.writeln('Límites player revisados ($playerFileCount archivos).');
   if (violationCount > 0) {
     stderr.writeln('Se encontraron $violationCount violaciones de imports.');
     exit(1);

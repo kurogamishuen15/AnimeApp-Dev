@@ -16,4 +16,6 @@ Las 14 selecciones tecnológicas de la sección 3 fueron aprobadas por el propie
 
 F1.3: estrategia aprobada **núcleo Dart compartido + Fedora/Linux primero + adaptadores progresivos por necesidad real**, registrada independientemente en [ADR-015](../adr/ADR-015-arquitectura-core-linux-first.md) y desarrollada en [ARCHITECTURE.md](../../ARCHITECTURE.md). Android, Android TV y Windows son destinos futuros; no crear scaffolding anticipado. F1.3 se completó documentalmente; F1.4 no está iniciada.
 
+Catálogo desacoplado e identidad local: propuesta incremental parcialmente implementada, no aprobada formalmente, registrada en [ADR-A14](../adr/additional/ADR-A14-catalog-providers-identity.md). La UI usa un fake local sin I/O y la persistencia está en Drift v6; no altera ADR-008 ni F1.3. Los estados de biblioteca y el default son provisionales. Providers externos permanecen desconectados; elegibilidad/retención/licencias siguen pendientes.
+
 Las decisiones de investigación no se aprueban automáticamente. Los ADR de producto no están disponibles aquí.

@@ -53,8 +53,10 @@ final class FakeSyncRemote implements SyncRemote {
       );
 
   static Object? _freezeValue(Object? value) => switch (value) {
-    Map<String, dynamic> value => _freezeMap(value),
-    List<Object?> value => List<Object?>.unmodifiable(value.map(_freezeValue)),
+    final Map<String, dynamic> value => _freezeMap(value),
+    final List<Object?> value => List<Object?>.unmodifiable(
+      value.map(_freezeValue),
+    ),
     _ => value,
   };
 }

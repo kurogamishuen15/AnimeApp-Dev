@@ -1,6 +1,6 @@
 # Arquitectura de AnimeApp
 
-Este documento define la arquitectura de referencia aprobada para F1.3. **La arquitectura está documentada; la mayoría de sus módulos y flujos aún no están implementados.** El único código de producto existente es el esqueleto Flutter Linux descrito en el apartado de estado.
+Este documento conserva la arquitectura de referencia aprobada para F1.3 y registra las implementaciones locales posteriores. No todos los módulos conceptuales están implementados: el estado real se indica por módulo y en `PROGRESS.md`. El producto abre [Inicio](app/lib/app/home/README.md) dentro del shell de catálogo local offline y un spike aislado de reproducción local F2.2; el spike no está conectado a la navegación ni al catálogo.
 
 ## Decisión de plataforma
 
@@ -56,8 +56,11 @@ Estos nombres describen límites de responsabilidad; no ordenan crear de anteman
 
 | Grupo | Responsabilidad y límite | Estado y portabilidad |
 | --- | --- | --- |
-| `app` | Arranque, composición y selección de implementaciones. | Parcial: existe composición mínima Flutter. UI/composición se adaptará por destino cuando proceda. |
-| `core` | Tipos y utilidades transversales realmente compartidos; contratos solo cuando haya necesidad concreta. | Planificado; Dart puro y portable. No debe convertirse en depósito de funcionalidades. |
+| `app` | Arranque, composición y selección de implementaciones. | Parcial: bootstrap Flutter y composición del catálogo local Linux-first. |
+| `application` | Coordinación de casos de uso Dart puros. | Implementado para catálogo; no depende de Flutter, SQL ni HTTP. |
+| `domain` | Identidades, modelos, reglas y contratos Dart puros. | Implementado para identidad, catálogo, biblioteca, progreso, credenciales y sincronización. |
+| `data` | Adaptadores de persistencia, proveedores y servicios externos. | Implementado para Drift/SQLite y fake de metadatos; proveedores reales no están conectados al flujo local. |
+| `core` | Tipos y utilidades transversales realmente compartidos; contratos solo cuando haya necesidad concreta. | Implementado para `Result`, errores y logging; no debe convertirse en depósito de funcionalidades. |
 | `shared` | Componentes reutilizables por más de una feature, con límites y ciclo de vida propios. | Planificado; crear al aparecer reutilización demostrada. |
 | `features` | Recorridos independientes, cada uno con presentación y coordinación propias. | Planificado; lógica de negocio invoca aplicación/dominio y no importa otras UIs. |
 | `integrations` | Clientes/adaptadores de AniList, persistencia, sincronización, reproductor y sistemas externos. | Planificado; aislar librerías aprobadas tras sus validaciones por fase. |
@@ -86,35 +89,39 @@ sequenceDiagram
 
 Solo se inicializan servicios necesarios para el recorrido disponible. El arranque no debe cargar anticipadamente integraciones pesadas ni iniciar tareas de fondo innecesarias.
 
-### Operación con datos locales (futuro)
+### Catálogo local offline (implementado parcialmente)
 
 ```mermaid
 sequenceDiagram
-  participant UI as Feature UI
-  participant UC as Caso de uso
-  participant Port as Contrato de dominio
-  participant Repo as Adaptador local
+  participant UI as app/catalog UI
+  participant UC as CatalogService
+  participant Port as Contratos/modelos domain
+  participant Fake as FakeMetadataProvider
+  participant Repo as Adaptadores Drift
   participant DB as Drift / SQLite
-  UI->>UC: acción del usuario
-  UC->>Port: solicita operación
-  Port->>Repo: implementación seleccionada en composición
+  UI->>UC: buscar / consultar / añadir
+  UC->>Fake: búsqueda o detalles sintéticos
+  UC->>Port: operaciones tipadas
+  UC->>Repo: identidad, biblioteca y progreso
   Repo->>DB: lee/escribe datos locales
   DB-->>UI: resultado mediante aplicación/estado
 ```
 
-El contrato preciso y el esquema se definen en las subfases responsables. La persistencia local-first es la fuente operativa; una red no es requisito para consultar/modificar datos que deban funcionar offline.
+El recorrido usa registros sintéticos y no hace solicitudes de red. `CatalogModule` compone servicio, fake, repositorios y base; es responsable de cerrarlos. Persisten identidad local, membresía de biblioteca y progreso tipado F1.10 en Drift v6. Los estados de biblioteca y `episode:1` son demostrativos. AniList/TMDB/Kitsu no están conectados a este flujo.
 
-### Reproducción (futuro, F2)
+### Reproducción F2.2 (spike local, no flujo de producto)
 
 ```mermaid
 flowchart LR
-  PlayerUI[Player UI] --> Controller[Controlador / sesión]
-  Controller --> Contract[PlaybackEngine]
-  Contract --> Adapter[Adaptador Linux a validar]
-  Adapter --> Backend[media_kit / libmpv]
+  PlayerUI[SpikePlayerPage] --> Coordinator[SpikePlayerCoordinator]
+  Coordinator --> Contract[PlaybackSpikeEngine]
+  Contract --> Adapter[MediaKitSpikeEngine]
+  Adapter --> Backend[media_kit / libmpv del sistema]
+  Adapter --> Surface[VideoController único]
+  Surface --> PlayerUI
 ```
 
-`media_kit`/libmpv permanece detrás de `PlaybackEngine`. La integración solo se hará tras validar rendimiento, compatibilidad, ciclo de vida, recursos y licencias. Ninguna interfaz controla el motor directamente.
+F2.2 implementa un puerto temporal `PlaybackSpikeEngine`, no el contrato final `PlaybackEngine` de F2.5. El adaptador crea un solo `Player` y su único `VideoController`; la UI usa el mismo controller mediante `MediaKitVideoSurface`. Esta superficie configura `NoVideoControls` para que `media_kit_video` no monte su barra adaptativa; Play/Pause, Stop y seek pertenecen solo a los controles de Kongroo. El entrypoint abre únicamente un fixture local. No modifica `main.dart`, navegación, catálogo, Drift ni progreso. El seek interactivo solicita el destino final y el adaptador valida `file:` y archivo regular existente. El runner GTK destruye la ventana solo después de la respuesta Dart que confirma cleanup real. Su watchdog de respuesta de 15 s devuelve “mantener abierta” si el cleanup sigue pendiente; no cancela ninguna operación nativa. La última ejecución no pudo compilar el entrypoint por un desacople del Flutter framework/engine local; por ello la UI corregida, el gesto GTK y un frame en compositor no se revalidaron. La auditoría de artefactos/licencias también sigue pendiente; ver el [informe F2.2 v2](docs/player/F2.2-spike-report-v2.md) y la [auditoría del 2026-11-10](docs/ai-system/audits/F2.2-audit-2026-11-10.md).
 
 ## Contratos y adaptadores
 
@@ -166,7 +173,9 @@ Al incorporar una plataforma futura: inventariar dependencias reales, reutilizar
 
 ## Estado actual de implementación
 
-F0.4 añadió `app/lib/domain/app_identity.dart` sin dependencias Flutter, `app/lib/app/anime_app.dart`, `app/lib/main.dart` y el runner Flutter Linux. No existen aún catálogo, navegación, servicios, repositorios, módulos de plataforma ni motor de vídeo. Android, Android TV y Windows no están implementados. El estado de análisis y medición de F0.4–F0.6 se registra en [PROGRESS.md](PROGRESS.md) y [TESTING.md](TESTING.md); esta arquitectura no cambia esos resultados ni los afirma como verificados de nuevo.
+El catálogo se distribuye por capas: contratos/modelos en `app/lib/domain/catalog`, coordinación en `app/lib/application/catalog`, persistencia en `app/lib/data/local_db`, fake en `app/lib/data/metadata` y UI/composición en `app/lib/app/catalog`. El progreso tipado está en `app/lib/domain/progress` con adaptador en `data/local_db`; el formato opaco legado permanece separado para preservar compatibilidad. Los README de módulo detallan archivos, contratos, dependencias y pruebas.
+
+F2.1 tiene evaluación documental y F2.2 tiene un spike nativo aislado con `media_kit`/libmpv. Las responsabilidades por archivo y los comandos verificados se documentan en los README de los módulos player y en [el informe v2](docs/player/F2.2-spike-report-v2.md). La señal del plugin de textura/primer frame no prueba presentación visual del compositor; en este entorno no se obtuvo captura nativa. El motor no se integra con progreso, catálogo, navegación ni persistencia. Android, Android TV y Windows no están implementados. El estado de F0.4–F0.6 se registra en [PROGRESS.md](PROGRESS.md) y [TESTING.md](TESTING.md).
 
 ## Decisión asociada
 

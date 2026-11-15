@@ -1457,6 +1457,1303 @@ class PlaybackProgressEntriesCompanion
   }
 }
 
+class $AnimeIdentityEntriesTable extends AnimeIdentityEntries
+    with TableInfo<$AnimeIdentityEntriesTable, AnimeIdentityEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AnimeIdentityEntriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _animeIdMeta = const VerificationMeta(
+    'animeId',
+  );
+  @override
+  late final GeneratedColumn<String> animeId = GeneratedColumn<String>(
+    'anime_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtUtcMeta = const VerificationMeta(
+    'createdAtUtc',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAtUtc = GeneratedColumn<DateTime>(
+    'created_at_utc',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [animeId, createdAtUtc];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'anime_identity_entries';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AnimeIdentityEntry> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('anime_id')) {
+      context.handle(
+        _animeIdMeta,
+        animeId.isAcceptableOrUnknown(data['anime_id']!, _animeIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_animeIdMeta);
+    }
+    if (data.containsKey('created_at_utc')) {
+      context.handle(
+        _createdAtUtcMeta,
+        createdAtUtc.isAcceptableOrUnknown(
+          data['created_at_utc']!,
+          _createdAtUtcMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtUtcMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {animeId};
+  @override
+  AnimeIdentityEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AnimeIdentityEntry(
+      animeId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}anime_id'],
+      )!,
+      createdAtUtc: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at_utc'],
+      )!,
+    );
+  }
+
+  @override
+  $AnimeIdentityEntriesTable createAlias(String alias) {
+    return $AnimeIdentityEntriesTable(attachedDatabase, alias);
+  }
+}
+
+class AnimeIdentityEntry extends DataClass
+    implements Insertable<AnimeIdentityEntry> {
+  final String animeId;
+  final DateTime createdAtUtc;
+  const AnimeIdentityEntry({required this.animeId, required this.createdAtUtc});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['anime_id'] = Variable<String>(animeId);
+    map['created_at_utc'] = Variable<DateTime>(createdAtUtc);
+    return map;
+  }
+
+  AnimeIdentityEntriesCompanion toCompanion(bool nullToAbsent) {
+    return AnimeIdentityEntriesCompanion(
+      animeId: Value(animeId),
+      createdAtUtc: Value(createdAtUtc),
+    );
+  }
+
+  factory AnimeIdentityEntry.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AnimeIdentityEntry(
+      animeId: serializer.fromJson<String>(json['animeId']),
+      createdAtUtc: serializer.fromJson<DateTime>(json['createdAtUtc']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'animeId': serializer.toJson<String>(animeId),
+      'createdAtUtc': serializer.toJson<DateTime>(createdAtUtc),
+    };
+  }
+
+  AnimeIdentityEntry copyWith({String? animeId, DateTime? createdAtUtc}) =>
+      AnimeIdentityEntry(
+        animeId: animeId ?? this.animeId,
+        createdAtUtc: createdAtUtc ?? this.createdAtUtc,
+      );
+  AnimeIdentityEntry copyWithCompanion(AnimeIdentityEntriesCompanion data) {
+    return AnimeIdentityEntry(
+      animeId: data.animeId.present ? data.animeId.value : this.animeId,
+      createdAtUtc: data.createdAtUtc.present
+          ? data.createdAtUtc.value
+          : this.createdAtUtc,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AnimeIdentityEntry(')
+          ..write('animeId: $animeId, ')
+          ..write('createdAtUtc: $createdAtUtc')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(animeId, createdAtUtc);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AnimeIdentityEntry &&
+          other.animeId == this.animeId &&
+          other.createdAtUtc == this.createdAtUtc);
+}
+
+class AnimeIdentityEntriesCompanion
+    extends UpdateCompanion<AnimeIdentityEntry> {
+  final Value<String> animeId;
+  final Value<DateTime> createdAtUtc;
+  final Value<int> rowid;
+  const AnimeIdentityEntriesCompanion({
+    this.animeId = const Value.absent(),
+    this.createdAtUtc = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AnimeIdentityEntriesCompanion.insert({
+    required String animeId,
+    required DateTime createdAtUtc,
+    this.rowid = const Value.absent(),
+  }) : animeId = Value(animeId),
+       createdAtUtc = Value(createdAtUtc);
+  static Insertable<AnimeIdentityEntry> custom({
+    Expression<String>? animeId,
+    Expression<DateTime>? createdAtUtc,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (animeId != null) 'anime_id': animeId,
+      if (createdAtUtc != null) 'created_at_utc': createdAtUtc,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AnimeIdentityEntriesCompanion copyWith({
+    Value<String>? animeId,
+    Value<DateTime>? createdAtUtc,
+    Value<int>? rowid,
+  }) {
+    return AnimeIdentityEntriesCompanion(
+      animeId: animeId ?? this.animeId,
+      createdAtUtc: createdAtUtc ?? this.createdAtUtc,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (animeId.present) {
+      map['anime_id'] = Variable<String>(animeId.value);
+    }
+    if (createdAtUtc.present) {
+      map['created_at_utc'] = Variable<DateTime>(createdAtUtc.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AnimeIdentityEntriesCompanion(')
+          ..write('animeId: $animeId, ')
+          ..write('createdAtUtc: $createdAtUtc, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ExternalAnimeIdentifiersTable extends ExternalAnimeIdentifiers
+    with TableInfo<$ExternalAnimeIdentifiersTable, ExternalAnimeIdentifier> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ExternalAnimeIdentifiersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _providerIdMeta = const VerificationMeta(
+    'providerId',
+  );
+  @override
+  late final GeneratedColumn<String> providerId = GeneratedColumn<String>(
+    'provider_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _externalIdMeta = const VerificationMeta(
+    'externalId',
+  );
+  @override
+  late final GeneratedColumn<String> externalId = GeneratedColumn<String>(
+    'external_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _animeIdMeta = const VerificationMeta(
+    'animeId',
+  );
+  @override
+  late final GeneratedColumn<String> animeId = GeneratedColumn<String>(
+    'anime_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES anime_identity_entries (anime_id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _evidenceMeta = const VerificationMeta(
+    'evidence',
+  );
+  @override
+  late final GeneratedColumn<String> evidence = GeneratedColumn<String>(
+    'evidence',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _linkedAtUtcMeta = const VerificationMeta(
+    'linkedAtUtc',
+  );
+  @override
+  late final GeneratedColumn<DateTime> linkedAtUtc = GeneratedColumn<DateTime>(
+    'linked_at_utc',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    providerId,
+    externalId,
+    animeId,
+    evidence,
+    linkedAtUtc,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'external_anime_identifiers';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ExternalAnimeIdentifier> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('provider_id')) {
+      context.handle(
+        _providerIdMeta,
+        providerId.isAcceptableOrUnknown(data['provider_id']!, _providerIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_providerIdMeta);
+    }
+    if (data.containsKey('external_id')) {
+      context.handle(
+        _externalIdMeta,
+        externalId.isAcceptableOrUnknown(data['external_id']!, _externalIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_externalIdMeta);
+    }
+    if (data.containsKey('anime_id')) {
+      context.handle(
+        _animeIdMeta,
+        animeId.isAcceptableOrUnknown(data['anime_id']!, _animeIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_animeIdMeta);
+    }
+    if (data.containsKey('evidence')) {
+      context.handle(
+        _evidenceMeta,
+        evidence.isAcceptableOrUnknown(data['evidence']!, _evidenceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_evidenceMeta);
+    }
+    if (data.containsKey('linked_at_utc')) {
+      context.handle(
+        _linkedAtUtcMeta,
+        linkedAtUtc.isAcceptableOrUnknown(
+          data['linked_at_utc']!,
+          _linkedAtUtcMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_linkedAtUtcMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {providerId, externalId};
+  @override
+  ExternalAnimeIdentifier map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ExternalAnimeIdentifier(
+      providerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}provider_id'],
+      )!,
+      externalId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}external_id'],
+      )!,
+      animeId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}anime_id'],
+      )!,
+      evidence: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}evidence'],
+      )!,
+      linkedAtUtc: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}linked_at_utc'],
+      )!,
+    );
+  }
+
+  @override
+  $ExternalAnimeIdentifiersTable createAlias(String alias) {
+    return $ExternalAnimeIdentifiersTable(attachedDatabase, alias);
+  }
+}
+
+class ExternalAnimeIdentifier extends DataClass
+    implements Insertable<ExternalAnimeIdentifier> {
+  final String providerId;
+  final String externalId;
+  final String animeId;
+  final String evidence;
+  final DateTime linkedAtUtc;
+  const ExternalAnimeIdentifier({
+    required this.providerId,
+    required this.externalId,
+    required this.animeId,
+    required this.evidence,
+    required this.linkedAtUtc,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['provider_id'] = Variable<String>(providerId);
+    map['external_id'] = Variable<String>(externalId);
+    map['anime_id'] = Variable<String>(animeId);
+    map['evidence'] = Variable<String>(evidence);
+    map['linked_at_utc'] = Variable<DateTime>(linkedAtUtc);
+    return map;
+  }
+
+  ExternalAnimeIdentifiersCompanion toCompanion(bool nullToAbsent) {
+    return ExternalAnimeIdentifiersCompanion(
+      providerId: Value(providerId),
+      externalId: Value(externalId),
+      animeId: Value(animeId),
+      evidence: Value(evidence),
+      linkedAtUtc: Value(linkedAtUtc),
+    );
+  }
+
+  factory ExternalAnimeIdentifier.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ExternalAnimeIdentifier(
+      providerId: serializer.fromJson<String>(json['providerId']),
+      externalId: serializer.fromJson<String>(json['externalId']),
+      animeId: serializer.fromJson<String>(json['animeId']),
+      evidence: serializer.fromJson<String>(json['evidence']),
+      linkedAtUtc: serializer.fromJson<DateTime>(json['linkedAtUtc']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'providerId': serializer.toJson<String>(providerId),
+      'externalId': serializer.toJson<String>(externalId),
+      'animeId': serializer.toJson<String>(animeId),
+      'evidence': serializer.toJson<String>(evidence),
+      'linkedAtUtc': serializer.toJson<DateTime>(linkedAtUtc),
+    };
+  }
+
+  ExternalAnimeIdentifier copyWith({
+    String? providerId,
+    String? externalId,
+    String? animeId,
+    String? evidence,
+    DateTime? linkedAtUtc,
+  }) => ExternalAnimeIdentifier(
+    providerId: providerId ?? this.providerId,
+    externalId: externalId ?? this.externalId,
+    animeId: animeId ?? this.animeId,
+    evidence: evidence ?? this.evidence,
+    linkedAtUtc: linkedAtUtc ?? this.linkedAtUtc,
+  );
+  ExternalAnimeIdentifier copyWithCompanion(
+    ExternalAnimeIdentifiersCompanion data,
+  ) {
+    return ExternalAnimeIdentifier(
+      providerId: data.providerId.present
+          ? data.providerId.value
+          : this.providerId,
+      externalId: data.externalId.present
+          ? data.externalId.value
+          : this.externalId,
+      animeId: data.animeId.present ? data.animeId.value : this.animeId,
+      evidence: data.evidence.present ? data.evidence.value : this.evidence,
+      linkedAtUtc: data.linkedAtUtc.present
+          ? data.linkedAtUtc.value
+          : this.linkedAtUtc,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExternalAnimeIdentifier(')
+          ..write('providerId: $providerId, ')
+          ..write('externalId: $externalId, ')
+          ..write('animeId: $animeId, ')
+          ..write('evidence: $evidence, ')
+          ..write('linkedAtUtc: $linkedAtUtc')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(providerId, externalId, animeId, evidence, linkedAtUtc);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ExternalAnimeIdentifier &&
+          other.providerId == this.providerId &&
+          other.externalId == this.externalId &&
+          other.animeId == this.animeId &&
+          other.evidence == this.evidence &&
+          other.linkedAtUtc == this.linkedAtUtc);
+}
+
+class ExternalAnimeIdentifiersCompanion
+    extends UpdateCompanion<ExternalAnimeIdentifier> {
+  final Value<String> providerId;
+  final Value<String> externalId;
+  final Value<String> animeId;
+  final Value<String> evidence;
+  final Value<DateTime> linkedAtUtc;
+  final Value<int> rowid;
+  const ExternalAnimeIdentifiersCompanion({
+    this.providerId = const Value.absent(),
+    this.externalId = const Value.absent(),
+    this.animeId = const Value.absent(),
+    this.evidence = const Value.absent(),
+    this.linkedAtUtc = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ExternalAnimeIdentifiersCompanion.insert({
+    required String providerId,
+    required String externalId,
+    required String animeId,
+    required String evidence,
+    required DateTime linkedAtUtc,
+    this.rowid = const Value.absent(),
+  }) : providerId = Value(providerId),
+       externalId = Value(externalId),
+       animeId = Value(animeId),
+       evidence = Value(evidence),
+       linkedAtUtc = Value(linkedAtUtc);
+  static Insertable<ExternalAnimeIdentifier> custom({
+    Expression<String>? providerId,
+    Expression<String>? externalId,
+    Expression<String>? animeId,
+    Expression<String>? evidence,
+    Expression<DateTime>? linkedAtUtc,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (providerId != null) 'provider_id': providerId,
+      if (externalId != null) 'external_id': externalId,
+      if (animeId != null) 'anime_id': animeId,
+      if (evidence != null) 'evidence': evidence,
+      if (linkedAtUtc != null) 'linked_at_utc': linkedAtUtc,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ExternalAnimeIdentifiersCompanion copyWith({
+    Value<String>? providerId,
+    Value<String>? externalId,
+    Value<String>? animeId,
+    Value<String>? evidence,
+    Value<DateTime>? linkedAtUtc,
+    Value<int>? rowid,
+  }) {
+    return ExternalAnimeIdentifiersCompanion(
+      providerId: providerId ?? this.providerId,
+      externalId: externalId ?? this.externalId,
+      animeId: animeId ?? this.animeId,
+      evidence: evidence ?? this.evidence,
+      linkedAtUtc: linkedAtUtc ?? this.linkedAtUtc,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (providerId.present) {
+      map['provider_id'] = Variable<String>(providerId.value);
+    }
+    if (externalId.present) {
+      map['external_id'] = Variable<String>(externalId.value);
+    }
+    if (animeId.present) {
+      map['anime_id'] = Variable<String>(animeId.value);
+    }
+    if (evidence.present) {
+      map['evidence'] = Variable<String>(evidence.value);
+    }
+    if (linkedAtUtc.present) {
+      map['linked_at_utc'] = Variable<DateTime>(linkedAtUtc.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExternalAnimeIdentifiersCompanion(')
+          ..write('providerId: $providerId, ')
+          ..write('externalId: $externalId, ')
+          ..write('animeId: $animeId, ')
+          ..write('evidence: $evidence, ')
+          ..write('linkedAtUtc: $linkedAtUtc, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $AnimeIdentityRelationshipsTable extends AnimeIdentityRelationships
+    with
+        TableInfo<$AnimeIdentityRelationshipsTable, AnimeIdentityRelationship> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AnimeIdentityRelationshipsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _sourceAnimeIdMeta = const VerificationMeta(
+    'sourceAnimeId',
+  );
+  @override
+  late final GeneratedColumn<String> sourceAnimeId = GeneratedColumn<String>(
+    'source_anime_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES anime_identity_entries (anime_id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _targetAnimeIdMeta = const VerificationMeta(
+    'targetAnimeId',
+  );
+  @override
+  late final GeneratedColumn<String> targetAnimeId = GeneratedColumn<String>(
+    'target_anime_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES anime_identity_entries (anime_id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _relationshipKindMeta = const VerificationMeta(
+    'relationshipKind',
+  );
+  @override
+  late final GeneratedColumn<String> relationshipKind = GeneratedColumn<String>(
+    'relationship_kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _evidenceMeta = const VerificationMeta(
+    'evidence',
+  );
+  @override
+  late final GeneratedColumn<String> evidence = GeneratedColumn<String>(
+    'evidence',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _linkedAtUtcMeta = const VerificationMeta(
+    'linkedAtUtc',
+  );
+  @override
+  late final GeneratedColumn<DateTime> linkedAtUtc = GeneratedColumn<DateTime>(
+    'linked_at_utc',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    sourceAnimeId,
+    targetAnimeId,
+    relationshipKind,
+    evidence,
+    linkedAtUtc,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'anime_identity_relationships';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AnimeIdentityRelationship> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('source_anime_id')) {
+      context.handle(
+        _sourceAnimeIdMeta,
+        sourceAnimeId.isAcceptableOrUnknown(
+          data['source_anime_id']!,
+          _sourceAnimeIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceAnimeIdMeta);
+    }
+    if (data.containsKey('target_anime_id')) {
+      context.handle(
+        _targetAnimeIdMeta,
+        targetAnimeId.isAcceptableOrUnknown(
+          data['target_anime_id']!,
+          _targetAnimeIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_targetAnimeIdMeta);
+    }
+    if (data.containsKey('relationship_kind')) {
+      context.handle(
+        _relationshipKindMeta,
+        relationshipKind.isAcceptableOrUnknown(
+          data['relationship_kind']!,
+          _relationshipKindMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_relationshipKindMeta);
+    }
+    if (data.containsKey('evidence')) {
+      context.handle(
+        _evidenceMeta,
+        evidence.isAcceptableOrUnknown(data['evidence']!, _evidenceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_evidenceMeta);
+    }
+    if (data.containsKey('linked_at_utc')) {
+      context.handle(
+        _linkedAtUtcMeta,
+        linkedAtUtc.isAcceptableOrUnknown(
+          data['linked_at_utc']!,
+          _linkedAtUtcMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_linkedAtUtcMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {
+    sourceAnimeId,
+    targetAnimeId,
+    relationshipKind,
+  };
+  @override
+  AnimeIdentityRelationship map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AnimeIdentityRelationship(
+      sourceAnimeId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_anime_id'],
+      )!,
+      targetAnimeId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}target_anime_id'],
+      )!,
+      relationshipKind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}relationship_kind'],
+      )!,
+      evidence: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}evidence'],
+      )!,
+      linkedAtUtc: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}linked_at_utc'],
+      )!,
+    );
+  }
+
+  @override
+  $AnimeIdentityRelationshipsTable createAlias(String alias) {
+    return $AnimeIdentityRelationshipsTable(attachedDatabase, alias);
+  }
+}
+
+class AnimeIdentityRelationship extends DataClass
+    implements Insertable<AnimeIdentityRelationship> {
+  final String sourceAnimeId;
+  final String targetAnimeId;
+  final String relationshipKind;
+  final String evidence;
+  final DateTime linkedAtUtc;
+  const AnimeIdentityRelationship({
+    required this.sourceAnimeId,
+    required this.targetAnimeId,
+    required this.relationshipKind,
+    required this.evidence,
+    required this.linkedAtUtc,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['source_anime_id'] = Variable<String>(sourceAnimeId);
+    map['target_anime_id'] = Variable<String>(targetAnimeId);
+    map['relationship_kind'] = Variable<String>(relationshipKind);
+    map['evidence'] = Variable<String>(evidence);
+    map['linked_at_utc'] = Variable<DateTime>(linkedAtUtc);
+    return map;
+  }
+
+  AnimeIdentityRelationshipsCompanion toCompanion(bool nullToAbsent) {
+    return AnimeIdentityRelationshipsCompanion(
+      sourceAnimeId: Value(sourceAnimeId),
+      targetAnimeId: Value(targetAnimeId),
+      relationshipKind: Value(relationshipKind),
+      evidence: Value(evidence),
+      linkedAtUtc: Value(linkedAtUtc),
+    );
+  }
+
+  factory AnimeIdentityRelationship.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AnimeIdentityRelationship(
+      sourceAnimeId: serializer.fromJson<String>(json['sourceAnimeId']),
+      targetAnimeId: serializer.fromJson<String>(json['targetAnimeId']),
+      relationshipKind: serializer.fromJson<String>(json['relationshipKind']),
+      evidence: serializer.fromJson<String>(json['evidence']),
+      linkedAtUtc: serializer.fromJson<DateTime>(json['linkedAtUtc']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'sourceAnimeId': serializer.toJson<String>(sourceAnimeId),
+      'targetAnimeId': serializer.toJson<String>(targetAnimeId),
+      'relationshipKind': serializer.toJson<String>(relationshipKind),
+      'evidence': serializer.toJson<String>(evidence),
+      'linkedAtUtc': serializer.toJson<DateTime>(linkedAtUtc),
+    };
+  }
+
+  AnimeIdentityRelationship copyWith({
+    String? sourceAnimeId,
+    String? targetAnimeId,
+    String? relationshipKind,
+    String? evidence,
+    DateTime? linkedAtUtc,
+  }) => AnimeIdentityRelationship(
+    sourceAnimeId: sourceAnimeId ?? this.sourceAnimeId,
+    targetAnimeId: targetAnimeId ?? this.targetAnimeId,
+    relationshipKind: relationshipKind ?? this.relationshipKind,
+    evidence: evidence ?? this.evidence,
+    linkedAtUtc: linkedAtUtc ?? this.linkedAtUtc,
+  );
+  AnimeIdentityRelationship copyWithCompanion(
+    AnimeIdentityRelationshipsCompanion data,
+  ) {
+    return AnimeIdentityRelationship(
+      sourceAnimeId: data.sourceAnimeId.present
+          ? data.sourceAnimeId.value
+          : this.sourceAnimeId,
+      targetAnimeId: data.targetAnimeId.present
+          ? data.targetAnimeId.value
+          : this.targetAnimeId,
+      relationshipKind: data.relationshipKind.present
+          ? data.relationshipKind.value
+          : this.relationshipKind,
+      evidence: data.evidence.present ? data.evidence.value : this.evidence,
+      linkedAtUtc: data.linkedAtUtc.present
+          ? data.linkedAtUtc.value
+          : this.linkedAtUtc,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AnimeIdentityRelationship(')
+          ..write('sourceAnimeId: $sourceAnimeId, ')
+          ..write('targetAnimeId: $targetAnimeId, ')
+          ..write('relationshipKind: $relationshipKind, ')
+          ..write('evidence: $evidence, ')
+          ..write('linkedAtUtc: $linkedAtUtc')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    sourceAnimeId,
+    targetAnimeId,
+    relationshipKind,
+    evidence,
+    linkedAtUtc,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AnimeIdentityRelationship &&
+          other.sourceAnimeId == this.sourceAnimeId &&
+          other.targetAnimeId == this.targetAnimeId &&
+          other.relationshipKind == this.relationshipKind &&
+          other.evidence == this.evidence &&
+          other.linkedAtUtc == this.linkedAtUtc);
+}
+
+class AnimeIdentityRelationshipsCompanion
+    extends UpdateCompanion<AnimeIdentityRelationship> {
+  final Value<String> sourceAnimeId;
+  final Value<String> targetAnimeId;
+  final Value<String> relationshipKind;
+  final Value<String> evidence;
+  final Value<DateTime> linkedAtUtc;
+  final Value<int> rowid;
+  const AnimeIdentityRelationshipsCompanion({
+    this.sourceAnimeId = const Value.absent(),
+    this.targetAnimeId = const Value.absent(),
+    this.relationshipKind = const Value.absent(),
+    this.evidence = const Value.absent(),
+    this.linkedAtUtc = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AnimeIdentityRelationshipsCompanion.insert({
+    required String sourceAnimeId,
+    required String targetAnimeId,
+    required String relationshipKind,
+    required String evidence,
+    required DateTime linkedAtUtc,
+    this.rowid = const Value.absent(),
+  }) : sourceAnimeId = Value(sourceAnimeId),
+       targetAnimeId = Value(targetAnimeId),
+       relationshipKind = Value(relationshipKind),
+       evidence = Value(evidence),
+       linkedAtUtc = Value(linkedAtUtc);
+  static Insertable<AnimeIdentityRelationship> custom({
+    Expression<String>? sourceAnimeId,
+    Expression<String>? targetAnimeId,
+    Expression<String>? relationshipKind,
+    Expression<String>? evidence,
+    Expression<DateTime>? linkedAtUtc,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (sourceAnimeId != null) 'source_anime_id': sourceAnimeId,
+      if (targetAnimeId != null) 'target_anime_id': targetAnimeId,
+      if (relationshipKind != null) 'relationship_kind': relationshipKind,
+      if (evidence != null) 'evidence': evidence,
+      if (linkedAtUtc != null) 'linked_at_utc': linkedAtUtc,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AnimeIdentityRelationshipsCompanion copyWith({
+    Value<String>? sourceAnimeId,
+    Value<String>? targetAnimeId,
+    Value<String>? relationshipKind,
+    Value<String>? evidence,
+    Value<DateTime>? linkedAtUtc,
+    Value<int>? rowid,
+  }) {
+    return AnimeIdentityRelationshipsCompanion(
+      sourceAnimeId: sourceAnimeId ?? this.sourceAnimeId,
+      targetAnimeId: targetAnimeId ?? this.targetAnimeId,
+      relationshipKind: relationshipKind ?? this.relationshipKind,
+      evidence: evidence ?? this.evidence,
+      linkedAtUtc: linkedAtUtc ?? this.linkedAtUtc,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (sourceAnimeId.present) {
+      map['source_anime_id'] = Variable<String>(sourceAnimeId.value);
+    }
+    if (targetAnimeId.present) {
+      map['target_anime_id'] = Variable<String>(targetAnimeId.value);
+    }
+    if (relationshipKind.present) {
+      map['relationship_kind'] = Variable<String>(relationshipKind.value);
+    }
+    if (evidence.present) {
+      map['evidence'] = Variable<String>(evidence.value);
+    }
+    if (linkedAtUtc.present) {
+      map['linked_at_utc'] = Variable<DateTime>(linkedAtUtc.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AnimeIdentityRelationshipsCompanion(')
+          ..write('sourceAnimeId: $sourceAnimeId, ')
+          ..write('targetAnimeId: $targetAnimeId, ')
+          ..write('relationshipKind: $relationshipKind, ')
+          ..write('evidence: $evidence, ')
+          ..write('linkedAtUtc: $linkedAtUtc, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $LocalLibraryEntriesTable extends LocalLibraryEntries
+    with TableInfo<$LocalLibraryEntriesTable, LocalLibraryEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalLibraryEntriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _animeIdMeta = const VerificationMeta(
+    'animeId',
+  );
+  @override
+  late final GeneratedColumn<String> animeId = GeneratedColumn<String>(
+    'anime_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES anime_identity_entries (anime_id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _addedAtUtcMeta = const VerificationMeta(
+    'addedAtUtc',
+  );
+  @override
+  late final GeneratedColumn<DateTime> addedAtUtc = GeneratedColumn<DateTime>(
+    'added_at_utc',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('planned'),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [animeId, addedAtUtc, status];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'library_entries';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalLibraryEntry> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('anime_id')) {
+      context.handle(
+        _animeIdMeta,
+        animeId.isAcceptableOrUnknown(data['anime_id']!, _animeIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_animeIdMeta);
+    }
+    if (data.containsKey('added_at_utc')) {
+      context.handle(
+        _addedAtUtcMeta,
+        addedAtUtc.isAcceptableOrUnknown(
+          data['added_at_utc']!,
+          _addedAtUtcMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_addedAtUtcMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {animeId};
+  @override
+  LocalLibraryEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalLibraryEntry(
+      animeId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}anime_id'],
+      )!,
+      addedAtUtc: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}added_at_utc'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalLibraryEntriesTable createAlias(String alias) {
+    return $LocalLibraryEntriesTable(attachedDatabase, alias);
+  }
+}
+
+class LocalLibraryEntry extends DataClass
+    implements Insertable<LocalLibraryEntry> {
+  final String animeId;
+  final DateTime addedAtUtc;
+  final String status;
+  const LocalLibraryEntry({
+    required this.animeId,
+    required this.addedAtUtc,
+    required this.status,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['anime_id'] = Variable<String>(animeId);
+    map['added_at_utc'] = Variable<DateTime>(addedAtUtc);
+    map['status'] = Variable<String>(status);
+    return map;
+  }
+
+  LocalLibraryEntriesCompanion toCompanion(bool nullToAbsent) {
+    return LocalLibraryEntriesCompanion(
+      animeId: Value(animeId),
+      addedAtUtc: Value(addedAtUtc),
+      status: Value(status),
+    );
+  }
+
+  factory LocalLibraryEntry.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalLibraryEntry(
+      animeId: serializer.fromJson<String>(json['animeId']),
+      addedAtUtc: serializer.fromJson<DateTime>(json['addedAtUtc']),
+      status: serializer.fromJson<String>(json['status']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'animeId': serializer.toJson<String>(animeId),
+      'addedAtUtc': serializer.toJson<DateTime>(addedAtUtc),
+      'status': serializer.toJson<String>(status),
+    };
+  }
+
+  LocalLibraryEntry copyWith({
+    String? animeId,
+    DateTime? addedAtUtc,
+    String? status,
+  }) => LocalLibraryEntry(
+    animeId: animeId ?? this.animeId,
+    addedAtUtc: addedAtUtc ?? this.addedAtUtc,
+    status: status ?? this.status,
+  );
+  LocalLibraryEntry copyWithCompanion(LocalLibraryEntriesCompanion data) {
+    return LocalLibraryEntry(
+      animeId: data.animeId.present ? data.animeId.value : this.animeId,
+      addedAtUtc: data.addedAtUtc.present
+          ? data.addedAtUtc.value
+          : this.addedAtUtc,
+      status: data.status.present ? data.status.value : this.status,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalLibraryEntry(')
+          ..write('animeId: $animeId, ')
+          ..write('addedAtUtc: $addedAtUtc, ')
+          ..write('status: $status')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(animeId, addedAtUtc, status);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalLibraryEntry &&
+          other.animeId == this.animeId &&
+          other.addedAtUtc == this.addedAtUtc &&
+          other.status == this.status);
+}
+
+class LocalLibraryEntriesCompanion extends UpdateCompanion<LocalLibraryEntry> {
+  final Value<String> animeId;
+  final Value<DateTime> addedAtUtc;
+  final Value<String> status;
+  final Value<int> rowid;
+  const LocalLibraryEntriesCompanion({
+    this.animeId = const Value.absent(),
+    this.addedAtUtc = const Value.absent(),
+    this.status = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalLibraryEntriesCompanion.insert({
+    required String animeId,
+    required DateTime addedAtUtc,
+    this.status = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : animeId = Value(animeId),
+       addedAtUtc = Value(addedAtUtc);
+  static Insertable<LocalLibraryEntry> custom({
+    Expression<String>? animeId,
+    Expression<DateTime>? addedAtUtc,
+    Expression<String>? status,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (animeId != null) 'anime_id': animeId,
+      if (addedAtUtc != null) 'added_at_utc': addedAtUtc,
+      if (status != null) 'status': status,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalLibraryEntriesCompanion copyWith({
+    Value<String>? animeId,
+    Value<DateTime>? addedAtUtc,
+    Value<String>? status,
+    Value<int>? rowid,
+  }) {
+    return LocalLibraryEntriesCompanion(
+      animeId: animeId ?? this.animeId,
+      addedAtUtc: addedAtUtc ?? this.addedAtUtc,
+      status: status ?? this.status,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (animeId.present) {
+      map['anime_id'] = Variable<String>(animeId.value);
+    }
+    if (addedAtUtc.present) {
+      map['added_at_utc'] = Variable<DateTime>(addedAtUtc.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalLibraryEntriesCompanion(')
+          ..write('animeId: $animeId, ')
+          ..write('addedAtUtc: $addedAtUtc, ')
+          ..write('status: $status, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -1469,6 +2766,22 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $LatestAnimeSearchTable(this);
   late final $PlaybackProgressEntriesTable playbackProgressEntries =
       $PlaybackProgressEntriesTable(this);
+  late final $AnimeIdentityEntriesTable animeIdentityEntries =
+      $AnimeIdentityEntriesTable(this);
+  late final $ExternalAnimeIdentifiersTable externalAnimeIdentifiers =
+      $ExternalAnimeIdentifiersTable(this);
+  late final $AnimeIdentityRelationshipsTable animeIdentityRelationships =
+      $AnimeIdentityRelationshipsTable(this);
+  late final $LocalLibraryEntriesTable localLibraryEntries =
+      $LocalLibraryEntriesTable(this);
+  late final Index externalAnimeIdentifiersByAnime = Index(
+    'external_anime_identifiers_by_anime',
+    'CREATE INDEX external_anime_identifiers_by_anime ON external_anime_identifiers (anime_id)',
+  );
+  late final Index libraryEntriesByAddedAt = Index(
+    'library_entries_by_added_at',
+    'CREATE INDEX library_entries_by_added_at ON library_entries (added_at_utc)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1478,7 +2791,50 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     progressDocuments,
     latestAnimeSearch,
     playbackProgressEntries,
+    animeIdentityEntries,
+    externalAnimeIdentifiers,
+    animeIdentityRelationships,
+    localLibraryEntries,
+    externalAnimeIdentifiersByAnime,
+    libraryEntriesByAddedAt,
   ];
+  @override
+  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'anime_identity_entries',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [
+        TableUpdate('external_anime_identifiers', kind: UpdateKind.delete),
+      ],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'anime_identity_entries',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [
+        TableUpdate('anime_identity_relationships', kind: UpdateKind.delete),
+      ],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'anime_identity_entries',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [
+        TableUpdate('anime_identity_relationships', kind: UpdateKind.delete),
+      ],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'anime_identity_entries',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('library_entries', kind: UpdateKind.delete)],
+    ),
+  ]);
 }
 
 typedef $$SettingsEntriesTableCreateCompanionBuilder =
@@ -2368,6 +3724,1711 @@ typedef $$PlaybackProgressEntriesTableProcessedTableManager =
       PlaybackProgressEntry,
       PrefetchHooks Function()
     >;
+typedef $$AnimeIdentityEntriesTableCreateCompanionBuilder =
+    AnimeIdentityEntriesCompanion Function({
+      required String animeId,
+      required DateTime createdAtUtc,
+      Value<int> rowid,
+    });
+typedef $$AnimeIdentityEntriesTableUpdateCompanionBuilder =
+    AnimeIdentityEntriesCompanion Function({
+      Value<String> animeId,
+      Value<DateTime> createdAtUtc,
+      Value<int> rowid,
+    });
+
+final class $$AnimeIdentityEntriesTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $AnimeIdentityEntriesTable,
+          AnimeIdentityEntry
+        > {
+  $$AnimeIdentityEntriesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static MultiTypedResultKey<
+    $ExternalAnimeIdentifiersTable,
+    List<ExternalAnimeIdentifier>
+  >
+  _externalAnimeIdentifiersRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.externalAnimeIdentifiers,
+        aliasName: 'anime_identity_entries__anime_id__external_anime_identifiers__anime_id',
+      );
+
+  $$ExternalAnimeIdentifiersTableProcessedTableManager
+  get externalAnimeIdentifiersRefs {
+    final manager =
+        $$ExternalAnimeIdentifiersTableTableManager(
+          $_db,
+          $_db.externalAnimeIdentifiers,
+        ).filter(
+          (f) => f.animeId.animeId.sqlEquals($_itemColumn<String>('anime_id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _externalAnimeIdentifiersRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $AnimeIdentityRelationshipsTable,
+    List<AnimeIdentityRelationship>
+  >
+  _outgoingRelationshipsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.animeIdentityRelationships,
+        aliasName: 'anime_identity_entries__anime_id__anime_identity_relationships__source_anime_id',
+      );
+
+  $$AnimeIdentityRelationshipsTableProcessedTableManager
+  get outgoingRelationships {
+    final manager =
+        $$AnimeIdentityRelationshipsTableTableManager(
+          $_db,
+          $_db.animeIdentityRelationships,
+        ).filter(
+          (f) => f.sourceAnimeId.animeId.sqlEquals(
+            $_itemColumn<String>('anime_id')!,
+          ),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _outgoingRelationshipsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $AnimeIdentityRelationshipsTable,
+    List<AnimeIdentityRelationship>
+  >
+  _incomingRelationshipsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.animeIdentityRelationships,
+        aliasName: 'anime_identity_entries__anime_id__anime_identity_relationships__target_anime_id',
+      );
+
+  $$AnimeIdentityRelationshipsTableProcessedTableManager
+  get incomingRelationships {
+    final manager =
+        $$AnimeIdentityRelationshipsTableTableManager(
+          $_db,
+          $_db.animeIdentityRelationships,
+        ).filter(
+          (f) => f.targetAnimeId.animeId.sqlEquals(
+            $_itemColumn<String>('anime_id')!,
+          ),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _incomingRelationshipsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$LocalLibraryEntriesTable, List<LocalLibraryEntry>>
+  _localLibraryEntriesRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.localLibraryEntries,
+        aliasName:
+            'anime_identity_entries__anime_id__library_entries__anime_id',
+      );
+
+  $$LocalLibraryEntriesTableProcessedTableManager get localLibraryEntriesRefs {
+    final manager =
+        $$LocalLibraryEntriesTableTableManager(
+          $_db,
+          $_db.localLibraryEntries,
+        ).filter(
+          (f) => f.animeId.animeId.sqlEquals($_itemColumn<String>('anime_id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _localLibraryEntriesRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$AnimeIdentityEntriesTableFilterComposer
+    extends Composer<_$AppDatabase, $AnimeIdentityEntriesTable> {
+  $$AnimeIdentityEntriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get animeId => $composableBuilder(
+    column: $table.animeId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAtUtc => $composableBuilder(
+    column: $table.createdAtUtc,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> externalAnimeIdentifiersRefs(
+    Expression<bool> Function($$ExternalAnimeIdentifiersTableFilterComposer f)
+    f,
+  ) {
+    final $$ExternalAnimeIdentifiersTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.animeId,
+          referencedTable: $db.externalAnimeIdentifiers,
+          getReferencedColumn: (t) => t.animeId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ExternalAnimeIdentifiersTableFilterComposer(
+                $db: $db,
+                $table: $db.externalAnimeIdentifiers,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<bool> outgoingRelationships(
+    Expression<bool> Function($$AnimeIdentityRelationshipsTableFilterComposer f)
+    f,
+  ) {
+    final $$AnimeIdentityRelationshipsTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.animeId,
+          referencedTable: $db.animeIdentityRelationships,
+          getReferencedColumn: (t) => t.sourceAnimeId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AnimeIdentityRelationshipsTableFilterComposer(
+                $db: $db,
+                $table: $db.animeIdentityRelationships,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<bool> incomingRelationships(
+    Expression<bool> Function($$AnimeIdentityRelationshipsTableFilterComposer f)
+    f,
+  ) {
+    final $$AnimeIdentityRelationshipsTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.animeId,
+          referencedTable: $db.animeIdentityRelationships,
+          getReferencedColumn: (t) => t.targetAnimeId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AnimeIdentityRelationshipsTableFilterComposer(
+                $db: $db,
+                $table: $db.animeIdentityRelationships,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<bool> localLibraryEntriesRefs(
+    Expression<bool> Function($$LocalLibraryEntriesTableFilterComposer f) f,
+  ) {
+    final $$LocalLibraryEntriesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.animeId,
+      referencedTable: $db.localLibraryEntries,
+      getReferencedColumn: (t) => t.animeId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LocalLibraryEntriesTableFilterComposer(
+            $db: $db,
+            $table: $db.localLibraryEntries,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$AnimeIdentityEntriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $AnimeIdentityEntriesTable> {
+  $$AnimeIdentityEntriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get animeId => $composableBuilder(
+    column: $table.animeId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAtUtc => $composableBuilder(
+    column: $table.createdAtUtc,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$AnimeIdentityEntriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AnimeIdentityEntriesTable> {
+  $$AnimeIdentityEntriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get animeId =>
+      $composableBuilder(column: $table.animeId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAtUtc => $composableBuilder(
+    column: $table.createdAtUtc,
+    builder: (column) => column,
+  );
+
+  Expression<T> externalAnimeIdentifiersRefs<T extends Object>(
+    Expression<T> Function($$ExternalAnimeIdentifiersTableAnnotationComposer a)
+    f,
+  ) {
+    final $$ExternalAnimeIdentifiersTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.animeId,
+          referencedTable: $db.externalAnimeIdentifiers,
+          getReferencedColumn: (t) => t.animeId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ExternalAnimeIdentifiersTableAnnotationComposer(
+                $db: $db,
+                $table: $db.externalAnimeIdentifiers,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> outgoingRelationships<T extends Object>(
+    Expression<T> Function(
+      $$AnimeIdentityRelationshipsTableAnnotationComposer a,
+    )
+    f,
+  ) {
+    final $$AnimeIdentityRelationshipsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.animeId,
+          referencedTable: $db.animeIdentityRelationships,
+          getReferencedColumn: (t) => t.sourceAnimeId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AnimeIdentityRelationshipsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.animeIdentityRelationships,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> incomingRelationships<T extends Object>(
+    Expression<T> Function(
+      $$AnimeIdentityRelationshipsTableAnnotationComposer a,
+    )
+    f,
+  ) {
+    final $$AnimeIdentityRelationshipsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.animeId,
+          referencedTable: $db.animeIdentityRelationships,
+          getReferencedColumn: (t) => t.targetAnimeId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AnimeIdentityRelationshipsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.animeIdentityRelationships,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<T> localLibraryEntriesRefs<T extends Object>(
+    Expression<T> Function($$LocalLibraryEntriesTableAnnotationComposer a) f,
+  ) {
+    final $$LocalLibraryEntriesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.animeId,
+          referencedTable: $db.localLibraryEntries,
+          getReferencedColumn: (t) => t.animeId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$LocalLibraryEntriesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.localLibraryEntries,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$AnimeIdentityEntriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AnimeIdentityEntriesTable,
+          AnimeIdentityEntry,
+          $$AnimeIdentityEntriesTableFilterComposer,
+          $$AnimeIdentityEntriesTableOrderingComposer,
+          $$AnimeIdentityEntriesTableAnnotationComposer,
+          $$AnimeIdentityEntriesTableCreateCompanionBuilder,
+          $$AnimeIdentityEntriesTableUpdateCompanionBuilder,
+          (AnimeIdentityEntry, $$AnimeIdentityEntriesTableReferences),
+          AnimeIdentityEntry,
+          PrefetchHooks Function({
+            bool externalAnimeIdentifiersRefs,
+            bool outgoingRelationships,
+            bool incomingRelationships,
+            bool localLibraryEntriesRefs,
+          })
+        > {
+  $$AnimeIdentityEntriesTableTableManager(
+    _$AppDatabase db,
+    $AnimeIdentityEntriesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AnimeIdentityEntriesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AnimeIdentityEntriesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$AnimeIdentityEntriesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> animeId = const Value.absent(),
+                Value<DateTime> createdAtUtc = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AnimeIdentityEntriesCompanion(
+                animeId: animeId,
+                createdAtUtc: createdAtUtc,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String animeId,
+                required DateTime createdAtUtc,
+                Value<int> rowid = const Value.absent(),
+              }) => AnimeIdentityEntriesCompanion.insert(
+                animeId: animeId,
+                createdAtUtc: createdAtUtc,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$AnimeIdentityEntriesTable, AnimeIdentityEntry>(
+                    table,
+                  ),
+                  $$AnimeIdentityEntriesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({
+                externalAnimeIdentifiersRefs = false,
+                outgoingRelationships = false,
+                incomingRelationships = false,
+                localLibraryEntriesRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (externalAnimeIdentifiersRefs)
+                      db.externalAnimeIdentifiers,
+                    if (outgoingRelationships) db.animeIdentityRelationships,
+                    if (incomingRelationships) db.animeIdentityRelationships,
+                    if (localLibraryEntriesRefs) db.localLibraryEntries,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (externalAnimeIdentifiersRefs)
+                        await $_getPrefetchedDataByColumns<
+                          AnimeIdentityEntry,
+                          $AnimeIdentityEntriesTable,
+                          ExternalAnimeIdentifier,
+                          $ExternalAnimeIdentifiersTable
+                        >(
+                          currentTable: table,
+                          referencedTable: $$AnimeIdentityEntriesTableReferences
+                              ._externalAnimeIdentifiersRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$AnimeIdentityEntriesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).externalAnimeIdentifiersRefs,
+                          currentColumn: 'anime_id',
+                          referencedColumn: 'anime_id',
+                          typedResults: items,
+                        ),
+                      if (outgoingRelationships)
+                        await $_getPrefetchedDataByColumns<
+                          AnimeIdentityEntry,
+                          $AnimeIdentityEntriesTable,
+                          AnimeIdentityRelationship,
+                          $AnimeIdentityRelationshipsTable
+                        >(
+                          currentTable: table,
+                          referencedTable: $$AnimeIdentityEntriesTableReferences
+                              ._outgoingRelationshipsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$AnimeIdentityEntriesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).outgoingRelationships,
+                          currentColumn: 'anime_id',
+                          referencedColumn: 'source_anime_id',
+                          typedResults: items,
+                        ),
+                      if (incomingRelationships)
+                        await $_getPrefetchedDataByColumns<
+                          AnimeIdentityEntry,
+                          $AnimeIdentityEntriesTable,
+                          AnimeIdentityRelationship,
+                          $AnimeIdentityRelationshipsTable
+                        >(
+                          currentTable: table,
+                          referencedTable: $$AnimeIdentityEntriesTableReferences
+                              ._incomingRelationshipsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$AnimeIdentityEntriesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).incomingRelationships,
+                          currentColumn: 'anime_id',
+                          referencedColumn: 'target_anime_id',
+                          typedResults: items,
+                        ),
+                      if (localLibraryEntriesRefs)
+                        await $_getPrefetchedDataByColumns<
+                          AnimeIdentityEntry,
+                          $AnimeIdentityEntriesTable,
+                          LocalLibraryEntry,
+                          $LocalLibraryEntriesTable
+                        >(
+                          currentTable: table,
+                          referencedTable: $$AnimeIdentityEntriesTableReferences
+                              ._localLibraryEntriesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$AnimeIdentityEntriesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).localLibraryEntriesRefs,
+                          currentColumn: 'anime_id',
+                          referencedColumn: 'anime_id',
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$AnimeIdentityEntriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AnimeIdentityEntriesTable,
+      AnimeIdentityEntry,
+      $$AnimeIdentityEntriesTableFilterComposer,
+      $$AnimeIdentityEntriesTableOrderingComposer,
+      $$AnimeIdentityEntriesTableAnnotationComposer,
+      $$AnimeIdentityEntriesTableCreateCompanionBuilder,
+      $$AnimeIdentityEntriesTableUpdateCompanionBuilder,
+      (AnimeIdentityEntry, $$AnimeIdentityEntriesTableReferences),
+      AnimeIdentityEntry,
+      PrefetchHooks Function({
+        bool externalAnimeIdentifiersRefs,
+        bool outgoingRelationships,
+        bool incomingRelationships,
+        bool localLibraryEntriesRefs,
+      })
+    >;
+typedef $$ExternalAnimeIdentifiersTableCreateCompanionBuilder =
+    ExternalAnimeIdentifiersCompanion Function({
+      required String providerId,
+      required String externalId,
+      required String animeId,
+      required String evidence,
+      required DateTime linkedAtUtc,
+      Value<int> rowid,
+    });
+typedef $$ExternalAnimeIdentifiersTableUpdateCompanionBuilder =
+    ExternalAnimeIdentifiersCompanion Function({
+      Value<String> providerId,
+      Value<String> externalId,
+      Value<String> animeId,
+      Value<String> evidence,
+      Value<DateTime> linkedAtUtc,
+      Value<int> rowid,
+    });
+
+final class $$ExternalAnimeIdentifiersTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $ExternalAnimeIdentifiersTable,
+          ExternalAnimeIdentifier
+        > {
+  $$ExternalAnimeIdentifiersTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $AnimeIdentityEntriesTable _animeIdTable(
+    _$AppDatabase db,
+  ) => db.animeIdentityEntries.createAlias(
+    'external_anime_identifiers__anime_id__anime_identity_entries__anime_id',
+  );
+
+  $$AnimeIdentityEntriesTableProcessedTableManager get animeId {
+    final $_column = $_itemColumn<String>('anime_id')!;
+
+    final manager = $$AnimeIdentityEntriesTableTableManager(
+      $_db,
+      $_db.animeIdentityEntries,
+    ).filter((f) => f.animeId.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_animeIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ExternalAnimeIdentifiersTableFilterComposer
+    extends Composer<_$AppDatabase, $ExternalAnimeIdentifiersTable> {
+  $$ExternalAnimeIdentifiersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get providerId => $composableBuilder(
+    column: $table.providerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get externalId => $composableBuilder(
+    column: $table.externalId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get evidence => $composableBuilder(
+    column: $table.evidence,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get linkedAtUtc => $composableBuilder(
+    column: $table.linkedAtUtc,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$AnimeIdentityEntriesTableFilterComposer get animeId {
+    final $$AnimeIdentityEntriesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.animeId,
+      referencedTable: $db.animeIdentityEntries,
+      getReferencedColumn: (t) => t.animeId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AnimeIdentityEntriesTableFilterComposer(
+            $db: $db,
+            $table: $db.animeIdentityEntries,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ExternalAnimeIdentifiersTableOrderingComposer
+    extends Composer<_$AppDatabase, $ExternalAnimeIdentifiersTable> {
+  $$ExternalAnimeIdentifiersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get providerId => $composableBuilder(
+    column: $table.providerId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get externalId => $composableBuilder(
+    column: $table.externalId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get evidence => $composableBuilder(
+    column: $table.evidence,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get linkedAtUtc => $composableBuilder(
+    column: $table.linkedAtUtc,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$AnimeIdentityEntriesTableOrderingComposer get animeId {
+    final $$AnimeIdentityEntriesTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.animeId,
+          referencedTable: $db.animeIdentityEntries,
+          getReferencedColumn: (t) => t.animeId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AnimeIdentityEntriesTableOrderingComposer(
+                $db: $db,
+                $table: $db.animeIdentityEntries,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$ExternalAnimeIdentifiersTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ExternalAnimeIdentifiersTable> {
+  $$ExternalAnimeIdentifiersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get providerId => $composableBuilder(
+    column: $table.providerId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get externalId => $composableBuilder(
+    column: $table.externalId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get evidence =>
+      $composableBuilder(column: $table.evidence, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get linkedAtUtc => $composableBuilder(
+    column: $table.linkedAtUtc,
+    builder: (column) => column,
+  );
+
+  $$AnimeIdentityEntriesTableAnnotationComposer get animeId {
+    final $$AnimeIdentityEntriesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.animeId,
+          referencedTable: $db.animeIdentityEntries,
+          getReferencedColumn: (t) => t.animeId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AnimeIdentityEntriesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.animeIdentityEntries,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$ExternalAnimeIdentifiersTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ExternalAnimeIdentifiersTable,
+          ExternalAnimeIdentifier,
+          $$ExternalAnimeIdentifiersTableFilterComposer,
+          $$ExternalAnimeIdentifiersTableOrderingComposer,
+          $$ExternalAnimeIdentifiersTableAnnotationComposer,
+          $$ExternalAnimeIdentifiersTableCreateCompanionBuilder,
+          $$ExternalAnimeIdentifiersTableUpdateCompanionBuilder,
+          (ExternalAnimeIdentifier, $$ExternalAnimeIdentifiersTableReferences),
+          ExternalAnimeIdentifier,
+          PrefetchHooks Function({bool animeId})
+        > {
+  $$ExternalAnimeIdentifiersTableTableManager(
+    _$AppDatabase db,
+    $ExternalAnimeIdentifiersTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ExternalAnimeIdentifiersTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$ExternalAnimeIdentifiersTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$ExternalAnimeIdentifiersTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> providerId = const Value.absent(),
+                Value<String> externalId = const Value.absent(),
+                Value<String> animeId = const Value.absent(),
+                Value<String> evidence = const Value.absent(),
+                Value<DateTime> linkedAtUtc = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ExternalAnimeIdentifiersCompanion(
+                providerId: providerId,
+                externalId: externalId,
+                animeId: animeId,
+                evidence: evidence,
+                linkedAtUtc: linkedAtUtc,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String providerId,
+                required String externalId,
+                required String animeId,
+                required String evidence,
+                required DateTime linkedAtUtc,
+                Value<int> rowid = const Value.absent(),
+              }) => ExternalAnimeIdentifiersCompanion.insert(
+                providerId: providerId,
+                externalId: externalId,
+                animeId: animeId,
+                evidence: evidence,
+                linkedAtUtc: linkedAtUtc,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<
+                    $ExternalAnimeIdentifiersTable,
+                    ExternalAnimeIdentifier
+                  >(table),
+                  $$ExternalAnimeIdentifiersTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({animeId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (animeId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.animeId,
+                        referencedTable:
+                            $$ExternalAnimeIdentifiersTableReferences
+                                ._animeIdTable(db),
+                        referencedColumn:
+                            $$ExternalAnimeIdentifiersTableReferences
+                                ._animeIdTable(db)
+                                .animeId,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ExternalAnimeIdentifiersTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ExternalAnimeIdentifiersTable,
+      ExternalAnimeIdentifier,
+      $$ExternalAnimeIdentifiersTableFilterComposer,
+      $$ExternalAnimeIdentifiersTableOrderingComposer,
+      $$ExternalAnimeIdentifiersTableAnnotationComposer,
+      $$ExternalAnimeIdentifiersTableCreateCompanionBuilder,
+      $$ExternalAnimeIdentifiersTableUpdateCompanionBuilder,
+      (ExternalAnimeIdentifier, $$ExternalAnimeIdentifiersTableReferences),
+      ExternalAnimeIdentifier,
+      PrefetchHooks Function({bool animeId})
+    >;
+typedef $$AnimeIdentityRelationshipsTableCreateCompanionBuilder =
+    AnimeIdentityRelationshipsCompanion Function({
+      required String sourceAnimeId,
+      required String targetAnimeId,
+      required String relationshipKind,
+      required String evidence,
+      required DateTime linkedAtUtc,
+      Value<int> rowid,
+    });
+typedef $$AnimeIdentityRelationshipsTableUpdateCompanionBuilder =
+    AnimeIdentityRelationshipsCompanion Function({
+      Value<String> sourceAnimeId,
+      Value<String> targetAnimeId,
+      Value<String> relationshipKind,
+      Value<String> evidence,
+      Value<DateTime> linkedAtUtc,
+      Value<int> rowid,
+    });
+
+final class $$AnimeIdentityRelationshipsTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $AnimeIdentityRelationshipsTable,
+          AnimeIdentityRelationship
+        > {
+  $$AnimeIdentityRelationshipsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $AnimeIdentityEntriesTable _sourceAnimeIdTable(_$AppDatabase db) =>
+      db.animeIdentityEntries.createAlias(
+        'anime_identity_relationships__source_anime_id__anime_identity_entries__anime_id',
+      );
+
+  $$AnimeIdentityEntriesTableProcessedTableManager get sourceAnimeId {
+    final $_column = $_itemColumn<String>('source_anime_id')!;
+
+    final manager = $$AnimeIdentityEntriesTableTableManager(
+      $_db,
+      $_db.animeIdentityEntries,
+    ).filter((f) => f.animeId.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_sourceAnimeIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $AnimeIdentityEntriesTable _targetAnimeIdTable(_$AppDatabase db) =>
+      db.animeIdentityEntries.createAlias(
+        'anime_identity_relationships__target_anime_id__anime_identity_entries__anime_id',
+      );
+
+  $$AnimeIdentityEntriesTableProcessedTableManager get targetAnimeId {
+    final $_column = $_itemColumn<String>('target_anime_id')!;
+
+    final manager = $$AnimeIdentityEntriesTableTableManager(
+      $_db,
+      $_db.animeIdentityEntries,
+    ).filter((f) => f.animeId.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_targetAnimeIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$AnimeIdentityRelationshipsTableFilterComposer
+    extends Composer<_$AppDatabase, $AnimeIdentityRelationshipsTable> {
+  $$AnimeIdentityRelationshipsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get relationshipKind => $composableBuilder(
+    column: $table.relationshipKind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get evidence => $composableBuilder(
+    column: $table.evidence,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get linkedAtUtc => $composableBuilder(
+    column: $table.linkedAtUtc,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$AnimeIdentityEntriesTableFilterComposer get sourceAnimeId {
+    final $$AnimeIdentityEntriesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.sourceAnimeId,
+      referencedTable: $db.animeIdentityEntries,
+      getReferencedColumn: (t) => t.animeId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AnimeIdentityEntriesTableFilterComposer(
+            $db: $db,
+            $table: $db.animeIdentityEntries,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$AnimeIdentityEntriesTableFilterComposer get targetAnimeId {
+    final $$AnimeIdentityEntriesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.targetAnimeId,
+      referencedTable: $db.animeIdentityEntries,
+      getReferencedColumn: (t) => t.animeId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AnimeIdentityEntriesTableFilterComposer(
+            $db: $db,
+            $table: $db.animeIdentityEntries,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AnimeIdentityRelationshipsTableOrderingComposer
+    extends Composer<_$AppDatabase, $AnimeIdentityRelationshipsTable> {
+  $$AnimeIdentityRelationshipsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get relationshipKind => $composableBuilder(
+    column: $table.relationshipKind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get evidence => $composableBuilder(
+    column: $table.evidence,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get linkedAtUtc => $composableBuilder(
+    column: $table.linkedAtUtc,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$AnimeIdentityEntriesTableOrderingComposer get sourceAnimeId {
+    final $$AnimeIdentityEntriesTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.sourceAnimeId,
+          referencedTable: $db.animeIdentityEntries,
+          getReferencedColumn: (t) => t.animeId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AnimeIdentityEntriesTableOrderingComposer(
+                $db: $db,
+                $table: $db.animeIdentityEntries,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$AnimeIdentityEntriesTableOrderingComposer get targetAnimeId {
+    final $$AnimeIdentityEntriesTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.targetAnimeId,
+          referencedTable: $db.animeIdentityEntries,
+          getReferencedColumn: (t) => t.animeId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AnimeIdentityEntriesTableOrderingComposer(
+                $db: $db,
+                $table: $db.animeIdentityEntries,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$AnimeIdentityRelationshipsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AnimeIdentityRelationshipsTable> {
+  $$AnimeIdentityRelationshipsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get relationshipKind => $composableBuilder(
+    column: $table.relationshipKind,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get evidence =>
+      $composableBuilder(column: $table.evidence, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get linkedAtUtc => $composableBuilder(
+    column: $table.linkedAtUtc,
+    builder: (column) => column,
+  );
+
+  $$AnimeIdentityEntriesTableAnnotationComposer get sourceAnimeId {
+    final $$AnimeIdentityEntriesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.sourceAnimeId,
+          referencedTable: $db.animeIdentityEntries,
+          getReferencedColumn: (t) => t.animeId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AnimeIdentityEntriesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.animeIdentityEntries,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$AnimeIdentityEntriesTableAnnotationComposer get targetAnimeId {
+    final $$AnimeIdentityEntriesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.targetAnimeId,
+          referencedTable: $db.animeIdentityEntries,
+          getReferencedColumn: (t) => t.animeId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AnimeIdentityEntriesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.animeIdentityEntries,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$AnimeIdentityRelationshipsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AnimeIdentityRelationshipsTable,
+          AnimeIdentityRelationship,
+          $$AnimeIdentityRelationshipsTableFilterComposer,
+          $$AnimeIdentityRelationshipsTableOrderingComposer,
+          $$AnimeIdentityRelationshipsTableAnnotationComposer,
+          $$AnimeIdentityRelationshipsTableCreateCompanionBuilder,
+          $$AnimeIdentityRelationshipsTableUpdateCompanionBuilder,
+          (
+            AnimeIdentityRelationship,
+            $$AnimeIdentityRelationshipsTableReferences,
+          ),
+          AnimeIdentityRelationship,
+          PrefetchHooks Function({bool sourceAnimeId, bool targetAnimeId})
+        > {
+  $$AnimeIdentityRelationshipsTableTableManager(
+    _$AppDatabase db,
+    $AnimeIdentityRelationshipsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AnimeIdentityRelationshipsTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$AnimeIdentityRelationshipsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$AnimeIdentityRelationshipsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> sourceAnimeId = const Value.absent(),
+                Value<String> targetAnimeId = const Value.absent(),
+                Value<String> relationshipKind = const Value.absent(),
+                Value<String> evidence = const Value.absent(),
+                Value<DateTime> linkedAtUtc = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AnimeIdentityRelationshipsCompanion(
+                sourceAnimeId: sourceAnimeId,
+                targetAnimeId: targetAnimeId,
+                relationshipKind: relationshipKind,
+                evidence: evidence,
+                linkedAtUtc: linkedAtUtc,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String sourceAnimeId,
+                required String targetAnimeId,
+                required String relationshipKind,
+                required String evidence,
+                required DateTime linkedAtUtc,
+                Value<int> rowid = const Value.absent(),
+              }) => AnimeIdentityRelationshipsCompanion.insert(
+                sourceAnimeId: sourceAnimeId,
+                targetAnimeId: targetAnimeId,
+                relationshipKind: relationshipKind,
+                evidence: evidence,
+                linkedAtUtc: linkedAtUtc,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<
+                    $AnimeIdentityRelationshipsTable,
+                    AnimeIdentityRelationship
+                  >(table),
+                  $$AnimeIdentityRelationshipsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({sourceAnimeId = false, targetAnimeId = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (sourceAnimeId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.sourceAnimeId,
+                            referencedTable:
+                                $$AnimeIdentityRelationshipsTableReferences
+                                    ._sourceAnimeIdTable(db),
+                            referencedColumn:
+                                $$AnimeIdentityRelationshipsTableReferences
+                                    ._sourceAnimeIdTable(db)
+                                    .animeId,
+                          ) as T;
+                        }
+                        if (targetAnimeId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.targetAnimeId,
+                            referencedTable:
+                                $$AnimeIdentityRelationshipsTableReferences
+                                    ._targetAnimeIdTable(db),
+                            referencedColumn:
+                                $$AnimeIdentityRelationshipsTableReferences
+                                    ._targetAnimeIdTable(db)
+                                    .animeId,
+                          ) as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$AnimeIdentityRelationshipsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AnimeIdentityRelationshipsTable,
+      AnimeIdentityRelationship,
+      $$AnimeIdentityRelationshipsTableFilterComposer,
+      $$AnimeIdentityRelationshipsTableOrderingComposer,
+      $$AnimeIdentityRelationshipsTableAnnotationComposer,
+      $$AnimeIdentityRelationshipsTableCreateCompanionBuilder,
+      $$AnimeIdentityRelationshipsTableUpdateCompanionBuilder,
+      (AnimeIdentityRelationship, $$AnimeIdentityRelationshipsTableReferences),
+      AnimeIdentityRelationship,
+      PrefetchHooks Function({bool sourceAnimeId, bool targetAnimeId})
+    >;
+typedef $$LocalLibraryEntriesTableCreateCompanionBuilder =
+    LocalLibraryEntriesCompanion Function({
+      required String animeId,
+      required DateTime addedAtUtc,
+      Value<String> status,
+      Value<int> rowid,
+    });
+typedef $$LocalLibraryEntriesTableUpdateCompanionBuilder =
+    LocalLibraryEntriesCompanion Function({
+      Value<String> animeId,
+      Value<DateTime> addedAtUtc,
+      Value<String> status,
+      Value<int> rowid,
+    });
+
+final class $$LocalLibraryEntriesTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $LocalLibraryEntriesTable,
+          LocalLibraryEntry
+        > {
+  $$LocalLibraryEntriesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $AnimeIdentityEntriesTable _animeIdTable(_$AppDatabase db) =>
+      db.animeIdentityEntries.createAlias(
+        'library_entries__anime_id__anime_identity_entries__anime_id',
+      );
+
+  $$AnimeIdentityEntriesTableProcessedTableManager get animeId {
+    final $_column = $_itemColumn<String>('anime_id')!;
+
+    final manager = $$AnimeIdentityEntriesTableTableManager(
+      $_db,
+      $_db.animeIdentityEntries,
+    ).filter((f) => f.animeId.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_animeIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$LocalLibraryEntriesTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalLibraryEntriesTable> {
+  $$LocalLibraryEntriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<DateTime> get addedAtUtc => $composableBuilder(
+    column: $table.addedAtUtc,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$AnimeIdentityEntriesTableFilterComposer get animeId {
+    final $$AnimeIdentityEntriesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.animeId,
+      referencedTable: $db.animeIdentityEntries,
+      getReferencedColumn: (t) => t.animeId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AnimeIdentityEntriesTableFilterComposer(
+            $db: $db,
+            $table: $db.animeIdentityEntries,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$LocalLibraryEntriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalLibraryEntriesTable> {
+  $$LocalLibraryEntriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<DateTime> get addedAtUtc => $composableBuilder(
+    column: $table.addedAtUtc,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$AnimeIdentityEntriesTableOrderingComposer get animeId {
+    final $$AnimeIdentityEntriesTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.animeId,
+          referencedTable: $db.animeIdentityEntries,
+          getReferencedColumn: (t) => t.animeId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AnimeIdentityEntriesTableOrderingComposer(
+                $db: $db,
+                $table: $db.animeIdentityEntries,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$LocalLibraryEntriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalLibraryEntriesTable> {
+  $$LocalLibraryEntriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<DateTime> get addedAtUtc => $composableBuilder(
+    column: $table.addedAtUtc,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  $$AnimeIdentityEntriesTableAnnotationComposer get animeId {
+    final $$AnimeIdentityEntriesTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.animeId,
+          referencedTable: $db.animeIdentityEntries,
+          getReferencedColumn: (t) => t.animeId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AnimeIdentityEntriesTableAnnotationComposer(
+                $db: $db,
+                $table: $db.animeIdentityEntries,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$LocalLibraryEntriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocalLibraryEntriesTable,
+          LocalLibraryEntry,
+          $$LocalLibraryEntriesTableFilterComposer,
+          $$LocalLibraryEntriesTableOrderingComposer,
+          $$LocalLibraryEntriesTableAnnotationComposer,
+          $$LocalLibraryEntriesTableCreateCompanionBuilder,
+          $$LocalLibraryEntriesTableUpdateCompanionBuilder,
+          (LocalLibraryEntry, $$LocalLibraryEntriesTableReferences),
+          LocalLibraryEntry,
+          PrefetchHooks Function({bool animeId})
+        > {
+  $$LocalLibraryEntriesTableTableManager(
+    _$AppDatabase db,
+    $LocalLibraryEntriesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalLibraryEntriesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalLibraryEntriesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$LocalLibraryEntriesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> animeId = const Value.absent(),
+                Value<DateTime> addedAtUtc = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalLibraryEntriesCompanion(
+                animeId: animeId,
+                addedAtUtc: addedAtUtc,
+                status: status,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String animeId,
+                required DateTime addedAtUtc,
+                Value<String> status = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalLibraryEntriesCompanion.insert(
+                animeId: animeId,
+                addedAtUtc: addedAtUtc,
+                status: status,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$LocalLibraryEntriesTable, LocalLibraryEntry>(
+                    table,
+                  ),
+                  $$LocalLibraryEntriesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({animeId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (animeId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.animeId,
+                        referencedTable: $$LocalLibraryEntriesTableReferences
+                            ._animeIdTable(db),
+                        referencedColumn: $$LocalLibraryEntriesTableReferences
+                            ._animeIdTable(db)
+                            .animeId,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$LocalLibraryEntriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocalLibraryEntriesTable,
+      LocalLibraryEntry,
+      $$LocalLibraryEntriesTableFilterComposer,
+      $$LocalLibraryEntriesTableOrderingComposer,
+      $$LocalLibraryEntriesTableAnnotationComposer,
+      $$LocalLibraryEntriesTableCreateCompanionBuilder,
+      $$LocalLibraryEntriesTableUpdateCompanionBuilder,
+      (LocalLibraryEntry, $$LocalLibraryEntriesTableReferences),
+      LocalLibraryEntry,
+      PrefetchHooks Function({bool animeId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -2383,4 +5444,19 @@ class $AppDatabaseManager {
         _db,
         _db.playbackProgressEntries,
       );
+  $$AnimeIdentityEntriesTableTableManager get animeIdentityEntries =>
+      $$AnimeIdentityEntriesTableTableManager(_db, _db.animeIdentityEntries);
+  $$ExternalAnimeIdentifiersTableTableManager get externalAnimeIdentifiers =>
+      $$ExternalAnimeIdentifiersTableTableManager(
+        _db,
+        _db.externalAnimeIdentifiers,
+      );
+  $$AnimeIdentityRelationshipsTableTableManager
+  get animeIdentityRelationships =>
+      $$AnimeIdentityRelationshipsTableTableManager(
+        _db,
+        _db.animeIdentityRelationships,
+      );
+  $$LocalLibraryEntriesTableTableManager get localLibraryEntries =>
+      $$LocalLibraryEntriesTableTableManager(_db, _db.localLibraryEntries);
 }

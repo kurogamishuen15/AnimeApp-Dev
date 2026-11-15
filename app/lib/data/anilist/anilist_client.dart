@@ -7,19 +7,96 @@ import '../../core/result/result.dart';
 import '../../domain/catalog/anime_catalog_repository.dart';
 import '../../domain/catalog/anime_summary.dart';
 
+import 'anilist_detail_fields.dart';
+
 const _graphqlEndpoint = 'https://graphql.anilist.co';
 const _searchAnimeQuery = r'''
 query SearchAnime($search: String!, $page: Int!, $perPage: Int!) {
   Page(page: $page, perPage: $perPage) {
     media(search: $search, type: ANIME) {
-      id
-      title {
-        romaji
-        english
-        native
-      }
+      ...AnimeSummaryFields
     }
   }
+}
+fragment AnimeSummaryFields on Media {
+  id
+  title { romaji english native }
+  coverImage { extraLarge }
+  bannerImage
+  description(asHtml: false)
+  genres
+  status
+  format
+  season
+  seasonYear
+  startDate { year month day }
+  endDate { year month day }
+  averageScore
+  popularity
+}
+''';
+
+const _browseAnimeQuery = r'''
+query BrowseAnime($sort: [MediaSort!]!, $page: Int!, $perPage: Int!) {
+  Page(page: $page, perPage: $perPage) {
+    media(sort: $sort, type: ANIME) {
+      ...AnimeSummaryFields
+    }
+  }
+}
+fragment AnimeSummaryFields on Media {
+  id
+  title { romaji english native }
+  coverImage { extraLarge }
+  bannerImage
+  description(asHtml: false)
+  genres
+  status
+  format
+  season
+  seasonYear
+  startDate { year month day }
+  endDate { year month day }
+  averageScore
+  popularity
+}
+''';
+
+const _animeByIdQuery = r'''
+query AnimeById($id: Int!) {
+  Page(page: 1, perPage: 1) {
+    media(id: $id, type: ANIME) {
+      ...AnimeSummaryFields
+    }
+  }
+}
+fragment AnimeSummaryFields on Media {
+  id
+  title { romaji english native }
+  coverImage { extraLarge }
+  bannerImage
+  description(asHtml: false)
+  genres
+  status
+  format
+  season
+  seasonYear
+  startDate { year month day }
+  endDate { year month day }
+  averageScore
+  popularity
+  episodes
+  studios(isMain: true) { nodes { name } }
+  trailer { site id }
+  streamingEpisodes { title thumbnail site }
+  characters(perPage: 12, sort: [ROLE, RELEVANCE]) {
+    edges {
+      role
+      node { id name { full } image { medium } }
+      voiceActors(language: JAPANESE) { id name { full } languageV2 }
+    }
+  }
+  relations { edges { relationType(version: 2) node { id type title { english romaji native } } } }
 }
 ''';
 
@@ -46,13 +123,46 @@ class AniListClient implements AnimeCatalogRepository {
   }
 
   @override
+  Future<Result<AnimeSearchResult>> searchAnimeById(int id) async {
+    if (id < 1) {
+      return const Failure(
+        ValidationAppError('Anime ID must be a positive integer.'),
+      );
+    }
+    try {
+      await _rateLimiter.waitForRequestSlot();
+      final Response<Object?> response = await _dio.post<Object?>(
+        '',
+        data: {
+          'query': _animeByIdQuery,
+          'variables': {'id': id},
+        },
+        options: Options(
+          contentType: Headers.jsonContentType,
+          followRedirects: false,
+          validateStatus: (status) => status != null,
+        ),
+      );
+      _rateLimiter.updateRateLimit(response.headers);
+      return _mapResponse(response);
+    } on DioException catch (error) {
+      if (_isTimeout(error.type)) return const Failure(TimeoutAppError());
+      return const Failure(NetworkError());
+    } on Object {
+      return const Failure(
+        UnknownAppError('AniList response could not be read.'),
+      );
+    }
+  }
+
+  @override
   Future<Result<AnimeSearchResult>> searchAnime(
     String search, {
     int page = 1,
     int perPage = 20,
   }) async {
     final String normalizedSearch = search.trim();
-    if (normalizedSearch.isEmpty || page < 1 || perPage < 1 || perPage > 50) {
+    if (normalizedSearch.isEmpty || !_validPage(page, perPage)) {
       return const Failure(
         ValidationAppError('Anime search parameters are invalid.'),
       );
@@ -89,6 +199,54 @@ class AniListClient implements AnimeCatalogRepository {
       );
     }
   }
+
+  @override
+  Future<Result<AnimeSearchResult>> browseAnime({
+    AnimeBrowseSort sort = AnimeBrowseSort.popular,
+    int page = 1,
+    int perPage = 20,
+  }) async {
+    if (!_validPage(page, perPage)) {
+      return const Failure(
+        ValidationAppError('Anime browse parameters are invalid.'),
+      );
+    }
+    try {
+      await _rateLimiter.waitForRequestSlot();
+      final Response<Object?> response = await _dio.post<Object?>(
+        '',
+        data: {
+          'query': _browseAnimeQuery,
+          'variables': {
+            'sort': [
+              sort == AnimeBrowseSort.popular
+                  ? 'POPULARITY_DESC'
+                  : 'TRENDING_DESC',
+            ],
+            'page': page,
+            'perPage': perPage,
+          },
+        },
+        options: Options(
+          contentType: Headers.jsonContentType,
+          followRedirects: false,
+          validateStatus: (status) => status != null,
+        ),
+      );
+      _rateLimiter.updateRateLimit(response.headers);
+      return _mapResponse(response);
+    } on DioException catch (error) {
+      if (_isTimeout(error.type)) return const Failure(TimeoutAppError());
+      return const Failure(NetworkError());
+    } on Object {
+      return const Failure(
+        UnknownAppError('AniList response could not be read.'),
+      );
+    }
+  }
+
+  static bool _validPage(int page, int perPage) =>
+      page > 0 && perPage > 0 && perPage <= 50;
 
   static Dio _createDio(Duration timeout) => Dio(
     BaseOptions(
@@ -188,8 +346,105 @@ class AniListClient implements AnimeCatalogRepository {
       romajiTitle: _optionalString(title?['romaji']),
       englishTitle: _optionalString(title?['english']),
       nativeTitle: _optionalString(title?['native']),
+      coverImageUrl: _coverImageUrl(media?['coverImage']),
+      bannerImageUrl: _optionalUrl(media?['bannerImage']),
+      description: _strictOptionalString(media?['description']),
+      genres: _stringList(media?['genres']),
+      status: _strictOptionalString(media?['status']),
+      format: _strictOptionalString(media?['format']),
+      season: _strictOptionalString(media?['season']),
+      seasonYear: _optionalPositiveInt(media?['seasonYear']),
+      startDate: _releaseDate(media?['startDate']),
+      endDate: _releaseDate(media?['endDate']),
+      score: _optionalScore(media?['averageScore']),
+      popularity: _optionalNonNegativeInt(media?['popularity']),
+      detail: media!.containsKey('characters')
+          ? decodeAniListDetails(media)
+          : null,
     );
   }
+
+  AnimeReleaseDate? _releaseDate(Object? value) {
+    if (value == null) return null;
+    final Map<String, Object?>? date = _asStringMap(value);
+    if (date == null) throw const FormatException('AniList date is invalid.');
+    final int? year = _optionalPositiveInt(date['year']);
+    final int? month = _optionalPositiveInt(date['month']);
+    final int? day = _optionalPositiveInt(date['day']);
+    if (!_optionalIntIsValid(date['year']) ||
+        !_optionalIntIsValid(date['month']) ||
+        !_optionalIntIsValid(date['day']) ||
+        (month != null && month > 12) ||
+        (day != null && day > 31)) {
+      throw const FormatException('AniList date parts are invalid.');
+    }
+    return AnimeReleaseDate(year: year, month: month, day: day);
+  }
+
+  static List<String> _stringList(Object? value) {
+    if (value == null) return const [];
+    if (value is! List<Object?> || value.any((item) => item is! String)) {
+      throw const FormatException('AniList genres are invalid.');
+    }
+    return List<String>.unmodifiable(value.cast<String>());
+  }
+
+  static String? _optionalUrl(Object? value) {
+    if (value != null && value is! String) {
+      throw const FormatException('AniList image URL is invalid.');
+    }
+    final String? text = value as String?;
+    if (text == null) return null;
+    final Uri? uri = Uri.tryParse(text);
+    if (uri == null ||
+        (uri.scheme != 'http' && uri.scheme != 'https') ||
+        uri.host.isEmpty ||
+        uri.userInfo.isNotEmpty) {
+      throw const FormatException('AniList image URL is invalid.');
+    }
+    return text;
+  }
+
+  static String? _strictOptionalString(Object? value) {
+    if (value != null && value is! String) {
+      throw const FormatException('AniList text metadata is invalid.');
+    }
+    return _optionalString(value);
+  }
+
+  static String? _coverImageUrl(Object? value) {
+    if (value == null) return null;
+    final Map<String, Object?>? image = _asStringMap(value);
+    if (image == null) {
+      throw const FormatException('AniList cover image is invalid.');
+    }
+    return _optionalUrl(image['extraLarge']);
+  }
+
+  static double? _optionalScore(Object? value) {
+    if (value == null) return null;
+    if (value is! num || value < 0 || value > 100) {
+      throw const FormatException('AniList score is invalid.');
+    }
+    return value.toDouble();
+  }
+
+  static int? _optionalNonNegativeInt(Object? value) {
+    if (value == null) return null;
+    if (value is! int || value < 0) {
+      throw const FormatException('AniList popularity is invalid.');
+    }
+    return value;
+  }
+
+  static int? _optionalPositiveInt(Object? value) => value == null
+      ? null
+      : value is int && value > 0
+      ? value
+      : null;
+
+  static bool _optionalIntIsValid(Object? value) =>
+      value == null || value is int && value > 0;
 
   static Map<String, Object?>? _asStringMap(Object? value) {
     if (value is! Map<Object?, Object?>) {

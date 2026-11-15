@@ -1,13 +1,13 @@
 # Registro de MCP e investigación
 
-Fecha: 2026-11-07. Evidencia completa: [MCP_RESEARCH.md](MCP_RESEARCH.md). Solo se selecciona un MCP adicional remoto de lectura; no se instala npm, base vectorial ni servidor residente.
+Actualizado: 2026-11-09. Evidencia de investigación histórica: [MCP_RESEARCH.md](MCP_RESEARCH.md). Se mantienen dos MCP remotos de documentación, ambos de solo lectura: OpenAI Docs para documentación de OpenAI/Codex y Context7 para bibliotecas/versiones usadas durante el desarrollo. No se instala paquete npm, base vectorial ni servidor residente.
 
 | Capacidad | Selección | Prueba y límite |
 | --- | --- | --- |
 | OpenAI/Codex oficial | `.codex/config.toml`: `openai_docs`, HTTP oficial | initialize, tools/list, search_openai_docs reales satisfactorios; se permiten solo búsqueda y fetch. Aplicación efectiva de config se verifica aparte; clientes ya abiertos pueden necesitar recargar. |
 | GitHub público | Conector existente | Consulta pública real satisfactoria, sin escribir ni solicitar credenciales. Versión interna no expuesta. No añadir otro servidor GitHub. |
 | Web general | Herramienta de navegación de esta sesión | Búsqueda y apertura reales; en CLI depende de capacidades/proveedor. No garantizar portabilidad del conector desktop. |
-| Context7 | No habilitado | Servicio remoto respondió; se solapa con navegación. Reconsiderar para documentación de bibliotecas/versiones cuando haya una necesidad concreta. |
+| Context7 | `.codex/config.toml`: `context7`, HTTP remoto | URL oficial; allowlist solo `resolve-library-id` y `query-docs`. Útil para guías versionadas de Flutter, Drift y Dio. Sin clave/API key; uso sujeto a disponibilidad y cuota del servicio. Se activa cuando Codex recargue la configuración del proyecto. |
 | Memoria | CLI local, Markdown + SQLite | Pruebas y evaluación; no requiere MCP, red ni suscripción. Server-memory solo investigado, no instalado ni probado. |
 | node_repl personal | Preexistente, sin cambios | Fuera de configuración compartida y de esta misión tras delimitar alcance; no copiar credenciales ni configuración personal. |
 

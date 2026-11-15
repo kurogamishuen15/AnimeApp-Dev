@@ -1,6 +1,6 @@
 # AnimeApp
 
-AnimeApp es un proyecto multiplataforma para explorar, organizar y reproducir anime. El desarrollo empieza en Fedora Linux. La aplicación Flutter se está preparando; no se debe confundir el plan con funciones ya implementadas.
+AnimeApp es un proyecto multiplataforma para explorar, organizar y reproducir anime. El desarrollo empieza en Fedora Linux. La app ya contiene un recorrido local de demostración para buscar fixtures sintéticos, añadir a biblioteca, cambiar un estado provisional y guardar progreso offline; esto no equivale al catálogo completo, a providers externos ni a reproducción.
 
 ## Documentación principal del proyecto
 
@@ -13,6 +13,10 @@ AnimeApp es un proyecto multiplataforma para explorar, organizar y reproducir an
 | [TECH_DECISIONS.md](TECH_DECISIONS.md) | Decisiones aprobadas, propuestas y cuestiones abiertas. |
 | [CHANGELOG.md](CHANGELOG.md) | Cambios por subfase y versión. |
 | [TESTING.md](TESTING.md) | Comandos y alcance de las pruebas disponibles y previstas. |
+| [Auditoría de catálogo](docs/architecture/catalog-system-audit.md) | Estado comprobado de proveedores, identidad local y límites legales/técnicos. |
+| [Arquitectura de catálogo](docs/architecture/catalog-system.md) | Contratos y dependencias local-first; distingue lo implementado de lo pendiente. |
+| [Pruebas de catálogo](docs/development/catalog-testing.md) | Comandos, SQLite física y límites de pruebas de proveedores. |
+| [UI de catálogo local](app/lib/app/catalog/README.md) | Flujo de demostración, almacenamiento aislado y portabilidad. |
 | [Decisión D3 sobre LICENSE](TECH_DECISIONS.md#licencia-del-proyecto) | Archivo legal adicional, pendiente de elección del propietario. |
 
 La documentación requerida de F0.3 consta de README más los otros siete documentos Markdown de la tabla; todos están creados y enlazados. `LICENSE` es un archivo adicional previsto, sujeto a D3, y su decisión pendiente no bloquea F0.3. No se inventa un archivo legal.

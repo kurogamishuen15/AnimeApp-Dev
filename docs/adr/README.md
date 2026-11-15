@@ -48,12 +48,13 @@ Estos documentos pertenecen a la colección creada durante la primera pasada. No
 | [A11](additional/ADR-A11-sincronizacion-fakeremote.md) | Contrato local-first y FakeRemote | F1.11; complementa ADR-009 |
 | [A12](additional/ADR-A12-gestion-de-estado.md) | Análisis inicial de gestión de estado | Complementa ADR-003 |
 | [A13](additional/ADR-A13-navegacion.md) | Análisis inicial de navegación | Complementa ADR-004 |
+| [A14](additional/ADR-A14-catalog-providers-identity.md) | IDs locales, crosswalk, provider-neutral, biblioteca y demo offline sintética | Propuesta parcialmente implementada; status provisional y pendiente de aceptación, no habilita fuentes ni modifica ADR-008 |
 
 ## Condiciones de la aprobación y validaciones pendientes
 
 La aprobación es de **selección arquitectónica**, no de instalación inmediata ni de implementación fuera de fase. Se mantienen las condiciones del propietario: dominio independiente de Flutter; motor media_kit/libmpv aislado tras `PlaybackEngine`; rendimiento y compatibilidad real previos a integrar motor; persistencia local-first; validación de Supabase/Auth/RLS; backend sin videos; `mobile_scanner` solo Android; revisión de licencias/compatibilidad antes de distribuir; Flatpak como formato Linux principal propuesto.
 
-Los ADR originales están aceptados como selección; cada uno conserva sus validaciones por fase. Los 13 ADR adicionales son documentación complementaria y no se aprobaron automáticamente.
+Los ADR originales están aceptados como selección; cada uno conserva sus validaciones por fase. Los ADR adicionales A01–A14 son análisis/contratos complementarios; A14 continúa como propuesta y no se aprueba por implementación o documentación.
 
 ## Decisión arquitectónica F1.3
 
