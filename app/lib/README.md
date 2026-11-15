@@ -1,6 +1,6 @@
 # Código Flutter
 
-La aplicación sigue una separación por capas; `main.dart` y los composition roots conectan implementaciones concretas. El player es un spike opt-in y no está conectado al catálogo/progreso de producto.
+La aplicación sigue una separación por capas; `main.dart` y los composition roots conectan implementaciones concretas. La ficha conecta AnimeAV1/TioAnime con el player `SpikePlayerModule` existente. La ruta de playback está implementada, pero la reproducción de un episodio externo real sigue sin validación exitosa; el progreso todavía no está integrado con el player.
 
 | Carpeta | Responsabilidad | Guía |
 |---|---|---|

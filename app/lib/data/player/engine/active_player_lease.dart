@@ -10,9 +10,7 @@ final class ActivePlayerLease {
   static ActivePlayerLease? _active;
 
   static ActivePlayerLease acquire() {
-    if (_active != null) {
-      throw StateError('Only one media_kit Player may be active in F2.2.');
-    }
+    if (_active != null) throw ActivePlayerLeaseInUse();
     final ActivePlayerLease lease = ActivePlayerLease._();
     _active = lease;
     return lease;
@@ -25,7 +23,7 @@ final class ActivePlayerLease {
     if (active == null) return Future<void>.value();
     final Future<void> Function()? cleanup = active._cleanup;
     if (cleanup == null) {
-      throw StateError('The active Player has not requested disposal.');
+      throw ActivePlayerLeaseInUse();
     }
     return active.release(cleanup);
   }
@@ -63,4 +61,10 @@ final class ActivePlayerLease {
 
     return future;
   }
+}
+
+/// A different live engine still owns the single native-player slot.
+final class ActivePlayerLeaseInUse extends StateError {
+  ActivePlayerLeaseInUse()
+    : super('An active media_kit Player still owns the lease.');
 }

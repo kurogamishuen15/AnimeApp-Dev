@@ -7,6 +7,24 @@ Estado: vigente
 Decisión: AI-001, AI-002
 Evidencia: Herramientas, docs y resultados reproducibles
 
+### Último handoff: reconstrucción Kongroo Bloque A — 2026-11-15
+
+Esta sesión completó T00–T03 y G1 según `docs/ai-system/missions/`; se detuvo
+antes de T04/B. Rama `main`; base `33ceaef5b996c55577524c3448bbb4bee5363952`.
+El propietario autorizó commit/push al repositorio privado `AnimeApp-Dev`; la
+referencia actual se consulta con `git rev-parse HEAD`. La CI final pasó: 40 pruebas Python + 262
+opt-in omitidas; Flutter/Dart analyze, formato, checker, memoria y diff pasan.
+La auditoría independiente no encontró P0/P1/P2 abiertos. La prueba de doble
+apertura con libmpv real agotó 45 s y no se cuenta como evidencia. La integración
+local confirma lease ocupado con libmpv real, junto con las pruebas
+deterministas de contención/rollback. Falta una prueba E2E automatizada del
+ciclo nativo completo de `VideoController`. No se probó provider externo aquí,
+conteo `0/70`. No sobreescribir los cambios existentes ni el ZIP/paquete de
+misión inicialmente sin seguimiento. Detalle reproducible en
+[`STATUS`](../ai-system/missions/KONGROO-RECONSTRUCTION-STATUS.md),
+[`HANDOFF`](../ai-system/missions/KONGROO-RECONSTRUCTION-HANDOFF.md) y la
+[auditoría](../ai-system/audits/KONGROO-reconstruction-A-2026-11-15.md).
+
 ### Handoff: fidelidad visual de la cabecera de ficha — 2026-11-15
 
 El propietario ordenó comparar todas las capturas aprobadas y corregir solo la

@@ -54,6 +54,12 @@ verificado de episodios vistos. `PlaybackProgressRepository` se reutiliza por
 el service. Cerrar `CatalogModule` al terminar el propietario del runtime. Ver
 [detalle](detail/README.md).
 
+Al resolver episodios, la UI distingue resultados vacíos, capacidades no
+soportadas y fallos tipados de red, timeout, límite, respuesta inválida,
+solicitud denegada o circuito abierto mediante mensajes seguros. No muestra
+URLs de servidores, cuerpos HTTP ni excepciones del transporte. La traducción
+está probada en `app/test/catalog/playback_resolution_message_test.dart`.
+
 ## Inicio
 
 La aplicación abre [Inicio de Kongroo](../home/README.md), con browse público y estados personales vacíos hasta que haya datos locales. El shell conserva los accesos a Catálogo y Mi biblioteca. `FakeMetadataProvider` solo se usa explícitamente en pruebas y demostraciones aisladas.

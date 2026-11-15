@@ -4,6 +4,19 @@ Fuente viva del estado de fases. Actualizar al terminar o bloquear una subfase; 
 
 Estados: Pendiente, En desarrollo, Completado, Bloqueado, Requiere revisión.
 
+## Reconstrucción Kongroo — Bloque A (T00–T03), 2026-11-15
+
+| Tarea | Estado | Evidencia |
+| --- | --- | --- |
+| T00 — Inventario y estado Git | DONE | Rama `main`, base `33ceaef5b996c55577524c3448bbb4bee5363952`; grafo y defectos del alcance registrados en [auditoría A](docs/ai-system/audits/KONGROO-reconstruction-A-2026-11-15.md). |
+| T01 — Fallos de apertura | DONE | Frase reportada ausente del código y bundle examinado; resolución presenta resultados/fallos tipados de forma segura; pruebas focalizadas y CI final pasan. No se atribuyó el mensaje a una ruta no verificada. |
+| T02 — CI y límites | DONE | `SpikePlayerPage` recibe opciones tipadas; no importa `dart:io`. CI y checker de límites pasan con Flutter 3.47.9 aislado. |
+| T03 — Modularidad y lifecycle | DONE | Se conserva el único `SpikePlayerModule`/`MediaKitSpikeEngine`; rollback, contención, cierre y reintento cubiertos por pruebas. Auditoría independiente sin P0/P1/P2 abiertos; sus límites están registrados. |
+
+**G1: DONE.** `scripts/ci.sh` exit 0: 40 pruebas Python + 262 Flutter; 6 pruebas opt-in omitidas. `flutter analyze --no-pub`, Dart analyze, formato, checker e integridad de memoria sin problemas. Se usó el SDK aislado local; el SDK original de `PATH` mantiene el fallo LSP UTF-8 y no se modificó.
+
+La misión parte de `main`/`33ceaef5b996c55577524c3448bbb4bee5363952`; consulta `git rev-parse HEAD` para la revisión actual. El propietario autorizó publicar Bloque A en el repositorio privado `AnimeApp-Dev`; esto no publica una versión pública. No hubo solicitudes a proveedores ni reproducción externa en esta corrida: `0/70`. La apertura simultánea con dos Players nativos agotó un timeout de 45 s y no se considera aprobada; las pruebas de concurrencia del lease y rollback son deterministas. El lifecycle nativo completo de `VideoController` sigue sin prueba end-to-end automatizada. Consultar [estado](docs/ai-system/missions/KONGROO-RECONSTRUCTION-STATUS.md), [handoff](docs/ai-system/missions/KONGROO-RECONSTRUCTION-HANDOFF.md) y [auditoría A](docs/ai-system/audits/KONGROO-reconstruction-A-2026-11-15.md). La siguiente tarea elegible es T04/B; no se ejecutó en esta corrida.
+
 ## F0 Preparación Fedora
 
 | ID | Estado | Evidencia / resultado | Pendiente | Commit privado |
@@ -12,7 +25,7 @@ Estados: Pendiente, En desarrollo, Completado, Bloqueado, Requiere revisión.
 | F0.2 | Completado | Commit `84efbfb`; `main` subida a `AnimeApp-Dev` privado. Clone limpio; público `AnimeApp` vacío. Registro: [sesión F0.2](docs/memory/sessions/2026-11-07-f0-2-git.md). | Ninguno para el alcance F0.2. | `84efbfb`, `b18a79c` |
 | F0.3 | Completado | README y otros siete documentos Markdown completos y enlazados; enlaces relativos verificados. | D3: decisión del propietario sobre archivo `LICENSE` antes de distribuir. No bloquea F0.3. | `2af0a4c` |
 | F0.4 | Parcial | En Flutter 3.47.9 aislado con backport reproducible de #191377, `flutter analyze`, suite Flutter (250 pass/6 opt-in skip) y build Linux release pasan. Se evita el mismatch `SemanticsRole.slider` de beta sin tocar SDK global, app ni exclusiones de análisis. [Evidencia y procedimiento](TESTING.md). | F0 permanece parcial: repetir sobre una stable oficial sin backport y validar en hardware objetivo 4 GB. | `47a0e6e` |
-| F0.5 | Parcial | `scripts/ci.sh` con la toolchain 3.47.9 aislada pasa 40 pruebas IA, análisis Dart/Flutter y 250 Flutter (6 opt-in omitidas), pero CI termina exit 1 porque el import checker prohíbe `dart:io` en `app/lib/app/player/spike_player_page.dart`. [Evidencia](TESTING.md). | Revisar esa violación de capa en su propio cambio, mantener analyzer activo y volver a ejecutar CI completa. No se cambió archivo funcional ajeno en esta misión. | `2644ef7` |
+| F0.5 | Parcial | La violación `dart:io` de `spike_player_page.dart` se corrigió separando opciones del entorno hacia composición. CI vigente pasó con Flutter 3.47.9 aislado y `pub get --offline`: 40 pruebas IA y 257 Flutter (6 opt-in omitidas), analyzer y límites limpios. [Evidencia](TESTING.md) y [misión T00–T03](docs/ai-system/audits/KONGROO-reconstruction-A-2026-11-15.md). | F0 sigue parcial: el Flutter 3.47.9 que resolvía inicialmente en el PATH falló en el analysis server con una trama LSP UTF-8 incompleta. No se cambió ese SDK; para desarrollo repetir con el toolchain aislado del proyecto. | `2644ef7` |
 | F0.6 | Parcial | Bundle release y tres muestras completas. Medianas: primer frame 462 ms, RSS frame 140096 KiB, RSS tras 5 s 145284 KiB, CPU reposo 0.60% de un núcleo. Captura manual confirma ventana visible, pero el script no obtuvo latencia numérica de ventana. Informe: [medición Linux](docs/perf/measure-20261108T133341Z-15982.tsv). | Repetir en el objetivo de 4 GB cuando esté disponible; no hay reproducción ni prueba de fugas prolongada. No extrapolar del entorno de 7.5 GiB. | `0569396` |
 
 ## F1–F7
@@ -46,6 +59,7 @@ F2.1 mantiene pendiente la revisión de artefactos/licencias para distribución.
 
 ## Registro de cambios
 
+- 2026-11-15: Bloque A T00–T03 del plan Kongroo. Se corrigió el límite de imports, se añadió salida segura al fallar el inicio del player, se preserva un solo engine/controller y se actualizó documentación contradictoria. CI aislada exit 0 (40 IA + 257 Flutter; 6 opt-in omitidas). No se revalidaron proveedores externos; siguen 0/70 reproducciones acreditadas. [Auditoría](docs/ai-system/audits/KONGROO-reconstruction-A-2026-11-15.md).
 - 2026-11-14: conectados adaptadores reales AnimeAV1/TioAnime al catálogo y al player existente. 25 pruebas focalizadas y analyze limpio; live TioAnime encontró servidores pero libmpv no reprodujo, AnimeAV1 iframe 403. Ninja/JKAnime bloqueados por 403, AnimeJara sin ruta confirmada. Sin commit; flujo no aceptado como operativo. [Auditoría](docs/ai-system/audits/PROVIDER-IMPLEMENTATION-audit-2026-11-14.md).
 - 2026-11-08: F0.2 completada; commits `84efbfb` y actualización documental `b18a79c`, con push privado verificado.
 - 2026-11-08: F0.1 y F0.3 completadas; D3/Licencia sigue pendiente y no bloquea F0.3.

@@ -21,7 +21,10 @@ void main() {
 
       expect(identical(first, second), isTrue);
       expect(cleanupCalls, 1);
-      expect(() => ActivePlayerLease.acquire(), throwsStateError);
+      expect(
+        ActivePlayerLease.acquire,
+        throwsA(allOf(isA<ActivePlayerLeaseInUse>(), isA<StateError>())),
+      );
       await Future<void>.delayed(Duration.zero);
       expect(firstCompleted, isFalse);
 
@@ -37,7 +40,10 @@ void main() {
     'retry refuses to take over a live Player without a dispose request',
     () async {
       final ActivePlayerLease lease = ActivePlayerLease.acquire();
-      expect(ActivePlayerLease.retryPendingRelease, throwsStateError);
+      expect(
+        ActivePlayerLease.retryPendingRelease,
+        throwsA(isA<ActivePlayerLeaseInUse>()),
+      );
       await lease.release(() async {});
     },
   );
@@ -57,7 +63,7 @@ void main() {
         }),
         throwsStateError,
       );
-      expect(() => ActivePlayerLease.acquire(), throwsStateError);
+      expect(ActivePlayerLease.acquire, throwsA(isA<ActivePlayerLeaseInUse>()));
 
       await ActivePlayerLease.retryPendingRelease();
       expect(attempts, 2);

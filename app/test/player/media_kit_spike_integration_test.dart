@@ -10,6 +10,7 @@ import 'package:anime_app/application/player/providers/playback_provider_manager
 import 'package:anime_app/application/player/source_switching/playback_source_switch_service.dart';
 import 'package:anime_app/application/player/spike_player_coordinator.dart';
 import 'package:anime_app/data/opensubtitles/opensubtitles_client.dart';
+import 'package:anime_app/data/player/engine/active_player_lease.dart';
 import 'package:anime_app/data/player/engine/media_kit_spike_engine.dart';
 import 'package:anime_app/data/player/providers/mock/mock_playback_provider.dart';
 import 'package:anime_app/domain/catalog/anime_id.dart';
@@ -729,7 +730,7 @@ for url in sys.argv[1:]:
             externalSubtitleCatalog: catalog,
             disposeExternalSubtitleCatalog: () => rollbackDisposals++,
           ),
-          throwsStateError,
+          throwsA(isA<ActivePlayerLeaseInUse>()),
         );
         expect(rollbackDisposals, 1);
         final ExternalSubtitleService service = ExternalSubtitleService(

@@ -42,4 +42,4 @@ flutter build linux --debug --no-pub
 
 ## Portabilidad y pendientes
 
-El límite visual permanece Flutter; domain y aplicación son Dart puros. Fedora/Linux se construyó en esta integración; Android y Android TV requieren verificación en dispositivo. No hay OAuth, sync ni descarga. El producto principal no integra el reproductor: el spike F2.2 opt-in está aislado en `lib/{application,data,app}/player/` y no forma parte de su navegación ni de los flujos de reproducción. Cerrar el módulo al terminar el ciclo de vida del runtime. Revisar accesibilidad y uso con teclado al ampliar pantallas.
+El límite visual permanece Flutter; domain y aplicación son Dart puros. Fedora/Linux se construyó en esta integración; Android y Android TV requieren verificación en dispositivo. No hay OAuth, sync ni descarga. La ficha integra proveedores con `ProviderPlaybackRoute` y el `SpikePlayerModule` existente; aún no se acreditó un episodio externo reproducible y el progreso no está conectado al player. El módulo se cierra al terminar el ciclo de vida del runtime. Revisar accesibilidad y uso con teclado al ampliar pantallas.

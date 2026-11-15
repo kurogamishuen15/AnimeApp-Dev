@@ -10,18 +10,21 @@ import '../../application/player/skips/automatic_skip_controller.dart';
 import '../../application/player/skips/skip_segment_service.dart';
 import '../../application/player/source_switching/playback_source_switch_service.dart';
 import '../../application/player/spike_player_coordinator.dart';
+import '../../data/player/engine/active_player_lease.dart';
 import '../../data/player/engine/media_kit_spike_engine.dart';
 import '../../domain/player/providers/playback_source.dart';
 import '../../domain/player/skips/skip_automation_policy.dart';
 import '../../domain/player/skips/skip_segment_catalog.dart';
 import '../../domain/player/subtitles/external_subtitle_catalog.dart';
 import 'media_kit_video_surface.dart';
+import 'playback_route_session.dart';
 import 'player_video_display.dart';
 import 'player_window_controller.dart';
 import 'spike_player_page.dart';
+import 'spike_player_page_options.dart';
 
 /// Composition root for the opt-in F2.2 desktop spike.
-final class SpikePlayerModule {
+final class SpikePlayerModule implements PlaybackRouteSession {
   SpikePlayerModule._(
     this.engine,
     this.coordinator,
@@ -34,6 +37,7 @@ final class SpikePlayerModule {
     this.automaticSkipController,
     this._disposeExternalSubtitleCatalog,
     this._disposeSkipSegmentCatalog,
+    this.pageOptions,
   );
 
   final MediaKitSpikeEngine engine;
@@ -47,6 +51,7 @@ final class SpikePlayerModule {
   final AutomaticSkipController? automaticSkipController;
   final FutureOr<void> Function()? _disposeExternalSubtitleCatalog;
   final FutureOr<void> Function()? _disposeSkipSegmentCatalog;
+  final SpikePlayerPageOptions pageOptions;
   bool _catalogDisposed = false;
   bool _skipCatalogDisposed = false;
 
@@ -67,7 +72,10 @@ final class SpikePlayerModule {
         const SkipAutomationSettings(),
     EpisodeFillerEvidence? fillerEvidence,
     FutureOr<void> Function()? disposeSkipSegmentCatalog,
+    @visibleForTesting MediaKitSpikeEngine Function()? engineFactory,
   }) async {
+    // Ownership of supplied catalog disposers transfers only after argument
+    // validation; callers retain ownership when validation rejects the call.
     final Uri? fixtureUri = fixture?.absolute.uri;
     final Uri? initialUri = fixtureUri ?? initialResolvedSource?.uri;
     if (initialUri == null ||
@@ -102,15 +110,15 @@ final class SpikePlayerModule {
     var catalogDisposed = false;
     Future<void> disposeCatalog() async {
       if (catalogDisposed) return;
-      catalogDisposed = true;
       await disposeExternalSubtitleCatalog?.call();
+      catalogDisposed = true;
     }
 
     var skipCatalogDisposed = false;
     Future<void> disposeSkipCatalog() async {
       if (skipCatalogDisposed) return;
-      skipCatalogDisposed = true;
       await disposeSkipSegmentCatalog?.call();
+      skipCatalogDisposed = true;
     }
 
     MediaKitSpikeEngine? engine;
@@ -119,12 +127,40 @@ final class SpikePlayerModule {
     PlaybackSourceSwitchService? sourceSwitchService;
     SkipSegmentService? skipSegmentService;
     AutomaticSkipController? automaticSkipController;
+    Object? cleanupError;
+    StackTrace? cleanupStack;
+    Future<void> attemptCleanup(FutureOr<void> Function() cleanup) async {
+      try {
+        await cleanup();
+      } on Object catch (error, stack) {
+        cleanupError ??= error;
+        cleanupStack ??= stack;
+      }
+    }
+
     try {
       await MediaKitSpikeEngine.retryPendingDispose();
-      engine = MediaKitSpikeEngine(
-        demoSources: demoSources,
-        trustedExternalSources: trustedExternalSources,
+    } on Object catch (error, stack) {
+      await attemptCleanup(disposeCatalog);
+      await attemptCleanup(disposeSkipCatalog);
+      if (cleanupError == null && error is ActivePlayerLeaseInUse) {
+        Error.throwWithStackTrace(error, stack);
+      }
+      Error.throwWithStackTrace(
+        SpikePlayerStartupCleanupFailure(
+          startupError: error,
+          cleanupError: cleanupError ?? error,
+        ),
+        cleanupStack ?? stack,
       );
+    }
+    try {
+      engine =
+          engineFactory?.call() ??
+          MediaKitSpikeEngine(
+            demoSources: demoSources,
+            trustedExternalSources: trustedExternalSources,
+          );
       coordinator = SpikePlayerCoordinator(
         engine,
         demoSources: demoSources,
@@ -182,41 +218,54 @@ final class SpikePlayerModule {
         automaticSkipController,
         disposeCatalog,
         disposeSkipCatalog,
+        SpikePlayerPageOptions.fromEnvironment(Platform.environment),
       );
-    } catch (_) {
-      try {
-        try {
-          await sourceSwitchService?.dispose();
-        } finally {
-          try {
-            await automaticSkipController?.dispose();
-          } finally {
-            try {
-              await skipSegmentService?.dispose();
-            } finally {
-              if (coordinator != null) {
-                await coordinator.dispose();
-              } else {
-                await engine?.dispose();
-              }
-            }
-          }
-        }
-      } finally {
-        try {
-          await resolvedWindowController?.dispose();
-        } finally {
-          try {
-            await disposeCatalog();
-          } finally {
-            await disposeSkipCatalog();
-          }
+    } on Object catch (startupError, startupStack) {
+      final PlaybackSourceSwitchService? sourceSwitch = sourceSwitchService;
+      if (sourceSwitch != null) {
+        await attemptCleanup(sourceSwitch.dispose);
+      }
+      final AutomaticSkipController? automaticSkip = automaticSkipController;
+      if (automaticSkip != null) {
+        await attemptCleanup(automaticSkip.dispose);
+      }
+      final SkipSegmentService? skipService = skipSegmentService;
+      if (skipService != null) await attemptCleanup(skipService.dispose);
+      final SpikePlayerCoordinator? createdCoordinator = coordinator;
+      if (createdCoordinator != null) {
+        await attemptCleanup(createdCoordinator.dispose);
+      } else {
+        final MediaKitSpikeEngine? createdEngine = engine;
+        if (createdEngine != null) {
+          await attemptCleanup(createdEngine.dispose);
+        } else if (startupError is! ActivePlayerLeaseInUse) {
+          // The engine factory can allocate a native Player, then fail before
+          // returning it. Its synchronous rollback is registered on the
+          // lease; await that rollback before classifying startup as safe.
+          // ActivePlayerLeaseInUse from acquire() occurs before allocation, so
+          // there is no resource from this attempt to retry-dispose.
+          await attemptCleanup(MediaKitSpikeEngine.retryPendingDispose);
         }
       }
-      rethrow;
+      final PlayerWindowController? createdWindow = resolvedWindowController;
+      if (createdWindow != null) await attemptCleanup(createdWindow.dispose);
+      await attemptCleanup(disposeCatalog);
+      await attemptCleanup(disposeSkipCatalog);
+
+      if (cleanupError case final Object error) {
+        Error.throwWithStackTrace(
+          SpikePlayerStartupCleanupFailure(
+            startupError: startupError,
+            cleanupError: error,
+          ),
+          cleanupStack!,
+        );
+      }
+      Error.throwWithStackTrace(startupError, startupStack);
     }
   }
 
+  @override
   Widget build({Widget? demoControls}) => SpikePlayerPage(
     demoControls: demoControls,
     coordinator: coordinator,
@@ -230,8 +279,10 @@ final class SpikePlayerModule {
     externalSubtitleService: externalSubtitleService,
     sourceSwitchService: sourceSwitchService,
     skipSegmentService: skipSegmentService,
+    options: pageOptions,
   );
 
+  @override
   Future<void> close() async {
     try {
       await windowController.dispose();
@@ -257,16 +308,30 @@ final class SpikePlayerModule {
       } finally {
         try {
           if (!_catalogDisposed) {
-            _catalogDisposed = true;
             await _disposeExternalSubtitleCatalog?.call();
+            _catalogDisposed = true;
           }
         } finally {
           if (!_skipCatalogDisposed) {
-            _skipCatalogDisposed = true;
             await _disposeSkipSegmentCatalog?.call();
+            _skipCatalogDisposed = true;
           }
         }
       }
     }
   }
+}
+
+/// Indicates startup failed and at least one owned resource did not close.
+///
+/// The route must keep the user on the failure screen because the native
+/// player lease may still be quarantined and require an application restart.
+final class SpikePlayerStartupCleanupFailure implements Exception {
+  const SpikePlayerStartupCleanupFailure({
+    required this.startupError,
+    required this.cleanupError,
+  });
+
+  final Object startupError;
+  final Object cleanupError;
 }

@@ -21,6 +21,7 @@ import 'anime_detail_page.dart';
 import 'catalog_search_page.dart';
 import 'confirm_completed_status.dart';
 import 'local_library_page.dart';
+import 'playback_resolution_message.dart';
 
 final class CatalogHomePage extends StatefulWidget {
   const CatalogHomePage({
@@ -137,13 +138,11 @@ final class _CatalogHomePageState extends State<CatalogHomePage>
         PlaybackProviderUnsupported<List<ResolvedPlaybackStream>>() => const [],
       };
       if (streams.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Los proveedores no entregaron un stream HTTPS reproducible para este episodio.',
-            ),
-          ),
-        );
+        final String message =
+            playbackResolutionMessage(result) ??
+            'No se encontraron fuentes para este episodio.';
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(message)));
         return;
       }
       final ResolvedPlaybackStream? selected =

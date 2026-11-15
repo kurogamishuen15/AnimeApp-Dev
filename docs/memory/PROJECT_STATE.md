@@ -14,6 +14,28 @@ Preparar memoria, coordinación y ejecución segura únicamente en esta carpeta 
 
 ## Estado
 
+### Reconstrucción Kongroo T00–T03 — 2026-11-15
+
+El Bloque A y G1 están completados; esta ejecución se detuvo antes de T04/B.
+Las cuatro tareas T00–T03 tienen criterios y evidencias en [STATUS](../ai-system/missions/KONGROO-RECONSTRUCTION-STATUS.md),
+[HANDOFF](../ai-system/missions/KONGROO-RECONSTRUCTION-HANDOFF.md) y
+[auditoría](../ai-system/audits/KONGROO-reconstruction-A-2026-11-15.md).
+La CI final (`scripts/ci.sh`) pasó con Flutter 3.47.9 aislado: 40 pruebas
+Python, 262 Flutter, 6 opt-in omitidas; Flutter/Dart analyze, formato, checker,
+memoria y diff pasaron. La auditoría independiente no encontró P0/P1/P2
+abiertos. El `SpikePlayerModule` mantiene un único `MediaKitSpikeEngine`/
+`VideoController`; la ruta espera el cierre, diferencia contención de fallo de
+cleanup y permite reintentar el cierre seguro.
+
+El SDK original de PATH todavía produce el fallo LSP UTF-8; no fue modificado.
+Una prueba de doble apertura nativa agotó 45 s y no se considera aprobada; la
+contención/rollback tiene cobertura determinista, y una sesión libmpv local
+valida el lease ocupado. El lifecycle nativo completo de `VideoController`
+carece de prueba E2E automatizada. No hubo requests live ni reproducción
+externa en esta misión: `0/70`. El propietario autorizó la publicación de esta
+misión al repositorio privado `AnimeApp-Dev`; no equivale a publicar una versión
+pública. La siguiente tarea elegible es T04/B, que no se ejecutó aquí.
+
 ### Ficha: corrección de fidelidad de cabecera — 2026-11-15
 
 Se corrigió únicamente la composición de la cabecera de la ficha. En ancho

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
@@ -21,6 +20,7 @@ import 'player_video_layout.dart';
 import 'player_window_controller.dart';
 import 'skip_segment_panel.dart';
 import 'source_switch_panel.dart';
+import 'spike_player_page_options.dart';
 
 /// Central F2.3 keyboard increments, available to move to settings later.
 const int spikePlayerKeyboardSeekSeconds = 10;
@@ -38,6 +38,7 @@ final class SpikePlayerPage extends StatefulWidget {
     this.demoControls,
     this.performance,
     this.display,
+    this.options = const SpikePlayerPageOptions(),
     super.key,
   });
 
@@ -50,6 +51,7 @@ final class SpikePlayerPage extends StatefulWidget {
   final Widget? demoControls;
   final PlaybackPerformanceCollector? performance;
   final PlayerVideoDisplayController? display;
+  final SpikePlayerPageOptions options;
 
   @override
   State<SpikePlayerPage> createState() => _SpikePlayerPageState();
@@ -68,7 +70,7 @@ final class _SpikePlayerPageState extends State<SpikePlayerPage> {
   Future<void>? _stopOperation;
   PlayerFrameTimingProbe? _frameTimingProbe;
   StreamSubscription<PlaybackPerformanceSample>? _performanceLogSubscription;
-  bool _nerdVisible = Platform.environment['KONGROO_DEMO_SHOW_NERD'] == '1';
+  late bool _nerdVisible;
   late final PlayerVideoDisplayController _display =
       widget.display ?? PlayerVideoDisplayController();
   int _scrubRevision = 0;
@@ -86,23 +88,10 @@ final class _SpikePlayerPageState extends State<SpikePlayerPage> {
   @override
   void initState() {
     super.initState();
-    switch (Platform.environment['KONGROO_DEMO_FIT']) {
-      case 'cover':
-        _display.setFit(PlayerVideoFit.cover);
-      case 'fill':
-        _display.setFit(PlayerVideoFit.fill);
-      case 'original':
-        _display.setFit(PlayerVideoFit.originalSize);
-    }
-    switch (Platform.environment['KONGROO_DEMO_ASPECT']) {
-      case '16:9':
-        _display.setAspect(PlayerVideoAspect.widescreen);
-      case '4:3':
-        _display.setAspect(PlayerVideoAspect.classic);
-      case '21:9':
-        _display.setAspect(PlayerVideoAspect.cinema);
-    }
-    if (Platform.environment['KONGROO_PERF_DIAGNOSTIC'] == '1') {
+    _nerdVisible = widget.options.showNerdPanel;
+    _display.setFit(widget.options.initialFit);
+    _display.setAspect(widget.options.initialAspect);
+    if (widget.options.performanceDiagnosticsEnabled) {
       _frameTimingProbe = PlayerFrameTimingProbe();
       if (widget.performance
           case final PlaybackPerformanceCollector collector) {
@@ -453,7 +442,7 @@ final class _SpikePlayerPageState extends State<SpikePlayerPage> {
     setState(() => _nerdVisible = !_nerdVisible);
     if (_nerdVisible) {
       widget.performance?.start();
-    } else if (Platform.environment['KONGROO_PERF_DIAGNOSTIC'] != '1') {
+    } else if (!widget.options.performanceDiagnosticsEnabled) {
       unawaited(widget.performance?.stop());
     }
   }

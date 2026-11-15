@@ -484,3 +484,40 @@ flutter build linux --release --no-pub
 
 La prueba live no verifica interacción gráfica en una ventana Kongroo ni
 recorrido manual desde la ficha. Registrar esas comprobaciones por separado.
+
+## Reconstrucción Kongroo T00–T03 — 2026-11-15
+
+La evidencia, los límites del diagnóstico y el siguiente punto de trabajo están
+en [`KONGROO-RECONSTRUCTION-STATUS.md`](docs/ai-system/missions/KONGROO-RECONSTRUCTION-STATUS.md)
+y en la [auditoría del Bloque A](docs/ai-system/audits/KONGROO-reconstruction-A-2026-11-15.md).
+La CI se ejecutó con el toolchain aislado del proyecto
+`.ai-local/toolchains/flutter-3.47.9` (framework revision `c197ca5199`) y
+resolución de paquetes offline. El SDK externo/global no se modificó; la
+stable 3.47.9 que resolvía originalmente por `PATH` mantiene el fallo LSP UTF-8
+registrado arriba.
+
+Para repetir CI sin una consulta de red a pub.dev:
+
+```bash
+unset FLUTTER_ROOT
+export PATH="$PWD/.ai-local/toolchains/flutter-3.47.9/bin:$PATH"
+export KONGROO_FLUTTER_BIN="$PWD/.ai-local/toolchains/flutter-3.47.9/bin/flutter"
+flutter() {
+  if [[ "$#" -ge 2 && "$1" == "pub" && "$2" == "get" ]]; then
+    shift 2
+    "$KONGROO_FLUTTER_BIN" pub get --offline "$@"
+  else
+    "$KONGROO_FLUTTER_BIN" "$@"
+  fi
+}
+export -f flutter
+bash scripts/ci.sh
+```
+
+En esta ejecución la CI terminó correctamente (exit 0): 40 pruebas Python y 262
+Flutter pasaron; 6 pruebas opt-in se omitieron. `flutter analyze --no-pub`, Dart
+analyze, el checker de imports, el formato y la integridad de memoria pasaron.
+También se ejecutaron pruebas focalizadas de ruta/lease/rollback y una prueba de
+integración con libmpv real sobre una fixture local. Esto no valida reproducción
+de episodios externos ni la integración del ciclo nativo completo de
+`VideoController` con el compositor. Ver [auditoría del Bloque A](docs/ai-system/audits/KONGROO-reconstruction-A-2026-11-15.md).

@@ -1,6 +1,6 @@
 # Arquitectura de AnimeApp
 
-Este documento conserva la arquitectura de referencia aprobada para F1.3 y registra las implementaciones locales posteriores. No todos los módulos conceptuales están implementados: el estado real se indica por módulo y en `PROGRESS.md`. El producto abre [Inicio](app/lib/app/home/README.md) dentro del shell de catálogo local offline y un spike aislado de reproducción local F2.2; el spike no está conectado a la navegación ni al catálogo.
+Este documento conserva la arquitectura de referencia aprobada para F1.3 y registra las implementaciones locales posteriores. No todos los módulos conceptuales están implementados: el estado real se indica por módulo y en `PROGRESS.md`. El producto abre [Inicio](app/lib/app/home/README.md) dentro del shell de catálogo. La ficha está conectada a proveedores de reproducción y reutiliza el `SpikePlayerModule`/engine existentes; los streams externos encontrados hasta ahora no han demostrado reproducción exitosa. El progreso del player sigue sin integración.
 
 ## Decisión de plataforma
 
@@ -56,10 +56,10 @@ Estos nombres describen límites de responsabilidad; no ordenan crear de anteman
 
 | Grupo | Responsabilidad y límite | Estado y portabilidad |
 | --- | --- | --- |
-| `app` | Arranque, composición y selección de implementaciones. | Parcial: bootstrap Flutter y composición del catálogo local Linux-first. |
+| `app` | Arranque, composición y selección de implementaciones. | Parcial: bootstrap Flutter, catálogo AniList/SQLite y ruta de proveedores hacia el player existente Linux-first. |
 | `application` | Coordinación de casos de uso Dart puros. | Implementado para catálogo; no depende de Flutter, SQL ni HTTP. |
 | `domain` | Identidades, modelos, reglas y contratos Dart puros. | Implementado para identidad, catálogo, biblioteca, progreso, credenciales y sincronización. |
-| `data` | Adaptadores de persistencia, proveedores y servicios externos. | Implementado para Drift/SQLite y fake de metadatos; proveedores reales no están conectados al flujo local. |
+| `data` | Adaptadores de persistencia, proveedores y servicios externos. | Implementado para Drift/SQLite, AniList y adaptadores de playback AnimeAV1/TioAnime conectados desde la ficha; ningún episodio externo está acreditado como reproducible. |
 | `core` | Tipos y utilidades transversales realmente compartidos; contratos solo cuando haya necesidad concreta. | Implementado para `Result`, errores y logging; no debe convertirse en depósito de funcionalidades. |
 | `shared` | Componentes reutilizables por más de una feature, con límites y ciclo de vida propios. | Planificado; crear al aparecer reutilización demostrada. |
 | `features` | Recorridos independientes, cada uno con presentación y coordinación propias. | Planificado; lógica de negocio invoca aplicación/dominio y no importa otras UIs. |
@@ -69,9 +69,9 @@ Estos nombres describen límites de responsabilidad; no ordenan crear de anteman
 
 No se separan archivos solo por tamaño o por preferencia: un archivo propio se justifica por responsabilidad, estado/lógica, pruebas, reutilización, frecuencia de cambio o dependencias particulares. Componentes pequeños y cohesionados pueden compartir archivo. No crear carpetas con un único archivo sin motivo.
 
-## Flujos de referencia
+## Flujos de referencia e implementados
 
-Los siguientes son diagramas de diseño, no afirmaciones de capacidades implementadas.
+Los diagramas identifican expresamente qué recorrido está implementado y qué límites siguen pendientes.
 
 ### Arranque en Linux
 
@@ -89,39 +89,50 @@ sequenceDiagram
 
 Solo se inicializan servicios necesarios para el recorrido disponible. El arranque no debe cargar anticipadamente integraciones pesadas ni iniciar tareas de fondo innecesarias.
 
-### Catálogo local offline (implementado parcialmente)
+### Catálogo y biblioteca (implementación parcial con AniList público y persistencia local)
 
 ```mermaid
 sequenceDiagram
   participant UI as app/catalog UI
   participant UC as CatalogService
   participant Port as Contratos/modelos domain
-  participant Fake as FakeMetadataProvider
+  participant AniList as AniListMetadataProvider
   participant Repo as Adaptadores Drift
   participant DB as Drift / SQLite
   UI->>UC: buscar / consultar / añadir
-  UC->>Fake: búsqueda o detalles sintéticos
+  UC->>AniList: browse, búsqueda y detalles públicos
   UC->>Port: operaciones tipadas
   UC->>Repo: identidad, biblioteca y progreso
   Repo->>DB: lee/escribe datos locales
   DB-->>UI: resultado mediante aplicación/estado
 ```
 
-El recorrido usa registros sintéticos y no hace solicitudes de red. `CatalogModule` compone servicio, fake, repositorios y base; es responsable de cerrarlos. Persisten identidad local, membresía de biblioteca y progreso tipado F1.10 en Drift v6. Los estados de biblioteca y `episode:1` son demostrativos. AniList/TMDB/Kitsu no están conectados a este flujo.
+La composición normal consulta metadata pública AniList sin OAuth y conserva cachés, biblioteca y progreso local en Drift; los tests/widget usan `FakeMetadataProvider` y aíslan SQLite en temporales. `CatalogModule` es dueño del servicio y la base y debe cerrarse al terminar el runtime. Estados y muestras de progreso pueden seguir siendo demostrativos; `streamingEpisodes` son metadata, no URLs reproducibles.
 
-### Reproducción F2.2 (spike local, no flujo de producto)
+### Reproducción desde la ficha (integrada; fuente remota no validada como reproducible)
 
 ```mermaid
-flowchart LR
-  PlayerUI[SpikePlayerPage] --> Coordinator[SpikePlayerCoordinator]
-  Coordinator --> Contract[PlaybackSpikeEngine]
-  Contract --> Adapter[MediaKitSpikeEngine]
-  Adapter --> Backend[media_kit / libmpv del sistema]
-  Adapter --> Surface[VideoController único]
-  Surface --> PlayerUI
+sequenceDiagram
+  participant Detail as Ficha de anime
+  participant Catalog as PlaybackProviderManager
+  participant Site as AnimeAV1 / TioAnime
+  participant Picker as Selector de servidores
+  participant Route as ProviderPlaybackRoute
+  participant Module as SpikePlayerModule existente
+  participant Coordinator as SpikePlayerCoordinator
+  participant Engine as MediaKitSpikeEngine / libmpv
+  Detail->>Catalog: PlaybackEpisode
+  Catalog->>Site: buscar y resolver candidatos
+  Site-->>Catalog: ResolvedPlaybackStream tipados
+  Catalog-->>Picker: servidores disponibles
+  Picker->>Route: servidor elegido + allowlist exacta
+  Route->>Module: abrir un solo módulo/player
+  Module->>Coordinator: URI y acciones
+  Coordinator->>Engine: abrir / controlar / cerrar
+  Engine-->>Route: estado del medio
 ```
 
-F2.2 implementa un puerto temporal `PlaybackSpikeEngine`, no el contrato final `PlaybackEngine` de F2.5. El adaptador crea un solo `Player` y su único `VideoController`; la UI usa el mismo controller mediante `MediaKitVideoSurface`. Esta superficie configura `NoVideoControls` para que `media_kit_video` no monte su barra adaptativa; Play/Pause, Stop y seek pertenecen solo a los controles de Kongroo. El entrypoint abre únicamente un fixture local. No modifica `main.dart`, navegación, catálogo, Drift ni progreso. El seek interactivo solicita el destino final y el adaptador valida `file:` y archivo regular existente. El runner GTK destruye la ventana solo después de la respuesta Dart que confirma cleanup real. Su watchdog de respuesta de 15 s devuelve “mantener abierta” si el cleanup sigue pendiente; no cancela ninguna operación nativa. La última ejecución no pudo compilar el entrypoint por un desacople del Flutter framework/engine local; por ello la UI corregida, el gesto GTK y un frame en compositor no se revalidaron. La auditoría de artefactos/licencias también sigue pendiente; ver el [informe F2.2 v2](docs/player/F2.2-spike-report-v2.md) y la [auditoría del 2026-11-10](docs/ai-system/audits/F2.2-audit-2026-11-10.md).
+La ruta de producto está implementada en `CatalogHomePage` → `PlaybackProviderManager` → adaptadores AnimeAV1/TioAnime → selector → `ProviderPlaybackRoute`. El URI resuelto queda en allowlist exacta y se entrega al único `SpikePlayerModule`, `SpikePlayerCoordinator`, `MediaKitSpikeEngine` y `VideoController`; el manager y los adaptadores no controlan libmpv. Búsqueda y episodios reales se observaron, pero la evidencia live del 2026-11-14 no logró que libmpv avanzara en ningún stream probado; AnimeAV1 recibió 403 al resolver su iframe. Por tanto, la ruta está conectada pero no se declara reproducción externa operativa. El entrypoint `main_player_spike.dart` sigue disponible para pruebas locales del motor; la superficie desactiva controles adaptativos y el player se cierra mediante su módulo. La vida nativa completa de `VideoController` aún carece de prueba end-to-end automatizada. Ver el [README de providers](app/lib/data/player/providers/README.md), el [README del player](app/lib/app/player/README.md) y la [auditoría live](docs/ai-system/audits/PROVIDER-IMPLEMENTATION-audit-2026-11-14.md).
 
 ## Contratos y adaptadores
 

@@ -4,6 +4,7 @@ import 'package:anime_app/app/player/player_demo_panel.dart';
 import 'package:anime_app/app/player/player_video_display.dart';
 import 'package:anime_app/app/player/player_window_controller.dart';
 import 'package:anime_app/app/player/spike_player_page.dart';
+import 'package:anime_app/app/player/spike_player_page_options.dart';
 import 'package:anime_app/application/player/playback_spike_contract.dart';
 import 'package:anime_app/application/player/player_demo_session.dart';
 import 'package:anime_app/application/player/providers/playback_provider_manager.dart';
@@ -22,6 +23,34 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
 void main() {
+  test('player page options parse composition inputs with safe defaults', () {
+    expect(
+      SpikePlayerPageOptions.fromEnvironment({}),
+      const SpikePlayerPageOptions(),
+    );
+    expect(
+      SpikePlayerPageOptions.fromEnvironment({
+        'KONGROO_DEMO_SHOW_NERD': '1',
+        'KONGROO_PERF_DIAGNOSTIC': '1',
+        'KONGROO_DEMO_FIT': 'cover',
+        'KONGROO_DEMO_ASPECT': '21:9',
+      }),
+      const SpikePlayerPageOptions(
+        showNerdPanel: true,
+        performanceDiagnosticsEnabled: true,
+        initialFit: PlayerVideoFit.cover,
+        initialAspect: PlayerVideoAspect.cinema,
+      ),
+    );
+    expect(
+      SpikePlayerPageOptions.fromEnvironment({
+        'KONGROO_DEMO_FIT': 'unknown',
+        'KONGROO_DEMO_ASPECT': 'unknown',
+      }),
+      const SpikePlayerPageOptions(),
+    );
+  });
+
   for (final size in [
     const Size(1280, 720),
     const Size(1366, 768),

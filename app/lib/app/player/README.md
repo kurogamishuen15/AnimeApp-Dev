@@ -5,8 +5,9 @@
 Muestra una salida de video local y los controles temporales del spike sin
 incorporar una pantalla de producto ni modificar navegación, catálogo,
 biblioteca, Drift o progreso. `SpikePlayerModule` es el composition root: crea
-un engine y un coordinator, abre el fixture local y entrega la UI al estado y
-al `VideoController` asociado al mismo `Player`.
+un engine y un coordinator, abre un fixture local o una fuente externa HTTPS
+previamente resuelta y allowlisted, y entrega la UI al estado y al
+`VideoController` asociado al mismo `Player`.
 
 La capa app contiene widgets, composición, mensajes de estado, controles,
 foco y el handshake gráfico de cierre. No crea `Player`, no importa su API, no
@@ -17,8 +18,11 @@ de reproducción pasan por `SpikePlayerCoordinator`.
 
 | Archivo | Responsabilidad | Contrato | Dependencias |
 |---|---|---|---|
-| `spike_player_module.dart` | Composition root y cierre del grafo | fixture local → widget y `close()` | engine, coordinator |
-| `spike_player_page.dart` | Estado, control único Play/Pause, Stop, seek, tiempo y errores | snapshots → UI; acción → coordinator | Flutter UI, stream application |
+| `spike_player_module.dart` | Composition root y cierre del grafo | fixture o fuente HTTPS permitida → widget y `close()` | engine, coordinator |
+| `provider_playback_route.dart` | Abre y cierra el módulo existente desde una fuente resuelta | streams permitidos → sesión única; startup sin restos → retorno al catálogo | `PlaybackProviderManager`, `PlaybackRouteSession`, `SpikePlayerModule` |
+| `playback_route_session.dart` | Contrato pequeño para la sesión que la ruta construye y cierra | `build()` y `close()` | Flutter widgets |
+| `spike_player_page.dart` | Estado, control único Play/Pause, Stop, seek, tiempo y errores | snapshots → UI; acción → coordinator | Flutter UI, stream application, `SpikePlayerPageOptions` |
+| `spike_player_page_options.dart` | Valores de presentación iniciales, resueltos por composición | opciones tipadas → página; mapa de entorno → opciones con valores seguros | `PlayerVideoFit`, `PlayerVideoAspect`; sin acceso al proceso |
 | `audio_track_selector.dart` | Presenta las pistas conocidas del snapshot activo | selección → ID nativo, generación de fuente y revisión de contexto | domain track info, Flutter UI |
 | `player_quality_panel.dart` | Presenta resoluciones/pistas y opción automática solo para medios multipista | selección → ID, generación y revisión de contexto | `VideoTrackInfo`, `SpikePlayerCoordinator` |
 | `external_subtitle_search_panel.dart` | Búsqueda inglesa, candidatos, descarga y feedback tipado de F2.8 | texto/candidato → `ExternalSubtitleService` | application, domain, Flutter UI |
@@ -63,6 +67,30 @@ procesado por el plugin. Esa última señal no demuestra que el compositor haya
 presentado píxeles; para ello hace falta evidencia gráfica independiente.
 El badge sobre el video identifica estos estados y es un overlay diagnóstico
 intencional.
+
+El composition root `SpikePlayerModule` es el único punto que convierte las
+variables `KONGROO_DEMO_SHOW_NERD`, `KONGROO_DEMO_FIT`,
+`KONGROO_DEMO_ASPECT` y `KONGROO_PERF_DIAGNOSTIC` en
+`SpikePlayerPageOptions`. La página recibe opciones inmutables y no depende de
+`dart:io`; valores ausentes o desconocidos conservan la presentación normal.
+Los tests unitarios de opciones cubren defaults, valores admitidos y entradas
+desconocidas.
+
+Si la composición o inicialización falla, `SpikePlayerModule.open` intenta
+liberar todos los recursos que alcanzó a crear, espera también el lease nativo
+si el constructor síncrono del engine falla, y libera ambos catálogos recibidos,
+incluso si falla el preflight por un player ya activo. Si la limpieza termina,
+la ruta permite volver. Si algún dispose falla, `SpikePlayerStartupCleanupFailure`
+mantiene la ruta bloqueada y pide reiniciar antes de crear otro player; un
+`ActivePlayerLeaseInUse` por otra sesión viva se trata como error recuperable y
+permite volver. Con una sesión abierta, `PopScope` espera `close()` antes de
+navegar y conserva la ruta si el cierre falla para que se pueda reintentar.
+`app/test/player/provider_playback_route_test.dart` cubre fallo recuperable,
+limpieza incompleta y cierre controlado antes de navegar. La limpieza nativa
+parcial de libmpv sigue sin una inyección automatizada en la prueba de ruta.
+La propiedad de los catálogos se transfiere después de validar los argumentos:
+si `open` los rechaza, el caller conserva la responsabilidad de cerrar esos
+catálogos; `spike_player_module_test.dart` fija este contrato.
 
 ## Exclusividad de controles
 
