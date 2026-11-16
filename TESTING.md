@@ -17,35 +17,68 @@ Los controles integrados se describen en [scripts/README.md](scripts/README.md);
 
 ## Aplicación Flutter
 
-### Estado actual de providers S0-R (2026-11-16)
+### Estado actual de providers S0-S (2026-11-16)
 
-AnimeHeaven está registrado en `PlaybackProvidersModule`. Desde `app/`, las
-pruebas deterministas focalizadas se ejecutan así:
+El root registra `AnimesDigitalPlaybackProvider` v1.0.0 como candidato y un
+`DirectMediaHostResolver` genérico. El provider obtiene el episodio público de
+One Piece 1180, un HLS y su primer segmento (HTTP 200); al entregarlo a la
+ventana real media_kit/libmpv, se mostró error de decodificación y pantalla
+negra. No se acredita reproducción visible ni se cierra S0-S. `EpisodeSourceAdapter`
+separa matching, episodios y fuentes y no acepta fuzzy matching automático.
+Desde `app/`:
 
 ```bash
-../.ai-local/toolchains/flutter/bin/flutter test --no-pub \
-  test/data/player/providers/animeheaven \
+../.ai-local/toolchains/flutter/bin/flutter test --no-pub --concurrency=1 \
+  test/domain/episode_source_adapter_test.dart \
+  test/domain/playback_provider_contract_test.dart \
+  test/application/playback_provider_manager_test.dart \
+  test/application/playback_source_cache_test.dart \
+  test/data/player/providers/animesdigital \
+  test/data/player/providers/hosts/direct_media_host_resolver_test.dart \
   test/data/player/providers/playback_providers_module_test.dart
 ```
 
-En esta ejecución pasaron 13/13; una suite de regresión de 48/48 también cubrió
-provider, manager, contratos, ruta y módulo del player. `flutter analyze
---no-pub` pasó para el paquete completo y `dart analyze` pasó para provider,
-resolver, tests, composición y harness. La prueba live usa la ventana descrita en
-[`app/tool/README.md`](app/tool/README.md): One Piece ep. 1 publicó `cx`, `ct`
-y `ck`; los tres llegaron a libmpv y mostraron error genérico sin frame. No
-cuenta como reproducción. Las capturas están en `.ai-local/review/` con los
-nombres listados en esa guía. El propietario indicó «Autorizar manualmente en
-KDE»; una captura posterior no mostró el diálogo, pero Wayland MCP siguió con
-`Transport closed`. No se simuló entrada: el harness eligió cada mirror por
-variable de entorno. No se midió rendimiento del stream, y 0/70 títulos siguen
-reproducidos externamente.
+La prueba focalizada del provider AnimesDigital pasó 7/7, incluida la regresión
+de presupuesto total compartido entre búsquedas lentas. La última suite Flutter
+completa terminó con **300 aprobadas y 7 omitidas de forma optativa** mediante
+`../.ai-local/toolchains/flutter/bin/flutter test --no-pub --concurrency=1`.
+Dart analyze de `lib test tool` y
+`flutter analyze --no-pub` no reportaron problemas. El log completo ignorado
+por Git en `.ai-local/review/s0s-final-flutter-suite-2026-11-16.log` corresponde
+a la ejecución anterior de 297/7; la última salida de 300/7 quedó en la consola,
+no se guardó como log.
+El harness HTTP live está descrito en [`app/tool/README.md`](app/tool/README.md).
+Para ejecutar el smoke HLS técnico
+previo de libmpv:
+
+```bash
+KONGROO_TEST_PUBLIC_HLS=1 ../.ai-local/toolchains/flutter/bin/flutter test \
+  --no-pub --concurrency=1 test/player/public_hls_host_integration_test.dart
+```
+
+La fuente de prueba anterior devolvió HTTP 200 y libmpv avanzó 2038 ms, pero no
+hubo frame/ventana/audio observados ni es un episodio. El live harness actual
+comprobó en AnimesDigital el HLS 200/4998 bytes, 142 segmentos y un segmento TS
+200/67258 bytes para el episodio 1180. Las ventanas de los episodios 1180 y 1
+mostraron negro/error de decodificación. No se midió CPU/RAM del stream. La
+baseline del player previa a S0-S es
+[`S0-S-BASELINE-AND-IMPLEMENTATION.md`](docs/ai-system/missions/S0-S-BASELINE-AND-IMPLEMENTATION.md).
+
+La opción `KONGROO_LIVE_FFPROBE=1` añadió diagnóstico redacted: una corrida del
+episodio 1 observó que libavformat rechazó una referencia HLS `.webp` por
+`allowed_segment_extensions`; no demuestra que esa sea la causa del fallo de
+libmpv. Una solicitud posterior del provider terminó en `timeout`. No se amplió
+la lista permitida ni se almacenaron URLs firmadas. La herramienta analiza
+transporte y metadatos; no sustituye una ventana con cuadro visible.
+Las pruebas del resumen/redacción pasan 3/3 con el SDK aislado del proyecto;
+`dart analyze` del harness y su test no reporta issues.
 
 ### Estado histórico de providers tras limpieza S0 (2026-11-15)
 
-El runtime no registra providers externos ni resolutores concretos. La prueba
-ejecutable del composition root confirma que la lista de adapters está vacía;
-las pruebas genéricas del manager y contratos siguen disponibles. Desde `app/`:
+En el corte histórico del 2026-11-15, el runtime no registraba providers
+externos ni resolutores concretos. Esa limpieza fue reemplazada en S0-S por el
+registro del candidato AnimesDigital descrito arriba. Las pruebas que siguen
+documentan solo ese corte histórico.
 
 ```bash
 ../.ai-local/toolchains/flutter/bin/flutter test --no-pub \

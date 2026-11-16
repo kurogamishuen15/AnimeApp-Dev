@@ -45,24 +45,26 @@ activos se retiran; una cancelación tardía no revierte una respuesta ya
 completada. Las entradas en vuelo se eliminan al completar y no se cachean
 respuestas.
 
-## Circuit breaker
+## Circuit breaker y caché
 
-Cada proveedor mantiene dos breakers independientes: descubrimiento de fuentes
-y resolución de servidor. Esas son unidades de fallo distintas: una API puede
-seguir ofreciendo fuentes mientras un servidor/stream está caído, o viceversa.
-Ambos usan política 3 fallos elegibles consecutivos → 60 s abiertos, reloj
-inyectable y un único probe half-open. En resolución, la unidad es una operación
-completa por proveedor, no cada servidor individual: el manager prueba todas
-las alternativas antes de registrar un fallo agregado, y cualquier servidor
-resuelto reinicia el contador. Así, tres espejos fallidos no impiden probar el
-cuarto dentro de la misma selección. Un probe fallido vuelve a abrir 60 s; una
-cancelación libera el probe sin contar. Error de cuota sí cuenta; respuesta
-inválida, autorización, capacidad no soportada y cancelación no cuentan en
-estado cerrado.
+El descubrimiento tiene un breaker por `providerId`; la resolución comparte un
+breaker por hostname de destino entre adapters. Ambos usan 3 fallos transitorios
+consecutivos y 60 s de enfriamiento, reloj inyectable y un único probe
+half-open. Cada host se cuenta como una unidad durante una búsqueda completa:
+se prueban sus alternativas finitas y un éxito posterior sana el host; una
+fallida no bloquea otros hostnames. Cancelación y fallos no transitorios no
+consumen el umbral. `diagnostics` y `hostDiagnostics` exponen estados separados.
+El registro de breakers de host es LRU y no conserva más de 128 destinos; evita
+crecimiento por catálogos variables. Si está lleno únicamente con circuitos
+abiertos o probes activos, un host nuevo se omite con `circuitOpen` hasta que
+haya una entrada evictable. La expulsión de un circuito cerrado/ya vencido
+descarta su historial de fallos.
 
-`diagnostics` expone estado, fallos, vencimiento y último error por separado
-para descubrimiento y resolución. Un proveedor abierto no bloquea proveedores
-sanos. Circuitos abiertos no repiten llamadas al endpoint afectado.
+El registro acepta versión SemVer y TTL por provider. El `PlaybackSourceCache`
+mantiene hasta 128 entradas LRU en memoria, con TTL por defecto de 30 s,
+máximo 5 min y expiración efectiva acortada al primer candidate que expire.
+TTL cero lo desactiva. No se cachean errores ni resultados vacíos; la caché no
+es persistente.
 
 ## Dependencias, pruebas y extensión
 
@@ -75,15 +77,25 @@ declarar capacidades, prioridad y activar las contract tests compartidas.
 flutter test --no-pub test/application/playback_provider_manager_test.dart
 ```
 
-Los tests cubren orden, empty/error fallback, servidor caído, tres alternativas
-fallidas seguidas de un servidor sano, circuitos de descubrimiento/resolución,
-60 s sin sleeps, probe único, aislamiento, deduplicación pública/interna,
-cancelación por llamador y respuesta inválida.
+Los tests cubren orden, empty/error fallback, servidor caído, circuitos
+compartidos por hostname, registro host LRU acotado a 128 entradas, recuperación
+half-open ante respuestas transitorias y no transitorias, 60 s sin sleeps,
+probe único, aislamiento, deduplicación pública/interna, cancelación por
+llamador y respuesta inválida.
 
-Los adaptadores AnimeAV1, TioAnime y AnimeGG y el resolver HTTP estático fueron
-retirados en la limpieza S0 porque no produjeron video externo verificado.
-AnimeHeaven es la primera integración posterior: busca títulos y episodios y
-valida mirrors MP4, pero el smoke visual de libmpv todavía no confirmó imagen.
-Los contratos de provider/resolver, prioridades, alternativas, fallbacks y el
-paso seguro al player permanecen compartidos. Ver el [informe de limpieza](../../../../../docs/ai-system/audits/S0-provider-cleanup-audit-2026-11-15.md)
+La limpieza S0-S retiró también AnimeHeaven: los tres mirrors live fallaron en
+libmpv, y su protocolo de gate y resolver estaban acoplados al sitio. El
+composition root registra AnimesDigital únicamente como candidato; no hay
+fuente marcada `verified_video`. Las guías anteriores quedaron en el
+[archivo S0](../../../../../docs/ai-system/archive/providers/S0-2026-11-16/README.md).
+
+El dominio incluye `EpisodeSourceAdapter` con búsqueda, enumeración de
+episodios y descubrimiento de fuentes separados; su bridge usa este manager y
+rechaza matches fuzzy antes del playback. El composition root registra el
+candidato AnimesDigital y únicamente `DirectMediaHostResolver` como resolver
+concreto; no hay extractor específico de host activo. El HLS del episodio 1180
+respondió por HTTP pero mostró error de decodificación en la ventana real; no
+se declara funcional ninguna fuente de anime. Ver el
+[baseline e implementación S0-S](../../../../../docs/ai-system/missions/S0-S-BASELINE-AND-IMPLEMENTATION.md),
+el [informe de limpieza](../../../../../docs/ai-system/audits/S0-provider-cleanup-audit-2026-11-15.md)
 y el [reporte S0](../../../../../docs/ai-system/missions/S0-REAL-PLAYBACK-REPORT.md).

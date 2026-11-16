@@ -4,7 +4,7 @@ enum ProviderCircuitState { closed, open, halfOpen }
 
 enum CircuitPermit { allow, probe, deny }
 
-/// Per-provider 3 failures / 60 seconds breaker with one half-open probe.
+/// Resource-scoped 3 failures / 60 seconds breaker with one half-open probe.
 final class ProviderCircuitBreaker {
   ProviderCircuitBreaker({
     required this._clock,
@@ -59,6 +59,12 @@ final class ProviderCircuitBreaker {
       return;
     }
     if (_probeInFlight) {
+      if (!failure.kind.countsTowardCircuit) {
+        // A permanent/non-transient response (for example 403 or unsupported)
+        // ends the probe without imposing another transport cooldown.
+        releaseProbe();
+        return;
+      }
       _openForCooldown();
       return;
     }

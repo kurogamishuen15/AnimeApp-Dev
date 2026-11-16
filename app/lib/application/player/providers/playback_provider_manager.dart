@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:collection';
 
 import '../../../domain/player/providers/playback_provider_contract.dart';
 import '../../../domain/player/providers/playback_source.dart';
+import 'playback_source_cache.dart';
 import 'provider_circuit_breaker.dart';
 
 final class PlaybackProviderRegistration {
@@ -9,11 +11,15 @@ final class PlaybackProviderRegistration {
     required this.provider,
     this.priority = 0,
     this.enabled = true,
+    this.cacheTtl = const Duration(seconds: 30),
+    this.version = '1.0.0',
   });
 
   final PlaybackSourceProvider provider;
   final int priority;
   final bool enabled;
+  final Duration cacheTtl;
+  final String version;
 }
 
 final class PlaybackVideoHostResolverRegistration {
@@ -21,44 +27,58 @@ final class PlaybackVideoHostResolverRegistration {
     required this.resolver,
     this.priority = 0,
     this.enabled = true,
+    this.version = '1.0.0',
   });
 
   final PlaybackVideoHostResolver resolver;
   final int priority;
   final bool enabled;
+  final String version;
 }
 
 final class PlaybackProviderDiagnostic {
   const PlaybackProviderDiagnostic({
     required this.id,
+    required this.version,
     required this.circuit,
     required this.consecutiveFailures,
     required this.openUntil,
     required this.lastFailure,
     required this.probeInFlight,
-    required this.resolutionCircuit,
-    required this.resolutionConsecutiveFailures,
-    required this.resolutionOpenUntil,
-    required this.resolutionLastFailure,
-    required this.resolutionProbeInFlight,
   });
 
   final PlaybackProviderId id;
+  final String version;
   final ProviderCircuitState circuit;
   final int consecutiveFailures;
   final DateTime? openUntil;
   final PlaybackProviderFailureKind? lastFailure;
   final bool probeInFlight;
-  final ProviderCircuitState resolutionCircuit;
-  final int resolutionConsecutiveFailures;
-  final DateTime? resolutionOpenUntil;
-  final PlaybackProviderFailureKind? resolutionLastFailure;
-  final bool resolutionProbeInFlight;
+}
+
+final class PlaybackVideoHostDiagnostic {
+  const PlaybackVideoHostDiagnostic({
+    required this.hostId,
+    required this.circuit,
+    required this.consecutiveFailures,
+    required this.openUntil,
+    required this.lastFailure,
+    required this.probeInFlight,
+  });
+
+  final String hostId;
+  final ProviderCircuitState circuit;
+  final int consecutiveFailures;
+  final DateTime? openUntil;
+  final PlaybackProviderFailureKind? lastFailure;
+  final bool probeInFlight;
 }
 
 /// Orchestrates providers, fallback and source/server ordering; it never owns
 /// or calls the native playback engine.
 final class PlaybackProviderManager {
+  static const int maxHostCircuitBreakers = 128;
+
   PlaybackProviderManager({
     required Iterable<PlaybackProviderRegistration> providers,
     Iterable<PlaybackVideoHostResolverRegistration> videoHostResolvers =
@@ -85,13 +105,17 @@ final class PlaybackProviderManager {
       if (!ids.add(item.provider.id)) {
         throw ArgumentError('Playback provider IDs must be unique.');
       }
+      if (item.cacheTtl < Duration.zero ||
+          item.cacheTtl > const Duration(minutes: 5)) {
+        throw ArgumentError(
+          'Provider source cache TTL must be between 0 and 5 minutes.',
+        );
+      }
+      if (!_isSemanticVersion(item.version)) {
+        throw ArgumentError('Provider version must use semantic versioning.');
+      }
       _registrations[item.provider.id] = item;
       _breakers[item.provider.id] = ProviderCircuitBreaker(
-        clock: clock,
-        failureThreshold: circuitFailureThreshold,
-        cooldown: circuitCooldown,
-      );
-      _resolutionBreakers[item.provider.id] = ProviderCircuitBreaker(
         clock: clock,
         failureThreshold: circuitFailureThreshold,
         cooldown: circuitCooldown,
@@ -115,7 +139,8 @@ final class PlaybackProviderManager {
     final Set<String> resolverIds = {};
     for (final PlaybackVideoHostResolverRegistration item in orderedResolvers) {
       if (item.resolver.resolverId.trim().isEmpty ||
-          !resolverIds.add(item.resolver.resolverId)) {
+          !resolverIds.add(item.resolver.resolverId) ||
+          !_isSemanticVersion(item.version)) {
         throw ArgumentError('Video host resolver IDs must be unique.');
       }
     }
@@ -128,8 +153,9 @@ final class PlaybackProviderManager {
   final Map<PlaybackProviderId, PlaybackProviderRegistration> _registrations =
       {};
   final Map<PlaybackProviderId, ProviderCircuitBreaker> _breakers = {};
-  final Map<PlaybackProviderId, ProviderCircuitBreaker> _resolutionBreakers =
-      {};
+  final LinkedHashMap<String, ProviderCircuitBreaker> _hostBreakers =
+      LinkedHashMap<String, ProviderCircuitBreaker>();
+  final PlaybackSourceCache _sourceCache = PlaybackSourceCache(capacity: 128);
   late final List<PlaybackProviderRegistration> _ordered;
   late final List<PlaybackVideoHostResolverRegistration> _videoHostResolvers;
   final Map<String, _SharedProviderRequest> _inFlight = {};
@@ -138,9 +164,19 @@ final class PlaybackProviderManager {
   PlaybackSourceProvider? provider(PlaybackProviderId id) =>
       _registrations[id]?.provider;
 
+  List<PlaybackProviderRegistration> get providerRegistrations => _ordered;
+
+  List<PlaybackVideoHostResolverRegistration> get resolverRegistrations =>
+      _videoHostResolvers;
+
   List<PlaybackProviderDiagnostic> get diagnostics => List.unmodifiable([
     for (final PlaybackProviderRegistration item in _ordered)
       _diagnostic(item.provider.id),
+  ]);
+
+  List<PlaybackVideoHostDiagnostic> get hostDiagnostics => List.unmodifiable([
+    for (final String hostId in (_hostBreakers.keys.toList()..sort()))
+      _hostDiagnostic(hostId),
   ]);
 
   Future<PlaybackProviderResult<List<PlaybackSource>>> findSources(
@@ -239,8 +275,10 @@ final class PlaybackProviderManager {
   }) async {
     PlaybackProviderFailure? lastFailure;
     final List<ResolvedPlaybackStream> candidates = [];
+    final Map<String, _HostResolutionAttempt> hostAttempts = {};
     for (final PlaybackProviderRegistration registration in _ordered) {
       if (cancellation.isCancelled) {
+        _finishHostAttempts(hostAttempts);
         return const PlaybackProviderFailed(
           PlaybackProviderFailure(PlaybackProviderFailureKind.cancelled),
         );
@@ -251,60 +289,86 @@ final class PlaybackProviderManager {
       )) {
         continue;
       }
-      final ProviderCircuitBreaker breaker = _resolutionBreakers[provider.id]!;
-      final CircuitPermit permit = breaker.acquirePermit();
-      if (permit == CircuitPermit.deny) {
-        lastFailure = PlaybackProviderFailure(
-          PlaybackProviderFailureKind.circuitOpen,
-          retryAfter: _remainingCooldown(breaker),
-        );
-        continue;
-      }
       final PlaybackProviderResult<List<PlaybackSource>> sourceResult =
           await _findOnlyProviderSources(provider, episode, cancellation);
       if (sourceResult case PlaybackProviderFailed<List<PlaybackSource>>(
         :final failure,
       )) {
-        if (permit == CircuitPermit.probe) breaker.releaseProbe();
         lastFailure = failure;
         continue;
       }
       if (sourceResult is PlaybackProviderEmpty<List<PlaybackSource>> ||
           sourceResult is PlaybackProviderUnsupported<List<PlaybackSource>>) {
-        if (permit == CircuitPermit.probe) breaker.releaseProbe();
         continue;
       }
       if (sourceResult case PlaybackProviderSuccess<List<PlaybackSource>>(
         :final value,
       )) {
-        if (value.isEmpty) {
-          if (permit == CircuitPermit.probe) breaker.releaseProbe();
-          continue;
-        }
-        final int candidateCountBeforeProvider = candidates.length;
-        PlaybackProviderFailure? providerResolutionFailure;
         final List<PlaybackSource> sources = [...value]..sort(_compareSource);
         for (final PlaybackSource source in sources) {
           final List<PlaybackServer> servers = [...source.servers]
             ..sort(_compareServer);
           for (final PlaybackServer server in servers) {
             if (cancellation.isCancelled) {
-              if (permit == CircuitPermit.probe) breaker.releaseProbe();
+              _finishHostAttempts(hostAttempts);
               return const PlaybackProviderFailed(
                 PlaybackProviderFailure(PlaybackProviderFailureKind.cancelled),
               );
             }
-            try {
-              final PlaybackVideoHostResolver? resolver = _resolverFor(server);
-              if (resolver == null) {
-                final PlaybackProviderFailure failure =
-                    const PlaybackProviderFailure(
-                      PlaybackProviderFailureKind.unsupported,
-                    );
-                providerResolutionFailure ??= failure;
-                lastFailure ??= failure;
+            if (server.expiresAt case final DateTime expiry
+                when !expiry.isAfter(_clock())) {
+              const PlaybackProviderFailure failure = PlaybackProviderFailure(
+                PlaybackProviderFailureKind.expired,
+              );
+              lastFailure = failure;
+              continue;
+            }
+            if (server.kind != PlaybackCandidateKind.media) {
+              final PlaybackProviderFailure failure = PlaybackProviderFailure(
+                server.kind == PlaybackCandidateKind.embed
+                    ? PlaybackProviderFailureKind.unsupportedEmbed
+                    : PlaybackProviderFailureKind.unsupported,
+              );
+              lastFailure = failure;
+              continue;
+            }
+            final PlaybackVideoHostResolver? resolver = _resolverFor(server);
+            if (resolver == null) {
+              lastFailure ??= const PlaybackProviderFailure(
+                PlaybackProviderFailureKind.unsupported,
+              );
+              continue;
+            }
+            final String hostKey = server.hostKey;
+            final ProviderCircuitBreaker? hostBreaker = _hostBreaker(hostKey);
+            if (hostBreaker == null) {
+              lastFailure = const PlaybackProviderFailure(
+                PlaybackProviderFailureKind.circuitOpen,
+              );
+              continue;
+            }
+            final ProviderCircuitBreaker breaker = hostBreaker;
+            _HostResolutionAttempt? attempt = hostAttempts[hostKey];
+            if (attempt == null) {
+              final CircuitPermit permit = breaker.acquirePermit();
+              if (permit == CircuitPermit.deny) {
+                lastFailure = PlaybackProviderFailure(
+                  PlaybackProviderFailureKind.circuitOpen,
+                  retryAfter: _remainingCooldown(breaker),
+                );
                 continue;
               }
+              attempt = _HostResolutionAttempt(breaker, permit);
+              hostAttempts[hostKey] = attempt;
+            }
+            if (attempt.permit == CircuitPermit.deny) {
+              lastFailure = PlaybackProviderFailure(
+                PlaybackProviderFailureKind.circuitOpen,
+                retryAfter: _remainingCooldown(breaker),
+              );
+              continue;
+            }
+            try {
               final PlaybackProviderResult<ResolvedPlaybackStream> result =
                   await resolver.resolve(
                     source,
@@ -315,6 +379,15 @@ final class PlaybackProviderManager {
                 case PlaybackProviderSuccess<ResolvedPlaybackStream>(
                   :final value,
                 ):
+                  if (value.isExpiredAt(_clock())) {
+                    const PlaybackProviderFailure failure =
+                        PlaybackProviderFailure(
+                          PlaybackProviderFailureKind.expired,
+                        );
+                    attempt.lastFailure = failure;
+                    lastFailure = failure;
+                    continue;
+                  }
                   if (value.providerId != provider.id ||
                       value.sourceId != source.id ||
                       value.serverId != server.id) {
@@ -322,13 +395,14 @@ final class PlaybackProviderManager {
                         const PlaybackProviderFailure(
                           PlaybackProviderFailureKind.invalidResponse,
                         );
-                    providerResolutionFailure = failure;
+                    attempt.lastFailure = failure;
                     lastFailure = failure;
                     continue;
                   }
-                  breaker.recordSuccess();
+                  attempt.succeeded = true;
                   candidates.add(value);
                   if (stopAfterFirst) {
+                    _finishHostAttempts(hostAttempts);
                     return PlaybackProviderSuccess(
                       List.unmodifiable(candidates),
                     );
@@ -336,21 +410,19 @@ final class PlaybackProviderManager {
                 case PlaybackProviderEmpty<ResolvedPlaybackStream>():
                   break;
                 case PlaybackProviderUnsupported<ResolvedPlaybackStream>():
-                  final PlaybackProviderFailure failure =
-                      const PlaybackProviderFailure(
-                        PlaybackProviderFailureKind.unsupported,
-                      );
-                  providerResolutionFailure = failure;
-                  lastFailure = failure;
+                  attempt.lastFailure ??= const PlaybackProviderFailure(
+                    PlaybackProviderFailureKind.unsupported,
+                  );
+                  lastFailure ??= attempt.lastFailure;
                 case PlaybackProviderFailed<ResolvedPlaybackStream>(
                   :final failure,
                 ):
-                  providerResolutionFailure = failure;
+                  attempt.lastFailure = failure;
                   lastFailure = failure;
               }
             } catch (_) {
               if (cancellation.isCancelled) {
-                if (permit == CircuitPermit.probe) breaker.releaseProbe();
+                _finishHostAttempts(hostAttempts);
                 return const PlaybackProviderFailed(
                   PlaybackProviderFailure(
                     PlaybackProviderFailureKind.cancelled,
@@ -360,23 +432,14 @@ final class PlaybackProviderManager {
               final PlaybackProviderFailure failure = PlaybackProviderFailure(
                 PlaybackProviderFailureKind.unavailable,
               );
-              providerResolutionFailure = failure;
+              attempt.lastFailure = failure;
               lastFailure = failure;
             }
           }
         }
-        if (candidates.length == candidateCountBeforeProvider) {
-          if (providerResolutionFailure
-              case final PlaybackProviderFailure failure) {
-            _recordFailure(breaker, permit, failure);
-          } else if (permit == CircuitPermit.probe) {
-            // Empty/unsupported server results prove neither a healthy stream
-            // nor a transient outage. Let a later request probe again.
-            breaker.releaseProbe();
-          }
-        }
       }
     }
+    _finishHostAttempts(hostAttempts);
     if (candidates.isNotEmpty) {
       return PlaybackProviderSuccess(List.unmodifiable(candidates));
     }
@@ -385,12 +448,65 @@ final class PlaybackProviderManager {
         : PlaybackProviderFailed(lastFailure);
   }
 
-  PlaybackVideoHostResolver? _resolverFor(PlaybackServer server) {
+  PlaybackVideoHostResolver? _resolverFor(SourceCandidate server) {
     for (final PlaybackVideoHostResolverRegistration registration
         in _videoHostResolvers) {
       if (registration.resolver.supports(server)) return registration.resolver;
     }
     return null;
+  }
+
+  ProviderCircuitBreaker? _hostBreaker(String hostId) {
+    final ProviderCircuitBreaker? existing = _hostBreakers.remove(hostId);
+    if (existing != null) {
+      _hostBreakers[hostId] = existing;
+      return existing;
+    }
+
+    if (_hostBreakers.length >= maxHostCircuitBreakers) {
+      String? evictable;
+      for (final MapEntry<String, ProviderCircuitBreaker> entry
+          in _hostBreakers.entries) {
+        if (!entry.value.probeInFlight &&
+            entry.value.state != ProviderCircuitState.open) {
+          evictable = entry.key;
+          break;
+        }
+      }
+      if (evictable == null) return null;
+      _hostBreakers.remove(evictable);
+    }
+
+    final ProviderCircuitBreaker created = ProviderCircuitBreaker(
+      clock: _clock,
+      failureThreshold: circuitFailureThreshold,
+      cooldown: circuitCooldown,
+    );
+    _hostBreakers[hostId] = created;
+    return created;
+  }
+
+  void _finishHostAttempts(Map<String, _HostResolutionAttempt> attempts) {
+    for (final _HostResolutionAttempt attempt in attempts.values) {
+      if (attempt.succeeded) {
+        attempt.breaker.recordSuccess();
+        continue;
+      }
+      final PlaybackProviderFailure? failure = attempt.lastFailure;
+      if (failure != null) {
+        if (failure.kind.countsTowardCircuit) {
+          _recordFailure(attempt.breaker, attempt.permit, failure);
+        } else {
+          if (attempt.permit == CircuitPermit.probe) {
+            attempt.breaker.releaseProbe();
+          }
+          attempt.breaker.recordFailure(failure);
+        }
+      } else if (attempt.permit == CircuitPermit.probe) {
+        // Empty outcomes do not establish host health.
+        attempt.breaker.releaseProbe();
+      }
+    }
   }
 
   Future<PlaybackProviderResult<List<PlaybackSource>>> _findOnlyProviderSources(
@@ -405,15 +521,44 @@ final class PlaybackProviderManager {
     PlaybackSourceProvider provider,
     PlaybackEpisode episode,
     PlaybackCancellationToken cancellation,
-  ) {
+  ) async {
     final String key = '${provider.id.value}:${episode.requestKey}';
-    return _joinShared<List<PlaybackSource>>(
-      _providerRequests,
-      key,
-      cancellation,
-      (PlaybackCancellationToken sharedCancellation) =>
-          _executeProviderSources(provider, episode, sharedCancellation),
-    );
+    final List<PlaybackSource>? cached = _sourceCache.read(key, _clock());
+    if (cached != null) {
+      return PlaybackProviderSuccess<List<PlaybackSource>>(cached);
+    }
+    final PlaybackProviderResult<List<PlaybackSource>> result =
+        await _joinShared<List<PlaybackSource>>(
+          _providerRequests,
+          key,
+          cancellation,
+          (PlaybackCancellationToken sharedCancellation) =>
+              _executeProviderSources(provider, episode, sharedCancellation),
+        );
+    if (result case PlaybackProviderSuccess<List<PlaybackSource>>(:final value)
+        when value.isNotEmpty) {
+      final PlaybackProviderRegistration? registration =
+          _registrations[provider.id];
+      final DateTime now = _clock();
+      DateTime? validUntil;
+      for (final PlaybackSource source in value) {
+        for (final SourceCandidate candidate in source.servers) {
+          final DateTime? expiry = candidate.expiresAt;
+          if (expiry != null &&
+              (validUntil == null || expiry.isBefore(validUntil))) {
+            validUntil = expiry;
+          }
+        }
+      }
+      _sourceCache.write(
+        key,
+        value,
+        now: now,
+        ttl: registration?.cacheTtl ?? Duration.zero,
+        validUntil: validUntil,
+      );
+    }
+    return result;
   }
 
   Future<PlaybackProviderResult<List<PlaybackSource>>> _executeProviderSources(
@@ -535,17 +680,24 @@ final class PlaybackProviderManager {
     final ProviderCircuitBreaker breaker = _breakers[id]!;
     return PlaybackProviderDiagnostic(
       id: id,
+      version: _registrations[id]!.version,
       circuit: breaker.state,
       consecutiveFailures: breaker.consecutiveFailures,
       openUntil: breaker.openUntil,
       lastFailure: breaker.lastFailure,
       probeInFlight: breaker.probeInFlight,
-      resolutionCircuit: _resolutionBreakers[id]!.state,
-      resolutionConsecutiveFailures:
-          _resolutionBreakers[id]!.consecutiveFailures,
-      resolutionOpenUntil: _resolutionBreakers[id]!.openUntil,
-      resolutionLastFailure: _resolutionBreakers[id]!.lastFailure,
-      resolutionProbeInFlight: _resolutionBreakers[id]!.probeInFlight,
+    );
+  }
+
+  PlaybackVideoHostDiagnostic _hostDiagnostic(String hostId) {
+    final ProviderCircuitBreaker breaker = _hostBreakers[hostId]!;
+    return PlaybackVideoHostDiagnostic(
+      hostId: hostId,
+      circuit: breaker.state,
+      consecutiveFailures: breaker.consecutiveFailures,
+      openUntil: breaker.openUntil,
+      lastFailure: breaker.lastFailure,
+      probeInFlight: breaker.probeInFlight,
     );
   }
 
@@ -611,6 +763,25 @@ final class PlaybackProviderManager {
       return result as PlaybackProviderResult<T>;
     });
   }
+
+  static final RegExp _semanticVersionPattern = RegExp(
+    r'^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)'
+    r'(?:-((?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)'
+    r'(?:\.(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*))*))?'
+    r'(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$',
+  );
+
+  static bool _isSemanticVersion(String version) =>
+      _semanticVersionPattern.hasMatch(version.trim());
+}
+
+final class _HostResolutionAttempt {
+  _HostResolutionAttempt(this.breaker, this.permit);
+
+  final ProviderCircuitBreaker breaker;
+  final CircuitPermit permit;
+  bool succeeded = false;
+  PlaybackProviderFailure? lastFailure;
 }
 
 final class _SharedProviderRequest {

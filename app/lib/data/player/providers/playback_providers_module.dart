@@ -1,61 +1,51 @@
-import 'package:dio/dio.dart';
-
 import '../../../application/player/providers/playback_provider_manager.dart';
-import 'animeheaven/animeheaven_mp4_resolver.dart';
-import 'animeheaven/animeheaven_playback_provider.dart';
+import 'animesdigital/animesdigital_playback_provider.dart';
+import 'hosts/direct_media_host_resolver.dart';
 
 /// Composition root for playback discovery and host resolution.
 ///
-/// Owns the concrete provider transport and registers public episode discovery
-/// separately from host validation. The app continues using its existing
-/// manager, source-switch service, and media_kit player.
+/// Registers AnimesDigital as a candidate, not a verified source. The only
+/// built-in resolver wraps explicit direct-media candidates; it does not
+/// validate network availability or own the playback engine.
 final class PlaybackProvidersModule {
-  PlaybackProvidersModule._(this.manager, this._client);
+  PlaybackProvidersModule._(this.manager, this._ownedAdapters);
 
-  factory PlaybackProvidersModule.open({
-    DateTime Function()? clock,
-    Dio? httpClient,
-  }) {
-    final Dio client =
-        httpClient ??
-        Dio(
-          BaseOptions(
-            connectTimeout: const Duration(seconds: 8),
-            sendTimeout: const Duration(seconds: 8),
-            receiveTimeout: const Duration(seconds: 12),
-            maxRedirects: 0,
-          ),
-        );
-    final AnimeHeavenPlaybackProvider animeHeaven = AnimeHeavenPlaybackProvider(
-      client: client,
-    );
-    final AnimeHeavenMp4Resolver animeHeavenMp4Resolver =
-        AnimeHeavenMp4Resolver(client: client);
+  factory PlaybackProvidersModule.open({DateTime Function()? clock}) {
+    final AnimesDigitalPlaybackProvider animesDigital =
+        AnimesDigitalPlaybackProvider();
     return PlaybackProvidersModule._(
       PlaybackProviderManager(
         providers: <PlaybackProviderRegistration>[
-          PlaybackProviderRegistration(provider: animeHeaven, priority: 50),
+          PlaybackProviderRegistration(
+            provider: animesDigital,
+            priority: 100,
+            cacheTtl: Duration.zero,
+            version: animesDigital.adapterVersion,
+          ),
         ],
         videoHostResolvers: <PlaybackVideoHostResolverRegistration>[
           PlaybackVideoHostResolverRegistration(
-            resolver: animeHeavenMp4Resolver,
-            priority: 50,
+            resolver: DirectMediaHostResolver(),
+            version: '1.0.0',
           ),
         ],
         clock: clock ?? DateTime.now,
       ),
-      client,
+      <AnimesDigitalPlaybackProvider>[animesDigital],
     );
   }
 
   final PlaybackProviderManager manager;
-  final Dio _client;
+  final List<AnimesDigitalPlaybackProvider> _ownedAdapters;
   bool _closed = false;
 
-  /// Releases the owned HTTP transport. The manager does not own the player.
+  /// Idempotent lifecycle hook retained for the application composition root.
+  /// Registered adapters own and close their own injected transports.
   void close() {
     if (_closed) return;
     _closed = true;
-    _client.close(force: true);
+    for (final AnimesDigitalPlaybackProvider adapter in _ownedAdapters) {
+      adapter.close();
+    }
   }
 }

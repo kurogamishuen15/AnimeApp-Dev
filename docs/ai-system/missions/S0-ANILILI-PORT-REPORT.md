@@ -51,7 +51,7 @@ Integración y documentación actualizada:
 - `app/lib/data/player/providers/playback_providers_module.dart`
 - `app/test/data/player/providers/playback_providers_module_test.dart`
 - `app/lib/data/player/providers/README.md`
-- `app/lib/data/player/providers/video_hosts/README.md`
+- `docs/ai-system/archive/providers/S0-2026-11-16/video_hosts/README.md` (guía archivada durante S0-S)
 - `docs/ai-system/missions/KONGROO-RECONSTRUCTION-PLAN.md`
 - `docs/ai-system/missions/KONGROO-RECONSTRUCTION-STATUS.md`
 - `docs/ai-system/missions/KONGROO-RECONSTRUCTION-HANDOFF.md`

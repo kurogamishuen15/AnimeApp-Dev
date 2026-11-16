@@ -1,71 +1,64 @@
-# Dominio de proveedores de reproducción F2.5
+# Contratos de fuentes y reproducción
 
-## Propósito
+## Responsabilidad
 
-Define identidad, modelos inmutables y contratos independientes de cualquier
-API externa o motor. Un **proveedor** entrega fuentes; una **fuente** identifica
-una alternativa para un episodio; un **servidor** es un endpoint elegido dentro
-de una fuente; el **motor** reproduce el URI resuelto y no conoce proveedores.
-
-Los contratos permanecen neutrales. AnimeHeaven implementa los puertos en data
-y su resolver se registra separado del provider; la existencia de esa
-integración no confirma playback externo. El estado y los componentes
-retirados están documentados en la
-[auditoría de limpieza](../../../../../docs/ai-system/audits/S0-provider-cleanup-audit-2026-11-15.md).
+Este módulo define modelos Dart puros que conectan la identidad de AniList o
+del catálogo local con adapters de episodios, candidates de host y medios
+normalizados. No importa Flutter, Dio, `dart:io`, WebView ni libmpv. El
+reproductor recibe `PlayableSource` a través de los contratos de aplicación
+existentes.
 
 ## Archivos y contratos
 
-| Archivo | Responsabilidad | Contrato principal |
+| Archivo | Tipos principales | Responsabilidad |
 |---|---|---|
-| `playback_source.dart` | `PlaybackEpisode`, ID de proveedor, fuente, servidor y stream resuelto | modelos normalizados e inmutables |
-| `playback_provider_contract.dart` | capacidades, resultados y fallos tipados, cancelación cooperativa y puerto | `PlaybackSourceProvider` |
-| `README.md` | límites, dependencias, pruebas y extensión | documentación de módulo |
+| `anime_identity.dart` | `AnimeIdentity` | ID local, crosswalks externos y aliases; identidad sin login. |
+| `episode_source.dart` | `SourceAnimeMatch`, `EpisodeRef`, `AnimeMatchEvidence` | Mapping explícito y episodio en el namespace de un provider. |
+| `playback_source.dart` | `PlaybackEpisode`, `PlaybackSource`, `SourceCandidate`, `PlayableSource` | Request de reproducción, candidato con host/modalidad/expiración y medio resuelto. `PlaybackServer` y `ResolvedPlaybackStream` son aliases temporales para migrar callers existentes. |
+| `playback_provider_contract.dart` | `EpisodeSourceAdapter`, `PlaybackVideoHostResolver`, `PlaybackProviderResult`, fallos y cancelación | Puertos separados de búsqueda/episodios/fuentes y resolución del host. El adapter ofrece un bridge de tres fases al único `PlaybackProviderManager`. |
 
-`PlaybackSourceProvider.findSources` recibe identidad local, un ID externo
-opcional (AniList para el flujo actual), aliases de título acotados y número
-de episodio, nunca DTOs JSON. Los títulos y el ID externo forman parte de
-`requestKey` para no fusionar episodios de títulos distintos. Devuelve
-`Success`, `Empty`, `Unsupported` o
-`Failed`; la resolución del servidor devuelve el URI utilizable. El proveedor
-no puede acceder al `Player` ni importar `media_kit`. El adaptador de datos es
-responsable de traducir esquemas remotos a estos tipos y de validar respuesta.
+`PlaybackEpisode` conserva todos los IDs externos con su namespace. Su clave de
+request ordena los crosswalks para que su orden de entrada no cree cachés
+duplicadas. `EpisodeSourceAdapter` define `searchAnime(AnimeIdentity)`,
+`listEpisodes(SourceAnimeMatch)` y `findEpisodeSources(EpisodeRef)`. Su bridge
+heredado implementa el contrato agregado que hoy consume el manager, sin crear
+otro registry. El match solo sigue automáticamente si comparte un ID externo
+del namespace correcto o un título exacto normalizado; `fuzzy` y `unknown`
+quedan rechazados para reproducción.
 
-`PlaybackSource` conserva provider ID y episodio solicitado para que la capa
-application pueda rechazar identidad ajena, fuente duplicada o respuesta para
-otro episodio. Los servidores y streams solo admiten `http`, `https` o `file`;
-esta validación sintáctica no prueba disponibilidad ni confianza del contenido.
+Cada `SourceCandidate` mantiene `hostId`, modalidad (`media`, `embed`,
+`redirect`), idioma declarado/`unknown`, calidad, procedencia y expiración.
+Solo candidatos `media` no vencidos se ofrecen a un resolver. Un
+`PlayableSource` conserva formato (`mp4`, `hls`, `dash` o `unknown`), cabeceras
+públicas, procedencia y expiración. Nunca registra URLs temporales en sus
+representaciones de diagnóstico.
 
-## Errores y cancelación
+El resultado tipado distingue fallos de red, timeout, ausencia de ID/episodio/
+fuentes, denegación, embed no compatible, vencimiento, manifiesto inválido,
+decoder, bloqueo y cancelación. Errores de decodificación se originan en la
+capa de player y no se atribuyen al provider automáticamente.
 
-`PlaybackProviderFailureKind` distingue indisponibilidad/red, timeout, límite
-de cuota, respuesta inválida, autorización, capacidad no soportada, cancelación
-y circuito abierto. Solo `unavailable`, `network`, `timeout` y `rateLimited`
-cuentan como fallo elegible ordinario del breaker. En half-open, un fallo de
-probe (incluida respuesta inválida/no soportada) vuelve a abrir el circuito;
-cancelación libera el probe sin contar y una respuesta vacía de descubrimiento
-es un resultado correcto sin fuentes.
+## Seguridad y plataformas
 
-`PlaybackCancellationToken` es una señal cooperativa y permite registrar
-callbacks de cancelación para transportar la señal a sockets Dio. El adaptador
-debe comprobarla antes y después de operaciones suspendidas; no cancela por la
-fuerza un Future o recurso que no exponga cancelación. Los callbacks se
-desregistran al terminar cada request.
+`PlaybackRequestHeaders` solo admite un `Referer` HTTPS de origen público,
+validado; no transporta cookies, Authorization ni cabeceras arbitrarias. Los
+adapters no deben inventar tokens ni eludir autenticación, DRM, CAPTCHA o WAF.
+El dominio no requiere SDK por sistema operativo. Los adapters concretos de red,
+WebView o storage se inyectan en `data/`; Linux, Android y Windows aún no tienen
+validación completa en este módulo.
 
-## Dependencias y extensión
+## Pruebas y dependencias
 
-El dominio solo depende de `AnimeId` y Dart. Una integración nueva implementa
-`PlaybackSourceProvider` en `data/player/providers/<nombre>/`, convierte sus
-DTOs a estos modelos y debe reutilizar la batería de contract tests. Añadir una
-capacidad requiere documentar su semántica y probar el comportamiento del
-manager ante proveedores que no la declaran.
-
-## Pruebas
-
-Desde `app/`:
+No añade paquetes. Pruebas offline desde `app/`:
 
 ```bash
-flutter test --no-pub test/domain/playback_provider_contract_test.dart
+../.ai-local/toolchains/flutter/bin/flutter test --no-pub \
+  test/domain/episode_source_adapter_test.dart \
+  test/domain/playback_provider_contract_test.dart
 ```
 
-La suite prueba identidad/capacidades, fuentes y servidores válidos, resultado
-vacío, error, timeout tipado, respuesta malformada y cancelación.
+Los casos prueban las fases en orden, cruce exacto, rechazo fuzzy, cancelación,
+modelos normalizados y contrato de cabeceras. No prueban un servidor externo ni
+la reproducción en libmpv. El estado de providers está en
+[`data/player/providers`](../../../data/player/providers/README.md) y la auditoría
+en [`S0-S`](../../../../../docs/ai-system/missions/S0-S-BASELINE-AND-IMPLEMENTATION.md).

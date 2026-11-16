@@ -1,8 +1,90 @@
 # KONGROO — HANDOFF DE RECONSTRUCCIÓN
 
+## Reanudación activa — S0-S — 2026-11-16
+
+- Misión vigente: ejecutar
+  `.codex-attachments/2318f637-294a-4361-8820-1243b3b92404/7db95c84-8eed-43ba-b014-55af167cd93d/KONGROO_S0-S_ARQUITECTURA_FUENTES_HOSTS_2026-11-16.md`.
+- Git al inicio: `main`, `19470ed6bb19583cc0fc00938c08ab6c2f855300`. Hay cambios
+  rastreados y nuevos archivos, sin staging; preservar `.codex-attachments/` y
+  `KONGROO_RECONSTRUCCION_CODEX_T00-T24.zip`.
+- El reproductor existente pasó 120/3 skip tests en `test/player` y 14/2 skip
+  en la integración libmpv. La captura de `.ai-local/review/s0s-player-baseline-2026-11-16/spike-window.png`
+  muestra un cuadro sintético pausado. No se validaron audio/movimiento ni
+  cierre gráfico limpio; Wayland MCP está desconectado y `mpv` CLI no está
+  instalado. No se modificó el player.
+- Medición stress nativa: 245–247 MB inicial, 389–392 MB pico y 371–372 MB
+  posterior a dispose; no concluir fuga. La máquina tiene 7.5 GiB, no el equipo
+  de 4 GB. Véanse entorno, comandos y límites en
+  [S0-S baseline](S0-S-BASELINE-AND-IMPLEMENTATION.md).
+- La limpieza retiró AnimeHeaven y archivó los READMEs/evidencias anteriores.
+  AnimeAV1/TioAnime/AnimeGG/Miruro/AnimeOnline Ninja/video_hosts tampoco tienen
+  adapters Dart activos. Mantener manager, contratos, source switch, engine y
+  regresiones del player. El root registra AnimesDigital v1.0.0 como candidato
+  y un resolver directo reutilizable `direct-media`.
+- Se añadieron contratos `AnimeIdentity`, `EpisodeRef` y `EpisodeSourceAdapter`,
+  versiones SemVer, caché LRU (128 entradas, TTL por provider limitado a 5 min)
+  y circuit breakers separados por provider/hostname. El resolver directo solo
+  acepta HTTPS MP4/HLS/DASH y rechaza IPs locales/privadas literales; no hace
+  lookup DNS ni controla redirects.
+- Evidencia nueva: AnimesDigital localizó One Piece ep. 1180. Manifiesto: 200,
+  4,998 bytes, 142 segmentos. Primer segmento: 200, 67,258 bytes MPEG-TS.
+  También se sondeó ep. 1: manifiesto 200/5,313 bytes, 151 segmentos; primer
+  segmento 200/69,756 bytes. Las dos capturas de ventana muestran negro/error
+  de decodificación, no reproducción. Archivos locales ignorados por Git:
+  `.ai-local/review/animesdigital-live-player-current.png` y
+  `.ai-local/review/animesdigital-live-player-episode-1.png`.
+- Seguimiento del demux: una corrida con `KONGROO_LIVE_FFPROBE=1` sobre ep. 1
+  reportó una referencia `.webp` rechazada por libavformat
+  (`allowed_segment_extensions`) y otra `.m3u8`; las URLs se redactaron. No se
+  identificó el tag HLS, no es un log libmpv y no prueba que explique la ventana
+  negra. La petición posterior del provider agotó el timeout. No se habilitó
+  `.webp` ni otra extensión en el player.
+- La ruta de código desde ficha existe: `AnimeDetailPage` crea identidad y
+  episodio; `CatalogHomePage` consulta el manager, presenta candidatos y abre
+  `ProviderPlaybackRoute`. Sigue sin una prueba visual por clic real desde la
+  ficha y retorno. La app normal sí abrió Home; captura en
+  `.ai-local/review/s0s-real-ui-home.png`. La interacción no fue posible:
+  Wayland devolvió `Transport closed`, `xdotool` no encontró la ventana nativa y
+  `ydotool` no tiene daemon/socket activo. La ruta normal espera `Player.open()`
+  antes de construir la superficie; el harness montó la página primero. La
+  causalidad de ese orden frente al error no está probada; no modificar engine/UI
+  por hipótesis.
+- En esta reanudación: test provider AnimesDigital focalizado 7/7; suite Flutter
+  completa más reciente 300 pass/7 optativas omitidas; Dart analyze y Flutter
+  analyze sin issues. Su salida quedó en consola y no se guardó como archivo;
+  el log previo corresponde a 297/7. Los nuevos datos RSS locales están en el
+  baseline. Un presupuesto total de 20 s por operación sustituyó el timeout
+  renovado por petición; el test de búsquedas lentas encadenadas pasa. La
+  auditoría independiente confirmó las correcciones de `requestKey`, límites
+  HTML y timeout por petición; no ejecutó pruebas. También pasan Linux debug
+  build, formato, checker e import tests, 40 pruebas Python, `memory.py check`
+  (`[]`) y `git diff --check`. La auditoría escrita está en
+  `docs/ai-system/audits/S0S-audit-2026-11-16.md`.
+- Continuación diagnóstica: `dart analyze` y el test offline del harness (3/3)
+  pasaron tras añadir redacción de URLs y resumen de referencias HLS. Se revisó
+  la guía primaria de GoAnime para cliente hoja/registro/health checks; no se
+  copió código. El resultado y sus límites están en el baseline y
+  `app/tool/README.md`.
+- Plataformas Android/Windows no validadas con build; sin medición de recursos en
+  4 GB; mpv CLI no disponible según baseline. El engine, UI y dependencias del
+  reproductor no se modificaron. No se probó rendimiento del provider.
+- La investigación upstream encontró patrones de separación/versionado; no
+  se copiará código ni se ejecutará JavaScript remoto. Ver la tabla y licencias
+  en el baseline S0-S.
+- **Siguiente tarea:** obtener una fuente vigente y determinar qué tag HLS
+  publica `.webp`; confirmar si una allowlist estrecha soluciona el demux sin
+  abrir extensiones globales. Luego aislar mediante una regresión el orden
+  `open`/montaje de la ruta productiva y buscar una reproducción visible válida
+  por medios ordinarios. Luego validar el clic en ficha, retorno, otra fuente y
+  fallback.
+  Resolver el riesgo condicionado de DNS/redirect/playlist antes de aceptar el
+  límite de destinos. Conservar AnimesDigital como candidato; no cerrar S0-S
+  por HTTP 200, duración, audio aislado o eventos nativos sin imagen. Sin
+  staging, commit ni push.
+
 > Estado histórico actualizado el 2026-11-15. El punto vigente de reanudación S0-R está primero; los bloques siguientes conservan handoffs históricos.
 
-## Punto actual de reanudación — S0-R AnimeHeaven — 2026-11-16
+## Handoff histórico — S0-R AnimeHeaven — 2026-11-16
 
 - **Resultado:** `AnimeHeavenPlaybackProvider` y `AnimeHeavenMp4Resolver` están
   registrados en `PlaybackProvidersModule`, usando `PlaybackProviderManager`,

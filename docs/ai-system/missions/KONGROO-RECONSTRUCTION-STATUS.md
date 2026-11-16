@@ -1,8 +1,123 @@
 # KONGROO — ESTADO DE LA RECONSTRUCCIÓN
 
+## Ejecución activa — S0-S arquitectura y limpieza — 2026-11-16
+
+- **Estado:** `PARTIAL / IMPLEMENTING`. Se leyó íntegro el mandato S0-S. La
+  limpieza de runtime está hecha; se implementó AnimesDigital v1.0.0 y se
+  registró en el manager único. El candidato obtiene un HLS accesible, pero la
+  ventana libmpv presentó pantalla negra/error de decodificación. No se cierra
+  S0-S y no se considera funcional.
+- **Git al inicio:** `main`, `HEAD == origin/main ==
+  19470ed6bb19583cc0fc00938c08ab6c2f855300`. Hay cambios rastreados y nuevos
+  archivos de la ejecución y de trabajo previo; nada fue stageado ni revertido.
+  `.codex-attachments/` y `KONGROO_RECONSTRUCCION_CODEX_T00-T24.zip` siguen
+  preservados sin inspeccionar.
+- **Línea base player:** `test/player` 120 pass/3 skip; integración libmpv
+  14 pass/2 skip; ventana correcta del spike capturó un frame sintético pausado.
+  No se verificaron movimiento ni audio. `mpv` CLI no está disponible. RSS en
+  stress: 245–247 MB antes, 389–392 MB pico, 371–372 MB después de dispose;
+  observación que no demuestra fuga. El host tiene 7.5 GiB, no 4 GB. Evidencia
+  y límites: [S0-S baseline](S0-S-BASELINE-AND-IMPLEMENTATION.md).
+- **Limpieza S0-S:** retirados los archivos/runtime/tests/harness específicos
+  AnimeHeaven; READMEs y evidencia antigua permanecen archivados. AnimeAV1,
+  TioAnime, AnimeGG, Miruro, AnimeOnline Ninja y `video_hosts` ya no tienen
+  adaptadores Dart activos. Se preservan manager, source switching, ruta,
+  contratos genéricos, el único engine media_kit/libmpv y sus regresiones.
+- **Implementación nueva:** domain separa identidad, match y episodio; el
+  manager mantiene registros versionados, caché LRU de 128 fuentes, circuitos
+  de provider y un mapa LRU de máximo 128 hostnames. `PlaybackProvidersModule`
+  registra AnimesDigital v1.0.0 y un normalizador genérico HTTPS
+  MP4/HLS/DASH (`direct-media`). El candidato soporta solo el player público
+  que expone HLS directo; player 2 y embeds no estáticos quedan fuera. El
+  normalizador rechaza destinos locales/IP privadas literales, pero no hace
+  DNS ni valida redirects; no equivale a un extractor de host ni elimina el
+  riesgo DNS TOCTOU.
+- **Prueba live de transporte:** AnimesDigital encontró One Piece, episodio
+  1180. El GET ordinario del manifiesto respondió 200, 4,998 bytes y 142
+  segmentos; el primer segmento respondió 200 con 67,258 bytes y firma MPEG-TS.
+  No se registraron URLs completas ni valores firmados.
+- **Prueba live en ventana:** el harness montó `SpikePlayerPage`, coordinator,
+  `MediaKitVideoSurface` y `MediaKitSpikeEngine` existentes antes de abrir la
+  fuente. `Player.open()` terminó y se recibieron duración/pistas; la captura
+  `.ai-local/review/animesdigital-live-player-current.png` mostró una ventana
+  real, pantalla negra y “The media could not be opened or decoded.” El stream
+  no cuenta como reproducción funcional. La captura se guarda en área local
+  ignorada por Git. Otra captura de One Piece ep. 1 muestra 00:12/25:00 y la
+  interfaz Kongroo, pero también negro y el mismo error; el avance del reloj y
+  un evento nativo de primer frame no prueban que se presentara un cuadro.
+- **Ruta de producto:** el código sí está conectado: la ficha crea un
+  `PlaybackEpisode`, `CatalogHomePage` consulta `PlaybackProviderManager`, abre
+  un selector de fuentes y luego `ProviderPlaybackRoute`. El harness live abrió
+  directamente el player, no ejercitó clic real desde la ficha ni regreso a
+  ella. La app normal abrió Home en la captura
+  `.ai-local/review/s0s-real-ui-home.png`; no se pudo hacer clic porque Wayland
+  devolvió `Transport closed`, `xdotool` no encontró la ventana Wayland y
+  `ydotool` no tenía daemon/socket. No se inició uno. La ruta productiva espera
+  `Player.open()` antes de construir el widget de superficie; esa secuencia
+  difiere del harness y su efecto causal no está aislado.
+- **Seguimiento de demux:** `KONGROO_LIVE_FFPROBE=1` produjo un diagnóstico
+  redacted: libavformat rechazó una referencia `.webp` del HLS por
+  `allowed_segment_extensions`; la herramienta también mencionó una referencia
+  `.m3u8`. No se sabe qué tag lo publicó ni si libmpv falla por el mismo motivo.
+  Una solicitud posterior agotó el timeout del provider. No se relajó el filtro
+  ni se modificó el engine. Los tests offline de redacción y resumen HLS pasan
+  3/3; Dart analyze del harness y su test no reporta issues.
+- **Pruebas actuales:** provider AnimesDigital focalizado 7/7 y suite Flutter
+  completa más reciente 300 aprobadas/7 optativas omitidas. Dart analyze
+  (`lib test tool`) y Flutter analyze (`--no-pub`) terminaron sin problemas. Linux debug build,
+  formato de 192 archivos, checker/import tests, 40 pruebas Python, `memory.py
+  check` y `git diff --check` también pasaron. `scripts/ci.sh` no se ejecutó
+  porque invoca `flutter pub get`; no hubo cambios de dependencias y sus pasos
+  de test/análisis se ejecutaron por separado.
+- **Alcance plataforma/rendimiento:** las capas domain/application no usan
+  dependencias de sistema; se añadió `dart:io` estándar únicamente para revisar
+  IPs literales en el resolver data. Linux es el único destino ejercitado;
+  Android y Windows no tienen build verificado. No se midió consumo del smoke ni
+  se probó en el equipo de 4 GB.
+- **Investigación primaria:** Anilili MIT-0 separa catálogo/proveedor/Media3;
+  Zangetsu Providers tiene un README que declara MIT, pero la raíz consultada no
+  mostró un archivo `LICENSE`; no se copia su código. anime-sh (MIT) separa
+  providers/resolvers; anipy-cli y ani-cli declaran GPL-3.0; GoAnime declara
+  MIT y documenta AnimeFire, AnimeDrive y HiAnime. Se usan patrones, sin copiar
+  código ni cargar extensiones remotas.
+- **Investigación live:** AnimeFire API respondió 403 a GET ordinario. AnimeDrive
+  devolvió catálogo/ficha/episodio públicos, pero sus dos solicitudes de
+  disponibilidad al MP4 de `mangas.cloud` respondieron 403 HTML de Cloudflare.
+  AnivexaAPI devolvió 402; no se copió código. La guía de AniKotoAPI documenta
+  bloqueo de AJAX/resolución y ofrece iframe/WebView, no una fuente native-media
+  comprobada. Ningún candidato entregó un medio reproducible; detalle en el
+  [baseline S0-S](S0-S-BASELINE-AND-IMPLEMENTATION.md).
+- **Auditoría del código:** la revisión inicial encontró dos defectos P2
+  (pérdida de IDs externos secundarios y enfriamiento reiniciado por fallo
+  permanente en probe); ambos se corrigieron con regresiones. La pasada
+  adversarial añadió LRU de 128 para el mapa de breakers host. La segunda
+  revisión independiente confirmó claves encuadradas, límites HTML y deadline
+  anti-goteo; advirtió que el timeout se reiniciaba por cada petición. Se
+  corrigió con presupuesto total de 20 s por operación y test de varias
+  búsquedas lentas. Riesgo condicionado aún no verificado: el allowlist protege
+  el hostname HLS inicial, pero no se probaron DNS/redirects ni destinos de
+  segmentos/playlist que libmpv solicita después.
+- **Auditoría:** [S0-S audit](../audits/S0S-audit-2026-11-16.md) registra un P1
+  de aceptación abierto (sin video visible), un riesgo P2 condicionado en
+  destinos HLS/DNS, una pista no confirmada de extensión HLS rechazada por
+  ffprobe, la brecha no causal del orden de montaje y el timeout total ya
+  corregido. No hay P0 confirmado.
+- **Siguiente paso:** con una fuente pública vigente, identificar el tag HLS de
+  la referencia `.webp` y probar una allowlist estrecha en ffprobe/libmpv antes
+  de proponer una configuración por fuente; no ampliar extensiones globales.
+  Aislar con una regresión el orden `open`/montaje de la ruta productiva y
+  obtener una fuente externa que muestre un cuadro real;
+  comparar el mismo medio con mpv CLI solo si ya está disponible. Mantener
+  AnimesDigital como candidato hasta ver frame, avance y audio si corresponde;
+  después validar clic real desde ficha, retorno, segunda alternativa y
+  fallback. Android/Windows, mpv CLI, medición streaming y equipo de 4 GB siguen
+  pendientes. No cambió engine/UI ni dependencias del player. No stagear,
+  commit ni push.
+- **Git:** no staging, commit ni push.
+
 > Estado histórico actualizado el 2026-11-15 tras la limpieza posterior a S0-A. La ejecución activa S0-R se registra debajo; no implica aceptar G1/T03 ni avanzar a F1.
 
-## Ejecución activa — S0-R, provider AnimeHeaven — 2026-11-16
+## Historial de ejecución — S0-R, provider AnimeHeaven — 2026-11-16
 
 - **Estado:** se integró un provider AnimeHeaven y su resolver MP4 en el
   composition root existente. La búsqueda pública de One Piece, episodio 1,
@@ -82,7 +197,7 @@
   ya estaba sucio al iniciar. Todos los cambios previos se preservaron. Esta
   ejecución no hizo commit ni push.
 
-## Estado actual — limpieza posterior de providers S0 — 2026-11-15
+## Snapshot histórico — limpieza posterior de providers S0 — 2026-11-15
 
 Se retiró el runtime S0-A de Miruro después de que los GET públicos ordinarios
 de configuración y lookup devolvieran HTTP 403. No hubo episodios, URI

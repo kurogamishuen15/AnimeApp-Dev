@@ -10,6 +10,79 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test(
+    'versions are SemVer and successful source results use bounded TTL',
+    () async {
+      final _MutableClock clock = _MutableClock();
+      final MockPlaybackProvider provider = MockPlaybackProvider(
+        id: PlaybackProviderId('versioned-provider'),
+      );
+      final PlaybackProviderManager manager = PlaybackProviderManager(
+        providers: [
+          PlaybackProviderRegistration(
+            provider: provider,
+            cacheTtl: const Duration(seconds: 5),
+            version: '1.2.3-rc.1+build.7',
+          ),
+        ],
+        videoHostResolvers: [
+          PlaybackVideoHostResolverRegistration(
+            resolver: provider,
+            version: '2.0.0+host.4',
+          ),
+        ],
+        clock: clock.call,
+      );
+
+      expect(
+        manager.providerRegistrations.single.version,
+        '1.2.3-rc.1+build.7',
+      );
+      expect(manager.resolverRegistrations.single.version, '2.0.0+host.4');
+      expect(manager.diagnostics.single.version, '1.2.3-rc.1+build.7');
+      await manager.findSources(
+        _episode(),
+        cancellation: PlaybackCancellationToken(),
+      );
+      await manager.findSources(
+        _episode(),
+        cancellation: PlaybackCancellationToken(),
+      );
+      expect(provider.findCalls, 1);
+
+      clock.advance(const Duration(seconds: 6));
+      await manager.findSources(
+        _episode(),
+        cancellation: PlaybackCancellationToken(),
+      );
+      expect(provider.findCalls, 2);
+
+      for (final String invalidVersion in [
+        'latest',
+        '1.2',
+        '01.2.3',
+        '1.2.3-',
+        '1.2.3-alpha.',
+      ]) {
+        expect(
+          () => PlaybackProviderManager(
+            providers: [
+              PlaybackProviderRegistration(
+                provider: MockPlaybackProvider(
+                  id: PlaybackProviderId('invalid-version'),
+                ),
+                version: invalidVersion,
+              ),
+            ],
+            clock: clock.call,
+          ),
+          throwsArgumentError,
+          reason: 'Invalid provider version: $invalidVersion',
+        );
+      }
+    },
+  );
+
+  test(
     'orders sources and servers by priority with stable tie breaks',
     () async {
       final MockPlaybackProvider provider = MockPlaybackProvider(
@@ -86,7 +159,7 @@ void main() {
         'server-4',
       ]);
       expect(
-        manager.diagnostics.single.resolutionCircuit,
+        manager.hostDiagnostics.single.circuit,
         ProviderCircuitState.closed,
       );
     },
@@ -147,63 +220,140 @@ void main() {
           rawResult as PlaybackProviderSuccess<ResolvedPlaybackStream>;
       expect(result.value.providerId, healthy.id);
       expect(unavailableSource.resolveCalls, 1);
-      expect(manager.diagnostics.first.resolutionConsecutiveFailures, 1);
+      expect(
+        manager.hostDiagnostics
+            .singleWhere(
+              (PlaybackVideoHostDiagnostic item) =>
+                  item.hostId == 'source-down.mock.invalid',
+            )
+            .consecutiveFailures,
+        1,
+      );
       expect(healthy.resolveCalls, 1);
     },
   );
 
-  test(
-    'resolution failures have their own 3/60 circuit despite successful lookup',
-    () async {
-      final _MutableClock clock = _MutableClock();
-      final MockPlaybackProvider provider = MockPlaybackProvider(
-        id: PlaybackProviderId('server-flaky'),
-        scenario: MockPlaybackScenario.unavailableSource,
-      );
-      final PlaybackProviderManager manager = _manager([
-        provider,
-      ], clock: clock);
+  test('host resolution failures have their own 3/60 circuit', () async {
+    final _MutableClock clock = _MutableClock();
+    final MockPlaybackProvider provider = MockPlaybackProvider(
+      id: PlaybackProviderId('server-flaky'),
+      scenario: MockPlaybackScenario.unavailableSource,
+    );
+    final PlaybackProviderManager manager = _manager([provider], clock: clock);
 
-      for (int i = 0; i < 3; i++) {
-        final PlaybackProviderResult<ResolvedPlaybackStream> result =
-            await manager.resolveBestStream(
-              _episode(),
-              cancellation: PlaybackCancellationToken(),
-            );
-        expect(result, isA<PlaybackProviderFailed<ResolvedPlaybackStream>>());
-      }
-      expect(provider.findCalls, 3);
-      expect(provider.resolveCalls, 3);
-      expect(
-        manager.diagnostics.single.resolutionCircuit,
-        ProviderCircuitState.open,
-      );
-
-      await manager.resolveBestStream(
-        _episode(),
-        cancellation: PlaybackCancellationToken(),
-      );
-      expect(provider.findCalls, 3);
-      expect(
-        provider.resolveCalls,
-        3,
-        reason: 'open resolver circuit skips the server',
-      );
-
-      clock.advance(const Duration(seconds: 60));
-      provider.scenario = MockPlaybackScenario.valid;
-      final PlaybackProviderResult<ResolvedPlaybackStream> recovered =
+    for (int i = 0; i < 3; i++) {
+      final PlaybackProviderResult<ResolvedPlaybackStream> result =
           await manager.resolveBestStream(
             _episode(),
             cancellation: PlaybackCancellationToken(),
           );
-      expect(recovered, isA<PlaybackProviderSuccess<ResolvedPlaybackStream>>());
+      expect(result, isA<PlaybackProviderFailed<ResolvedPlaybackStream>>());
+    }
+    expect(provider.findCalls, 1);
+    expect(provider.resolveCalls, 3);
+    expect(manager.hostDiagnostics.single.circuit, ProviderCircuitState.open);
+
+    await manager.resolveBestStream(
+      _episode(),
+      cancellation: PlaybackCancellationToken(),
+    );
+    expect(provider.findCalls, 1);
+    expect(
+      provider.resolveCalls,
+      3,
+      reason: 'open host circuit skips resolution after discovery',
+    );
+
+    clock.advance(const Duration(seconds: 60));
+    provider.scenario = MockPlaybackScenario.valid;
+    final PlaybackProviderResult<ResolvedPlaybackStream> recovered =
+        await manager.resolveBestStream(
+          _episode(),
+          cancellation: PlaybackCancellationToken(),
+        );
+    expect(recovered, isA<PlaybackProviderSuccess<ResolvedPlaybackStream>>());
+    expect(manager.hostDiagnostics.single.circuit, ProviderCircuitState.closed);
+  });
+
+  test(
+    'host circuit registry remains bounded and evicts least-recent use',
+    () async {
+      final _ManyHostProvider provider = _ManyHostProvider(candidateCount: 130);
+      final PlaybackProviderManager manager = _manager([provider]);
+
+      final PlaybackProviderResult<List<ResolvedPlaybackStream>> result =
+          await manager.resolveCandidates(
+            _episode(),
+            cancellation: PlaybackCancellationToken(),
+          );
+
       expect(
-        manager.diagnostics.single.resolutionCircuit,
-        ProviderCircuitState.closed,
+        result,
+        isA<PlaybackProviderFailed<List<ResolvedPlaybackStream>>>(),
+      );
+      expect(
+        manager.hostDiagnostics,
+        hasLength(PlaybackProviderManager.maxHostCircuitBreakers),
+      );
+      expect(
+        manager.hostDiagnostics.any(
+          (PlaybackVideoHostDiagnostic item) =>
+              item.hostId == 'media-0.example.org',
+        ),
+        isFalse,
+      );
+      expect(
+        manager.hostDiagnostics.any(
+          (PlaybackVideoHostDiagnostic item) =>
+              item.hostId == 'media-129.example.org',
+        ),
+        isTrue,
       );
     },
   );
+
+  test('host circuits are shared across independent anime providers', () async {
+    final _MutableClock clock = _MutableClock();
+    final _DestinationSourceProvider first = _DestinationSourceProvider(
+      PlaybackProviderId('catalog-one'),
+    );
+    final _DestinationSourceProvider second = _DestinationSourceProvider(
+      PlaybackProviderId('catalog-two'),
+    );
+    final _FailingSharedHostResolver resolver = _FailingSharedHostResolver();
+    final PlaybackProviderManager manager = PlaybackProviderManager(
+      providers: [
+        PlaybackProviderRegistration(provider: first, priority: 20),
+        PlaybackProviderRegistration(provider: second, priority: 10),
+      ],
+      videoHostResolvers: [
+        PlaybackVideoHostResolverRegistration(resolver: resolver),
+      ],
+      clock: clock.call,
+    );
+
+    for (int i = 0; i < 3; i++) {
+      final PlaybackProviderResult<ResolvedPlaybackStream> result =
+          await manager.resolveBestStream(
+            _episode(),
+            cancellation: PlaybackCancellationToken(),
+          );
+      expect(result, isA<PlaybackProviderFailed<ResolvedPlaybackStream>>());
+    }
+    expect(resolver.calls, 6);
+    expect(manager.hostDiagnostics.single.hostId, 'media.example');
+    expect(manager.hostDiagnostics.single.circuit, ProviderCircuitState.open);
+
+    await manager.resolveBestStream(
+      _episode(),
+      cancellation: PlaybackCancellationToken(),
+    );
+    expect(
+      resolver.calls,
+      6,
+      reason: 'open host breaker blocks both providers',
+    );
+  });
 
   test(
     'opens after 3 eligible failures and recovers after the 60 second probe',
@@ -253,6 +403,52 @@ void main() {
       expect(provider.findCalls, 4);
       expect(manager.diagnostics.single.circuit, ProviderCircuitState.closed);
       expect(manager.diagnostics.single.consecutiveFailures, 0);
+    },
+  );
+
+  test(
+    'non-transient half-open result does not restart the cooldown',
+    () async {
+      final _MutableClock clock = _MutableClock();
+      final MockPlaybackProvider provider = MockPlaybackProvider(
+        id: PlaybackProviderId('non-transient-probe'),
+        scenario: MockPlaybackScenario.providerError,
+      );
+      final PlaybackProviderManager manager = _manager([
+        provider,
+      ], clock: clock);
+
+      for (int i = 0; i < 3; i++) {
+        await manager.findSources(
+          _episode(),
+          cancellation: PlaybackCancellationToken(),
+        );
+      }
+      final DateTime initialOpenUntil = manager.diagnostics.single.openUntil!;
+      clock.advance(const Duration(seconds: 60));
+      provider.scenario = MockPlaybackScenario.malformed;
+
+      final PlaybackProviderFailed<List<PlaybackSource>> probeResult =
+          await manager.findSources(
+            _episode(),
+            cancellation: PlaybackCancellationToken(),
+          ) as PlaybackProviderFailed<List<PlaybackSource>>;
+      expect(
+        probeResult.failure.kind,
+        PlaybackProviderFailureKind.invalidResponse,
+      );
+      expect(manager.diagnostics.single.circuit, ProviderCircuitState.halfOpen);
+      expect(manager.diagnostics.single.probeInFlight, isFalse);
+      expect(manager.diagnostics.single.openUntil, initialOpenUntil);
+
+      provider.scenario = MockPlaybackScenario.valid;
+      final PlaybackProviderResult<List<PlaybackSource>> recovery =
+          await manager.findSources(
+            _episode(),
+            cancellation: PlaybackCancellationToken(),
+          );
+      expect(recovery, isA<PlaybackProviderSuccess<List<PlaybackSource>>>());
+      expect(manager.diagnostics.single.circuit, ProviderCircuitState.closed);
     },
   );
 
@@ -360,6 +556,45 @@ void main() {
     expect(results[0], isA<PlaybackProviderSuccess<List<PlaybackSource>>>());
     expect(results[1], isA<PlaybackProviderSuccess<List<PlaybackSource>>>());
   });
+
+  test(
+    'does not collide cache keys for titles containing separators',
+    () async {
+      final MockPlaybackProvider provider = MockPlaybackProvider(
+        id: PlaybackProviderId('key-collision'),
+      );
+      final PlaybackProviderManager manager = PlaybackProviderManager(
+        providers: <PlaybackProviderRegistration>[
+          PlaybackProviderRegistration(
+            provider: provider,
+            cacheTtl: const Duration(seconds: 30),
+          ),
+        ],
+        clock: DateTime.now,
+      );
+      final PlaybackEpisode oneTitle = PlaybackEpisode(
+        animeId: AnimeId('same-anime'),
+        episodeNumber: 1,
+        animeTitles: const <String>['blue|lock'],
+      );
+      final PlaybackEpisode twoTitles = PlaybackEpisode(
+        animeId: AnimeId('same-anime'),
+        episodeNumber: 1,
+        animeTitles: const <String>['blue', 'lock'],
+      );
+
+      expect(oneTitle.requestKey, isNot(twoTitles.requestKey));
+      await manager.findSources(
+        oneTitle,
+        cancellation: PlaybackCancellationToken(),
+      );
+      await manager.findSources(
+        twoTitles,
+        cancellation: PlaybackCancellationToken(),
+      );
+      expect(provider.findCalls, 2);
+    },
+  );
 
   test(
     'one canceled waiter does not cancel another deduplicated caller',
@@ -560,11 +795,12 @@ void main() {
         ) as PlaybackProviderSuccess<ResolvedPlaybackStream>;
     expect(resolutionResult.value.providerId, healthy.id);
     expect(
-      resolutionManager.diagnostics
+      resolutionManager.hostDiagnostics
           .singleWhere(
-            (PlaybackProviderDiagnostic item) => item.id == wrongResolution.id,
+            (PlaybackVideoHostDiagnostic item) =>
+                item.hostId == 'wrong-resolution.mock.invalid',
           )
-          .resolutionLastFailure,
+          .lastFailure,
       PlaybackProviderFailureKind.invalidResponse,
     );
   });
@@ -642,7 +878,10 @@ final class _MultiServerProvider
   String get resolverId => 'test-multi-server-resolver';
 
   @override
-  bool supports(PlaybackServer server) => true;
+  String get hostId => 'test-multi-server';
+
+  @override
+  bool supports(SourceCandidate server) => true;
 
   @override
   Future<PlaybackProviderResult<List<PlaybackSource>>> findSources(
@@ -668,7 +907,7 @@ final class _MultiServerProvider
   @override
   Future<PlaybackProviderResult<ResolvedPlaybackStream>> resolve(
     PlaybackSource source,
-    PlaybackServer server, {
+    SourceCandidate server, {
     required PlaybackCancellationToken cancellation,
   }) async {
     attemptedServerIds.add(server.id);
@@ -686,4 +925,120 @@ final class _MultiServerProvider
       ),
     );
   }
+}
+
+final class _DestinationSourceProvider implements PlaybackSourceProvider {
+  _DestinationSourceProvider(this.id);
+
+  @override
+  final PlaybackProviderId id;
+
+  @override
+  Set<PlaybackProviderCapability> get capabilities => const {
+    PlaybackProviderCapability.episodeSources,
+  };
+
+  @override
+  Future<PlaybackProviderResult<List<PlaybackSource>>> findSources(
+    PlaybackEpisode episode, {
+    required PlaybackCancellationToken cancellation,
+  }) async => PlaybackProviderSuccess([
+    PlaybackSource(
+      id: '${id.value}-source',
+      providerId: id,
+      episode: episode,
+      language: 'unknown',
+      quality: 'unknown',
+      servers: [
+        SourceCandidate(
+          id: '${id.value}-candidate',
+          hostId: 'shared-host',
+          endpoint: Uri.https('media.example', '/episode.mp4'),
+          provenance: 'contract test',
+        ),
+      ],
+    ),
+  ]);
+}
+
+final class _FailingSharedHostResolver implements PlaybackVideoHostResolver {
+  int calls = 0;
+
+  @override
+  String get hostId => 'shared-host';
+
+  @override
+  String get resolverId => 'shared-host-test-resolver';
+
+  @override
+  bool supports(SourceCandidate candidate) =>
+      candidate.hostId == hostId && candidate.endpoint.host == 'media.example';
+
+  @override
+  Future<PlaybackProviderResult<ResolvedPlaybackStream>> resolve(
+    PlaybackSource source,
+    SourceCandidate candidate, {
+    required PlaybackCancellationToken cancellation,
+  }) async {
+    calls++;
+    return const PlaybackProviderFailed(
+      PlaybackProviderFailure(PlaybackProviderFailureKind.network),
+    );
+  }
+}
+
+final class _ManyHostProvider
+    implements PlaybackSourceProvider, PlaybackVideoHostResolver {
+  _ManyHostProvider({required this.candidateCount});
+
+  final int candidateCount;
+
+  @override
+  final PlaybackProviderId id = PlaybackProviderId('many-hosts');
+
+  @override
+  Set<PlaybackProviderCapability> get capabilities => const {
+    PlaybackProviderCapability.episodeSources,
+    PlaybackProviderCapability.sourceAlternatives,
+  };
+
+  @override
+  String get hostId => 'many-hosts-resolver';
+
+  @override
+  String get resolverId => 'many-hosts-resolver';
+
+  @override
+  bool supports(SourceCandidate candidate) => candidate.hostId == hostId;
+
+  @override
+  Future<PlaybackProviderResult<List<PlaybackSource>>> findSources(
+    PlaybackEpisode episode, {
+    required PlaybackCancellationToken cancellation,
+  }) async => PlaybackProviderSuccess([
+    PlaybackSource(
+      id: 'many-hosts-source',
+      providerId: id,
+      episode: episode,
+      language: 'unknown',
+      quality: 'unknown',
+      servers: [
+        for (int index = 0; index < candidateCount; index++)
+          SourceCandidate(
+            id: 'candidate-$index',
+            hostId: hostId,
+            endpoint: Uri.https('media-$index.example.org', '/episode.mp4'),
+          ),
+      ],
+    ),
+  ]);
+
+  @override
+  Future<PlaybackProviderResult<ResolvedPlaybackStream>> resolve(
+    PlaybackSource source,
+    SourceCandidate candidate, {
+    required PlaybackCancellationToken cancellation,
+  }) async => const PlaybackProviderFailed(
+    PlaybackProviderFailure(PlaybackProviderFailureKind.network),
+  );
 }

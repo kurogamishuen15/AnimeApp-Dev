@@ -20,7 +20,7 @@ Catálogo desacoplado e identidad local: propuesta incremental parcialmente impl
 
 Las decisiones de investigación no se aprueban automáticamente. Los ADR de producto no están disponibles aquí.
 
-## Kongroo S0 — contratos de providers y hosts — 2026-11-15
+## Kongroo S0 — contratos de providers y hosts — decisión original 2026-11-15
 
 Por instrucción explícita del propietario, la implementación mantiene tres
 responsabilidades: los adaptadores `AnimeProvider` descubren títulos, episodios
@@ -31,5 +31,23 @@ El manager admite registros independientes de ambos contratos. La limpieza del
 en reproducción externa; el composition root queda vacío hasta el siguiente
 prompt. Esta nota registra la separación arquitectónica, no declara hosts
 operativos ni aceptación de S0.
-Evidencia y límites: [auditoría de hosts](../ai-system/audits/S0-video-host-audit-2026-11-15.md)
+Evidencia histórica: [auditoría de hosts](../ai-system/audits/S0-video-host-audit-2026-11-15.md)
 y [matriz S0](../ai-system/missions/S0-REAL-PLAYBACK-REPORT.md).
+
+### Implementación S0-S — actualización del mandato del propietario — 2026-11-16
+
+El core de identity, episodios, candidates, manager, resolutores y fallback
+debe ser compatible con Linux, Android y Windows. Linux sigue primero para
+ejecución; no se afirma build/verificación Android o Windows. La limpieza
+retiró los adapters previos, añadió contratos de tres fases, SemVer, cache TTL
+LRU y breaker por hostname. El root registra cero AnimeProvider y un
+normalizador directo, no extractor específico. Un smoke HLS técnico avanzó 2 s
+en libmpv sin frame visible ni episodio. La descripción técnica y limitaciones
+están en [S0-S](../ai-system/missions/S0-S-BASELINE-AND-IMPLEMENTATION.md) y el
+[addendum de ADR-015](../adr/ADR-015-arquitectura-core-linux-first.md).
+
+Investigación actualizada 2026-11-16: el README de Zangetsu Providers declara
+MIT, pero el árbol raíz consultado no mostró un archivo `LICENSE`; no copiar
+sus extractores hasta confirmar la licencia en un texto de licencia explícito.
+El informe S0-S registra probes ordinarios de AnimeFire/AnimeDrive/AnivexaAPI
+y clasifica los bloqueos sin declarar funcional ningún proveedor.

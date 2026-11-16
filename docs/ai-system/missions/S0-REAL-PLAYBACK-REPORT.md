@@ -1,8 +1,8 @@
 # KONGROO — informe de reproducción real S0
 
-> Estado: `ACTIVE` — actualización 2026-11-16. Ningún proveedor ha superado todavía la reproducción real de video con libmpv. Este documento registra evidencia, no declara disponibilidad permanente.
+> Estado: `HISTÓRICO` — última actualización 2026-11-16. Ningún proveedor de anime superó la reproducción visible con libmpv en los cortes registrados aquí. El estado operativo S0-S se mantiene en [baseline](S0-S-BASELINE-AND-IMPLEMENTATION.md), [STATUS](KONGROO-RECONSTRUCTION-STATUS.md) y [HANDOFF](KONGROO-RECONSTRUCTION-HANDOFF.md).
 
-> **Nota de continuidad:** los snapshots siguientes describen cortes previos a la integración AnimeHeaven. El runtime actual tiene AnimeHeaven registrado, pero sin reproducción externa confirmada. La limpieza posterior retiró Miruro y los adapters anteriores. Ver el [README del provider actual](../../../app/lib/data/player/providers/animeheaven/README.md), la [auditoría AnimeHeaven](../audits/S0R-ANIMEHEAVEN-audit-2026-11-16.md), la [auditoría de limpieza](../audits/S0-provider-cleanup-followup-audit-2026-11-15.md) y la [auditoría del port](../audits/S0-ANILILI-port-audit-2026-11-15.md).
+> **Nota de continuidad:** los snapshots siguientes describen intentos históricos, incluido AnimeHeaven, retirado del runtime en S0-S. Su README fue archivado en [`archive/providers/S0-2026-11-16/animeheaven`](../archive/providers/S0-2026-11-16/animeheaven/README.md). Ver también la [auditoría AnimeHeaven](../audits/S0R-ANIMEHEAVEN-audit-2026-11-16.md), la [auditoría de limpieza](../audits/S0-provider-cleanup-followup-audit-2026-11-15.md) y la [auditoría del port](../audits/S0-ANILILI-port-audit-2026-11-15.md).
 
 ## S0-R — prueba visible de AnimeHeaven — 2026-11-16
 

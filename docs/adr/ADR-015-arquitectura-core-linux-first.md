@@ -44,3 +44,19 @@ La aplicación tiene solamente un esqueleto Flutter/Linux: `main.dart`, `AnimeAp
 ## Verificación y revisión
 
 En F1.4 revisar el grafo real de imports para confirmar que dominio/aplicación no dependen de Flutter o plugins, que solo se crean módulos usados y que el runner sigue siendo Linux. Al iniciar una plataforma futura, inventariar adaptadores necesarios, demostrar reutilización de la lógica común, ejecutar paridad funcional y registrar medidas de rendimiento/tamaño. Revisar este ADR si evidencia concreta demuestra que una dependencia común o el límite Linux-first impide un requisito aprobado.
+
+## Addendum S0-S — compatibilidad del core de providers — 2026-11-16
+
+Por instrucción explícita del propietario para S0-S, la arquitectura de
+identidad, episodios, fuentes, resolutores, selección, caché, errores y fallback
+debe ser compatible desde ahora con Linux, Android y Windows. Linux sigue siendo
+el destino primero de implementación/verificación, pero el core no puede
+depender de APIs exclusivas de Linux ni requerir reescritura posterior. Las
+adaptaciones de red, almacenamiento, WebView o APIs nativas se separan mediante
+contratos compartidos cuando exista una diferencia real.
+
+Este addendum prevalece sobre el carácter “futuro” de Android/Windows solo para
+la arquitectura y los módulos de providers/fuentes/resolución. No afirma builds
+ni validación ejecutada en Android o Windows, no autoriza paquetes o cambios de
+sistema y no implementa runners/UI específicos. A la fecha, únicamente Linux ha
+sido ejercitado; las otras plataformas quedan pendientes de build/paridad.

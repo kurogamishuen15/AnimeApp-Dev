@@ -1,37 +1,46 @@
-# Herramientas manuales del player
+# Herramientas de desarrollo de la aplicación
 
-## AnimeHeaven live harness
+`animesdigital_live_harness.dart` comprueba de forma opt-in la búsqueda del
+episodio público, la resolución del manifiesto y la descarga de un segmento.
+No muestra video en una ventana y no acredita reproducción.
 
-`animeheaven_live_harness.dart` es una pantalla temporal/de desarrollo para
-probar el provider live desde una ventana Linux. Resuelve One Piece, episodio
-1 y abre la misma `ProviderPlaybackRoute` y el mismo motor media_kit/libmpv de
-la ficha. Inicia reproducción en la primera alternativa que supera el probe;
-al volver al harness se pueden abrir los otros mirrors por separado. La
-pantalla muestra solo IDs de mirror y no guarda ni imprime URLs efímeras.
-
-Desde `app/`, con el SDK aislado del proyecto:
+Desde `app/`:
 
 ```bash
-../.ai-local/toolchains/flutter/bin/flutter run -d linux --no-pub \
-  -t tool/animeheaven_live_harness.dart
+../.ai-local/toolchains/flutter/bin/dart run tool/animesdigital_live_harness.dart
 ```
 
-Para abrir un mirror concreto entre los candidatos validados, antepone, por
-ejemplo, `KONGROO_ANIMEHEAVEN_MIRROR=mirror-ck` al comando. Si el ID solicitado
-no aparece entre los candidatos, el harness informa el error y no abre otro
-mirror. El proceso solo imprime los IDs de candidatos, nunca sus URI.
+`animesdigital_live_player_app.dart` es una herramienta diagnóstica que monta
+la página, coordinator, engine media_kit/libmpv y superficie existentes antes
+de abrir la fuente. Permite observar el estado nativo y el primer frame; no es
+otro reproductor ni un test automatizado. La última ejecución abrió el HLS,
+pero la ventana mostró error de decodificación y pantalla negra.
 
-En One Piece, episodio 1, el servicio publicó `mirror-cx`, `mirror-ct` y
-`mirror-ck`. Los tres se intentaron por separado en libmpv y mostraron un error
-genérico sin frame. Capturas locales (ignoradas por Git):
-`.ai-local/review/s0-animeheaven-mirror-cx.png`,
-`s0-animeheaven-mirror-ck.png`, `s0r-animeheaven-visible.png` y
-`s0r-animeheaven-mirror-switch.png`. No repetir este episodio sin evidencia de
-que cambió la disponibilidad.
+Para obtener un diagnóstico acotado con `ffprobe` ya instalado en Fedora,
+ejecuta `KONGROO_LIVE_FFPROBE=1 dart tool/animesdigital_live_harness.dart 1`.
+El harness informa codecs/dimensiones o un error con URLs redactadas; resume
+extensiones de referencias HLS sin guardar el manifiesto ni su query. Esto ayuda
+a separar transporte y demux, pero no acredita reproducción en libmpv. Una
+corrida observó una referencia `.webp` rechazada por el filtro de extensiones
+HLS; no se amplió el filtro y una petición posterior del provider agotó el
+timeout.
 
-Al regresar, selecciona cada mirror por separado para verificarlo. Cierra el
-player entre intentos para que el lease nativo se libere. Esta herramienta no
-es la interfaz del producto ni se ejecuta en CI. `flutter test` intercepta HTTP
-live y devuelve 400, así que este harness de escritorio es el recorrido real
-para red/catálogo/player. La evidencia real y los límites de acceso se registran en
-[`docs/ai-system/missions/S0-REAL-PLAYBACK-REPORT.md`](../../docs/ai-system/missions/S0-REAL-PLAYBACK-REPORT.md).
+```bash
+../.ai-local/toolchains/flutter/bin/flutter run -d linux \
+  -t tool/animesdigital_live_player_app.dart
+```
+
+El harness histórico `animeheaven_live_harness.dart` se retiró con el adapter;
+sus resultados se conservan en
+[`S0-REAL-PLAYBACK-REPORT.md`](../../docs/ai-system/missions/S0-REAL-PLAYBACK-REPORT.md)
+y el [archivo de READMEs retirados](../../docs/ai-system/archive/providers/S0-2026-11-16/README.md).
+
+El spike local del reproductor sigue disponible en
+[`tools/player/run_f2_2_spike.sh`](../../tools/player/run_f2_2_spike.sh). Su
+objetivo es validar media_kit/libmpv con fixtures locales, no probar hosts ni
+providers. La línea base ejecutada al inicio de S0-S y sus límites están en
+[`S0-S-BASELINE-AND-IMPLEMENTATION.md`](../../docs/ai-system/missions/S0-S-BASELINE-AND-IMPLEMENTATION.md).
+
+Las herramientas de providers nuevos deberán añadirse solo si acompañan un
+adapter registrado y pruebas de red limitadas; nunca guardarán URLs firmadas,
+cookies o credenciales en logs.

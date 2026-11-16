@@ -1,100 +1,93 @@
-# Proveedores de reproducción
+# Adaptadores de fuentes de reproducción
 
-## Estado actual
+## Estado S0-S (2026-11-16)
 
-El runtime registra **un provider implementado**, AnimeHeaven, y un resolver
-reutilizable específico para sus mirrors MP4. Aún hay **cero providers con
-reproducción externa confirmada**: los tres mirrors publicados para One Piece
-ep. 1 llegaron por separado al player existente, pero todos mostraron error de
-apertura/decodificación y no presentaron imagen. S0 sigue abierta.
+El composition root registra un provider candidato, AnimesDigital, junto al
+único normalizador reutilizable `DirectMediaHostResolver`. La implementación de
+AnimeHeaven se retiró
+porque los tres mirrors probados llegaron a libmpv sin presentar un cuadro, y
+su flujo específico de gate no dejó un resolver reutilizable. Los intentos
+AnimeAV1, TioAnime, AnimeGG, Miruro y AnimeOnline Ninja tampoco tienen código
+Dart activo. Sus guías históricas están en
+[`archive/providers/S0-2026-11-16`](../../../../../docs/ai-system/archive/providers/S0-2026-11-16/README.md);
+la evidencia de playback permanece en las auditorías S0 enlazadas allí.
 
-La limpieza S0-A de Miruro, AnimeAV1, TioAnime, AnimeGG y el resolver genérico
-anterior se conserva como historia; sus evidencias no equivalen a runtime
-actual. Ver el [informe S0](../../../../../docs/ai-system/missions/S0-REAL-PLAYBACK-REPORT.md),
-las [auditorías S0](../../../../../docs/ai-system/audits/) y el [handoff](../../../../../docs/ai-system/missions/KONGROO-RECONSTRUCTION-HANDOFF.md).
+AnimesDigital busca títulos exactos, descubre episodios paginados y soporta un
+iframe público que expone un manifiesto HLS directo. No ejecuta JavaScript ni
+usa su alternativa Blogspot. El medio se normaliza por `direct-media` y llega
+al player existente. Hasta verificar video visible en Kongroo, su estado es
+`candidate`, no `verified_video`.
 
-## Arquitectura y flujo
+## Responsabilidades y límites
 
-| Capa | Componente | Responsabilidad |
+| Componente | Responsabilidad | Estado |
 |---|---|---|
-| Catálogo/fuentes | [`animeheaven/`](animeheaven/README.md) | Busca por título AniList exacto, mapea episodio y pide sus alternativas MP4 al flujo público del proveedor. |
-| Hosts | `AnimeHeavenMp4Resolver` en `animeheaven/` | Permite una lista exacta de mirrors HTTPS, comprueba MIME/cabecera MP4 y cancela el body del probe tras 12 bytes. |
-| Orquestación | `PlaybackProviderManager` | Ordena alternativas, valida identidad, conserva errores y entrega fallback al caller. |
-| Cambio de fuente | `PlaybackSourceSwitchService` | Pide al coordinator existente que cambie de candidato y restaure el estado cuando corresponde. |
-| Motor | `MediaKitSpikeEngine` / libmpv | Único dueño del Player y la superficie de video; no consulta proveedores. |
+| `domain/player/providers` | Modelos y contratos neutrales; sin Flutter, Dio, `dart:io` ni libmpv | Activo; evolución S0-S en curso |
+| `application/player/providers/PlaybackProviderManager` | Registro estático, orden, cancelación, deduplicación, breakers y resolución/fallback | Activo y compartido; no posee un engine |
+| `application/player/source_switching` | Cambio/fallback entre fuentes a través del coordinator actual | Activo y reutilizable |
+| `PlaybackProvidersModule` | Composition root de adapters/resolvers del producto | AnimesDigital `1.0.0` (TTL de fuente cero); un normalizador `direct-media` |
+| `media_kit/libmpv` | Abrir y controlar el medio normalizado | Se mantiene en `data/player/engine` y no se consulta el catálogo |
 
-`PlaybackProvidersModule.open()` posee el cliente Dio y registra el provider y
-resolver separados. `close()` libera el transporte y es idempotente. La ficha
-construye `PlaybackEpisode` con ID AniList, aliases y número; el selector abre
-`ProviderPlaybackRoute`. No se crea un segundo sistema de reproducción.
+La arquitectura S0-S separa identidad, match de anime, episodio de proveedor,
+candidato de fuente, resolver del host y medio listo para libmpv. El manager y
+los contratos actuales son la base: no se crea otro registro, coordinador de
+reproducción ni player. La primera migración de un adapter debe entregar
+metadatos de host, modalidad (`media`, `embed` o `redirect`), idioma conocido o
+`unknown`, expiración y procedencia. Un embed no se pasa a libmpv como si fuera
+un archivo.
 
-## Carpetas y archivos principales
+## Añadir un adapter de forma estática
 
-- `animeheaven/animeheaven_playback_provider.dart`: búsqueda exacta, catálogo,
-  gate público y construcción de `PlaybackSource`.
-- `animeheaven/animeheaven_html_parser.dart`: parser puro de búsqueda,
-  episodios, keys gate y mirrors permitidos; no ejecuta scripts.
-- `animeheaven/animeheaven_mp4_resolver.dart`: comprobación host/MIME/prefix y
-  conversión a `ResolvedPlaybackStream`.
-- `animeheaven/animeheaven_http.dart`: límites de bytes, cancelación de Dio,
-  tiempo delegado a BaseOptions y rechazo de redirects.
-- `playback_providers_module.dart`: composition root y ciclo de vida del HTTP.
-- `mock/`: fixtures de contrato; no se registra en runtime.
+1. Implementar la búsqueda/matching y el listado de episodios en el módulo de
+proveedor, sin importar Flutter ni el engine.
+2. Devolver candidatos tipados y no asumir que un HTTP 200 es media reproducible.
+3. Mantener el protocolo de cada host en un `VideoHostResolver` independiente;
+un adapter de anime no debe repetir resolutores compartidos.
+4. Registrar ambos una sola vez desde `PlaybackProvidersModule`, con ID estable,
+versión, prioridad y capacidades explícitas.
+5. Añadir pruebas offline para matching, episodios, candidate, cancelación,
+redacción, redirects, formato y fallback. Añadir un smoke online acotado y
+opt-in si existe una ruta pública ordinaria.
+6. Integrar el resultado a la ruta y al engine existentes. Verificar frame,
+avance, cierre y retorno a la ficha antes de usar el estado `verified_video`.
 
-## Protocolo, idiomas y límites
+No se soportan scripts remotos, código arbitrario de extensiones, DRM,
+autenticación, CAPTCHA, WAF ni transformación de streams protegidos. No se
+registran URLs firmadas completas en logs o documentación.
 
-El recorrido actual usa GET ordinarios: búsqueda `search.php`, ficha
-`anime.php`, lista de episodios y `gate.php`. La página pública del episodio
-publica una key corta para el flujo de gate; el provider la envía solamente
-como cookie `key` a `gate.php`. No se envían cookies de cuenta, autorización,
-challenge ni datos del navegador. Las URLs de video que contienen tokens de
-tiempo limitado se mantienen solo en memoria y no se escriben en logs ni en
-caché.
+El módulo AnimesDigital tiene su contrato, límites, dependencias, pruebas y
+estado en [`animesdigital/README.md`](animesdigital/README.md). Un proveedor
+nuevo debe tener su propio README y no debe copiar la resolución de host.
 
-El alcance implementado es MP4 progresivo y una calidad por episodio. Los
-hosts se restringen por nombre completo a `ax`, `cx`, `cy`, `ct` y `ck` bajo
-`animeheaven.me`. Cada mirror es alternativa del mismo encode, no una calidad.
-Los GET del provider y el probe de media no siguen redirecciones. El probe pide
-`Range: bytes=0-31`, conserva como máximo el prefijo mínimo y valida `video/mp4`
-más `ftyp`. En el probe live previo, la respuesta fue `206 video/mp4` pero el
-`Content-Range` describió el archivo entero pese a pedir un byte; el resolver
-no confía en ese encabezado y el player sigue siendo la prueba decisiva.
+## Dependencias, pruebas y referencias
 
-La referencia upstream fijada de AnimeHeaven en Anilili declara contenido
-subtitulado sin doblaje ni selección de subtítulo. El idioma de subtítulo del
-episodio probado aún no se validó dentro de Kongroo, por lo que la UI no lo
-etiqueta como español ni multilenguaje. Se adaptó el protocolo y se escribió
-un parser independiente; no se copió el código upstream. Referencia/licencia:
-[AnimeHeavenProvider.kt en Anilili, revisión `d7b80f1`, MIT-0](https://github.com/sanilili/Anilili/blob/d7b80f1f5b6c3d014317af471a8565749947397d/app/src/main/java/com/anilili/data/remote/AnimeHeavenProvider.kt).
-
-## Dependencias e interfaces
-
-- Dio ya está en `app/pubspec.yaml`; no se añadió paquete.
-- Domain: `PlaybackSourceProvider`, `PlaybackVideoHostResolver`,
-  `PlaybackEpisode`, `PlaybackSource`, `PlaybackServer` y
-  `ResolvedPlaybackStream`.
-- Application: manager, breakers y `PlaybackSourceSwitchService` existentes.
-- Player: `ProviderPlaybackRoute` y engine media_kit/libmpv existentes.
-- Sin cliente, widget, cache o engine paralelo.
-
-## Pruebas
+No se añadieron dependencias: AnimesDigital usa Dio, ya existente. Cada
+adaptador de datos usa una implementación HTTP portable; el dominio y la
+coordinación no dependen de Linux, Android o Windows. El adapter posee su Dio
+por defecto y lo libera desde el composition root al cerrar la aplicación.
 
 Desde `app/`:
 
 ```bash
 ../.ai-local/toolchains/flutter/bin/flutter test --no-pub \
-  test/data/player/providers/animeheaven \
-  test/data/player/providers/playback_providers_module_test.dart
+  test/data/player/providers/animesdigital \
+  test/data/player/providers/playback_providers_module_test.dart \
+  test/application/playback_provider_manager_test.dart \
+  test/domain/playback_provider_contract_test.dart
 ```
 
-Los tests fake cubren búsqueda exacta, episodio/key, eliminación de source
-decoy en comentarios, allowlist, duplicados, redirects, MP4/MIME, Range con
-metadatos anómalos, cancelación y paso por manager/resolver. No prueban
-disponibilidad externa ni decodificación del sitio.
+Canario live de resolución del proveedor y manifiesto, desde `app/`:
 
-Para el smoke real con ventana Linux, usar
-[`app/tool/README.md`](../../../../../tool/README.md). No usar `flutter test`
-para requests live: `TestWidgetsFlutterBinding` intercepta `HttpClient` y
-devuelve 400. El primer intento GUI se documenta en
-[`S0-REAL-PLAYBACK-REPORT.md`](../../../../../docs/ai-system/missions/S0-REAL-PLAYBACK-REPORT.md);
-hubo ventana libmpv pero no un cuadro visible confirmado.
+```bash
+../.ai-local/toolchains/flutter/bin/dart run tool/animesdigital_live_harness.dart
+```
+
+El normalizador genérico preserva fuentes directas HTTPS MP4/HLS/DASH y rechaza
+esquemas no HTTPS, credenciales, fragmentos, puertos distintos de 443 y
+destinos locales/IP privados conocidos. No resuelve DNS ni valida redirects;
+no debe confundirse con un extractor de hosts. Un smoke opt-in entregó el HLS
+público de prueba a libmpv y avanzó 2 s, pero no mostró una ventana ni un
+episodio de anime. La suite del player está separada en
+[`TESTING.md`](../../../../../TESTING.md).
+Los patrones y licencias upstream estudiados para S0-S se resumen en
+[`S0-S baseline`](../../../../../docs/ai-system/missions/S0-S-BASELINE-AND-IMPLEMENTATION.md).

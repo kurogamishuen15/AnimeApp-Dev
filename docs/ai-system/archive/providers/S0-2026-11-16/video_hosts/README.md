@@ -1,3 +1,5 @@
+> ARCHIVO HISTÓRICO — Esta página se conserva como registro de un intento anterior; no describe el runtime actual. Los adaptadores y resolutores de este intento fueron retirados en S0-S (2026-11-16). Consulta el [índice vigente](../README.md) y la [línea base/estado S0-S](../../../../missions/S0-S-BASELINE-AND-IMPLEMENTATION.md).
+
 # Video host resolvers
 
 ## Estado actual — 2026-11-16

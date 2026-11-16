@@ -1030,7 +1030,7 @@ for url in sys.argv[1:]:
         reason:
             'switch=${result.status}, service=${service.state.error}, '
             'attempted=${provider.attemptedServers}, calls=${provider.resolveCalls}, '
-            'diagnostics=${manager.diagnostics.map((d) => d.resolutionLastFailure).toList()}, '
+            'hostDiagnostics=${manager.hostDiagnostics.map((d) => (d.hostId, d.lastFailure)).toList()}, '
             'session=${coordinator.state.status}/${coordinator.state.error}, '
             'uri=${coordinator.state.sourceUri}, duration=${coordinator.state.duration}, '
             'position=${coordinator.state.position}',

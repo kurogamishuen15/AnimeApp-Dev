@@ -1,5 +1,7 @@
 import 'package:anime_app/data/player/providers/mock/mock_playback_provider.dart';
 import 'package:anime_app/domain/catalog/anime_id.dart';
+import 'package:anime_app/domain/catalog/external_anime_id.dart';
+import 'package:anime_app/domain/player/providers/anime_identity.dart';
 import 'package:anime_app/domain/player/providers/playback_provider_contract.dart';
 import 'package:anime_app/domain/player/providers/playback_source.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -129,11 +131,44 @@ void main() {
     expect(PlaybackProviderId(' MOCK ').value, 'mock');
   });
 
+  test('playback bridge preserves all namespaced external anime IDs', () {
+    final ExternalAnimeId anilistId = ExternalAnimeId(
+      providerId: MetadataProviderId('anilist'),
+      value: '21',
+    );
+    final ExternalAnimeId malId = ExternalAnimeId(
+      providerId: MetadataProviderId('myanimelist'),
+      value: '123',
+    );
+    final AnimeIdentity identity = AnimeIdentity(
+      localId: AnimeId('multi-crosswalk'),
+      externalIds: [anilistId, malId],
+      titles: ['One Piece'],
+    );
+
+    final PlaybackEpisode fromIdentity = PlaybackEpisode.fromIdentity(
+      identity,
+      episodeNumber: 7,
+    );
+    final PlaybackEpisode reversed = PlaybackEpisode(
+      animeId: identity.localId,
+      episodeNumber: 7,
+      externalAnimeIds: [malId, anilistId],
+      animeTitles: identity.titles,
+    );
+
+    expect(fromIdentity.identity.externalIds, [anilistId, malId]);
+    expect(fromIdentity.externalAnimeId, anilistId);
+    expect(fromIdentity.requestKey, reversed.requestKey);
+  });
+
   test('playback request context permits only a public HTTPS referer', () {
     final PlaybackRequestHeaders headers = PlaybackRequestHeaders({
-      'referer': 'https://www.animegg.org/',
+      'referer': 'https://www.animegg.org/watch/episode-1',
     });
-    expect(headers.values, {'Referer': 'https://www.animegg.org/'});
+    expect(headers.values, {
+      'Referer': 'https://www.animegg.org/watch/episode-1',
+    });
     expect(
       () => PlaybackRequestHeaders({'Cookie': 'session=private'}),
       throwsArgumentError,
@@ -154,7 +189,6 @@ void main() {
       'https://127.0.0.1/',
       'https://[::1]/',
       'https://provider.example:8443/',
-      'https://provider.example/episode/1',
     ]) {
       expect(
         () => PlaybackRequestHeaders({'Referer': nonPublicOrigin}),
@@ -162,6 +196,12 @@ void main() {
         reason: 'Rejected non-public or non-origin Referer: $nonPublicOrigin',
       );
     }
+    expect(
+      () => PlaybackRequestHeaders({
+        'Referer': 'https://provider.example/episode/1?token=private',
+      }),
+      throwsArgumentError,
+    );
     expect(
       () =>
           PlaybackRequestHeaders({'Referer': 'https://example.org/?key=value'}),

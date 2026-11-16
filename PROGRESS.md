@@ -4,7 +4,39 @@ Fuente viva del estado de fases. Actualizar al terminar o bloquear una subfase; 
 
 Estados: Pendiente, En desarrollo, Completado, Bloqueado, Requiere revisión.
 
-## Kongroo — S0-R AnimeHeaven — 2026-11-16
+## Kongroo — S0-S source-first / host-first — 2026-11-16
+
+La limpieza de runtime terminó y se archivaron READMEs/evidencias anteriores.
+El root ahora registra `AnimesDigitalPlaybackProvider` v1.0.0 como candidato,
+un `DirectMediaHostResolver` común y el manager existente con cache/breakers
+acotados. La búsqueda exacta encontró One Piece, el episodio 1180 y un HLS
+público. GET ordinario validó manifiesto 200/4998 bytes (142 segmentos) y el
+primer segmento TS 200/67258 bytes.
+
+La ejecución gráfica real con la UI y engine existentes abrió el medio y
+reportó metadatos/pistas, pero las capturas de One Piece episodios 1180 y 1
+mostraron pantalla negra y “The media could not be opened or decoded.” No se
+acreditan video visible, audio ni reproducción funcional. `AnimesDigital`
+permanece candidato; S0-S sigue parcial. El código conecta la ficha, su episodio,
+el manager, selector y `ProviderPlaybackRoute`; falta validar con interacción
+gráfica real el clic y retorno. La ruta productiva espera `Player.open()` antes
+de montar su superficie, mientras el harness la monta primero; una regresión
+debe aislar si esa diferencia explica el fallo antes de tocar el engine.
+
+La prueba focalizada de AnimesDigital pasó 7/7. La suite Flutter completa más
+reciente pasó 300 pruebas y omitió 7 optativas. Dart analyze (`lib test tool`) y
+Flutter analyze (`--no-pub`) no reportaron problemas. La revisión independiente
+confirmó varias correcciones y encontró que el límite de 20 s se renovaba por
+solicitud; ahora es un presupuesto compartido por operación, cubierto por un
+test lento. Engine/UI y dependencias del player no se modificaron. Linux es lo
+único probado; Android/Windows, streaming en equipo de 4 GB y CPU/RAM del stream
+siguen pendientes. Una corrida `ffprobe` observó una referencia HLS `.webp`
+rechazada por el filtro de extensiones; esto no se confirmó como causa del error
+de libmpv. La siguiente petición del provider terminó en timeout. No se amplió
+el filtro. Las pruebas offline nuevas del diagnóstico pasaron 3/3; la suite
+completa más reciente pasó 300/7. No hay commit ni push. Ver [informe y baseline](docs/ai-system/missions/S0-S-BASELINE-AND-IMPLEMENTATION.md), [STATUS](docs/ai-system/missions/KONGROO-RECONSTRUCTION-STATUS.md), [HANDOFF](docs/ai-system/missions/KONGROO-RECONSTRUCTION-HANDOFF.md) y [auditoría](docs/ai-system/audits/S0S-audit-2026-11-16.md).
+
+## Historial — Kongroo S0-R AnimeHeaven — 2026-11-16
 
 Se integró un provider AnimeHeaven y resolver MP4 en el composition root
 existente, sin agregar dependencias ni un segundo reproductor. One Piece ep. 1

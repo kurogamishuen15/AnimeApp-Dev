@@ -1,6 +1,6 @@
 # Código Flutter
 
-La aplicación sigue una separación por capas; `main.dart` y los composition roots conectan implementaciones concretas. La ficha conserva la ruta al player `SpikePlayerModule` y el runtime registra AnimeHeaven con su resolver MP4 separado. La reproducción de un episodio externo aún no está confirmada; el progreso todavía no está integrado con el player.
+La aplicación sigue una separación por capas; `main.dart` y los composition roots conectan implementaciones concretas. La ficha conserva el `SpikePlayerModule` y el único motor media_kit/libmpv. S0-S registra `AnimesDigitalPlaybackProvider` como candidato y el normalizador genérico `DirectMediaHostResolver`. El HLS y su primer segmento se descargaron por HTTP ordinario, pero la ventana de libmpv mostró pantalla negra y error de decodificación; no se acredita reproducción. El progreso todavía no está integrado con el player.
 
 | Carpeta | Responsabilidad | Guía |
 |---|---|---|

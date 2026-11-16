@@ -60,7 +60,10 @@ final class MockPlaybackProvider
   String get resolverId => 'mock-${id.value}';
 
   @override
-  bool supports(PlaybackServer server) =>
+  String get hostId => id.value;
+
+  @override
+  bool supports(SourceCandidate server) =>
       server.endpoint.scheme == 'file' ||
       server.endpoint.host == '${id.value}.mock.invalid';
 
@@ -131,7 +134,7 @@ final class MockPlaybackProvider
   @override
   Future<PlaybackProviderResult<ResolvedPlaybackStream>> resolve(
     PlaybackSource source,
-    PlaybackServer server, {
+    SourceCandidate server, {
     required PlaybackCancellationToken cancellation,
   }) async {
     resolveCalls++;

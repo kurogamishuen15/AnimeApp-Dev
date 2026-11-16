@@ -32,5 +32,26 @@ String? playbackResolutionMessage(
       PlaybackProviderFailureKind.cancelled =>
         'La consulta se canceló. Inténtalo de nuevo.',
       PlaybackProviderFailureKind.circuitOpen => 'Los proveedores están temporalmente en pausa tras varios fallos. Inténtalo más tarde.',
+      PlaybackProviderFailureKind.missingId =>
+        'No se pudo identificar este anime en el proveedor.',
+      PlaybackProviderFailureKind.noEpisodes =>
+        'El proveedor no encontró el episodio solicitado.',
+      PlaybackProviderFailureKind.noSources =>
+        'El episodio no tiene una fuente de reproducción disponible.',
+      PlaybackProviderFailureKind.forbidden ||
+      PlaybackProviderFailureKind.blocked =>
+        'El proveedor no permite acceder a esta fuente.',
+      PlaybackProviderFailureKind.notFound =>
+        'La fuente solicitada ya no está disponible.',
+      PlaybackProviderFailureKind.unsupportedEmbed =>
+        'Esta alternativa solo ofrece un reproductor web incompatible.',
+      PlaybackProviderFailureKind.expired =>
+        'La fuente de reproducción venció. Vuelve a cargar las alternativas.',
+      PlaybackProviderFailureKind.invalidManifest =>
+        'El manifiesto multimedia no pasó la validación.',
+      PlaybackProviderFailureKind.decoderFailure =>
+        'El motor no pudo decodificar el contenido multimedia.',
+      PlaybackProviderFailureKind.unknown =>
+        'No se pudo clasificar el error de reproducción.',
     },
 };

@@ -7,31 +7,49 @@ Estado: vigente
 Decisión: AI-001, AI-002
 Evidencia: Herramientas, docs y resultados reproducibles
 
-### Último handoff: S0-R AnimeHeaven live — 2026-11-16
+### Último handoff: S0-S — source-first/host-first — 2026-11-16
 
-AnimeHeaven está registrado en `PlaybackProvidersModule`; su código vive en
-`app/lib/data/player/providers/animeheaven/`. El recorrido público de One Piece
-ep. 1 ofreció `mirror-cx`, `mirror-ct` y `mirror-ck`; los tres se abrieron
-secuencialmente por la ruta real y libmpv mostró error genérico sin imagen.
-Resultado: 1 provider implementado, 0 reproducibles, 0/70. Capturas en
-`.ai-local/review/s0r-animeheaven-visible.png`,
-`s0r-animeheaven-mirror-switch.png`, `s0-animeheaven-mirror-cx.png` y
-`s0-animeheaven-mirror-ck.png`. No almacenar ni imprimir URIs efímeras.
+La limpieza retiró AnimeHeaven y archivó READMEs/evidencias anteriores. El root
+registra `AnimesDigitalPlaybackProvider` v1.0.0 como candidato y
+`DirectMediaHostResolver` genérico HTTPS MP4/HLS/DASH. One Piece ep. 1180
+entregó manifiesto 200/4,998 B (142 segmentos) y primer TS 200/67,258 B; ep. 1
+también entregó HLS/segmento por HTTP. Las dos capturas libmpv muestran negro y
+“The media could not be opened or decoded”; no hay reproducción confirmada. El
+único manager conserva registro SemVer, caché LRU de 128 y circuitos de host
+limitados a 128. Domain separa identidad, match, episodios y el adapter de tres
+fases. Ficha→manager→selector→ruta está cableado en código, sin clic/retorno
+gráfico validado. Engine/UI y dependencias del player no se tocaron.
 
-13 tests focalizados y 48 regresiones centradas en provider/manager/route,
-Flutter analyze completo y Dart analyze focalizado pasan.
-El propietario respondió «Autorizar manualmente en KDE»; después, la captura ya
-no mostró el diálogo, aunque Wayland MCP siguió desconectado (`Transport
-closed`). No se simuló entrada: el harness seleccionó cada ID por entorno. No
-repetir esos tres mirrors sin evidencia nueva; `ax` y `cy` no fueron publicados
-por el episodio y no deben inferirse. No hay medición del stream ni en el equipo
-objetivo de 4 GB. Las rutas live ya probadas no aportaron otra fuente elegible,
-pero el inventario completo no está agotado: la revisión de Anivexa enumera 28
-candidatos y solo sondeó AniChan, AniPM y Zoko. El siguiente paso es inspeccionar
-estáticamente un candidato no probado; solo hacer como máximo un GET si revela
-un host distinto y una ruta pública ordinaria sin sesión, autenticación,
-challenge ni transformación protegida. S0 sigue parcial. Preservar cambios; sin
-staging, commit ni push. Ver STATUS, HANDOFF e informe S0.
+Provider test 7/7; suite Flutter más reciente 300 aprobadas/7 optativas omitidas; Dart
+analyze y Flutter analyze sin issues. Se cambió el timeout por petición a un
+presupuesto total de 20 s por operación, cubierto por prueba loopback. La
+auditoría independiente post-fix confirmó requestKey, límites HTML y deadline
+individual; advirtió la multiplicación del timeout, ya corregida con presupuesto
+total por operación. Checker de imports, sus tests, 40 tests Python,
+`memory.py check`, formato, build Linux y `git diff --check` pasaron. La ruta
+productiva espera `Player.open()` antes de montar superficie, mientras el
+harness la montó primero; falta regresión para aislar causalidad. No se midió
+rendimiento del provider. Android/Windows, mpv CLI y equipo de 4 GB no
+validados. S0-S sigue parcial. Ver la
+[auditoría](../ai-system/audits/S0S-audit-2026-11-16.md), README de AnimesDigital
+y el [baseline S0-S](../ai-system/missions/S0-S-BASELINE-AND-IMPLEMENTATION.md).
+Sin staging, commit ni push.
+
+Continuación: `KONGROO_LIVE_FFPROBE=1` reportó una referencia HLS `.webp`
+rechazada por el filtro de extensiones de FFmpeg; no es diagnóstico libmpv
+confirmado. Una petición posterior agotó el timeout. El harness fue analizado
+con `dart analyze` y los tests offline pasaron 3/3; no se amplió la lista de
+extensiones ni se modificó el engine. S0-S continúa parcial.
+
+Ver [baseline/informe S0-S](../ai-system/missions/S0-S-BASELINE-AND-IMPLEMENTATION.md),
+[STATUS](../ai-system/missions/KONGROO-RECONSTRUCTION-STATUS.md) y
+[HANDOFF](../ai-system/missions/KONGROO-RECONSTRUCTION-HANDOFF.md).
+
+### Handoff histórico: S0-R AnimeHeaven live — 2026-11-16
+
+El snapshot anterior registró AnimeHeaven y los mirrors `cx`, `ct`, `ck` que
+fallaron sin frame. El código y el harness fueron retirados durante S0-S; la
+evidencia quedó archivada. No reactivar ni repetir sin evidencia nueva.
 
 ### Handoff histórico: S0-R Gates 0–1 — 2026-11-16
 

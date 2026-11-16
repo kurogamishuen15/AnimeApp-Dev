@@ -10,13 +10,52 @@ Evidencia: `PROGRESS.md`, F1.1–F1.3 y sesiones enlazadas abajo
 ## Objetivo y alcance
 **Regla permanente del usuario:** los archivos de proyecto solo se inspeccionan y modifican dentro de la raíz Git y sus subcarpetas; no seguir symlinks externos ni explorar archivos personales no autorizados. Los mensajes del chat son instrucciones directas. Los adjuntos enviados expresamente por el propietario pueden leerse en solo lectura desde la ruta que la plataforma proporciona, sin recorrer archivos vecinos. Respetar permisos del sandbox y mantener cambios de código dentro del repositorio.
 
-Preparar memoria, coordinación y ejecución segura únicamente en esta carpeta de Vídeos. El proyecto contiene el scaffold Flutter Linux (F0.4), controles de calidad (F0.5), medición inicial (F0.6), módulos del núcleo F1, catálogo/biblioteca/progreso y un player reutilizable. Miruro se retiró en una limpieza posterior. El runtime actual registra AnimeHeaven y un resolver MP4 modular; los tres mirrors publicados para el episodio probado (`cx`, `ct`, `ck`) llegaron a libmpv y fallaron sin frame. S0 sigue incompleta, playback externo 0/70. F0.4–F0.6 y demás estados de fase conservan sus condiciones de aceptación.
+Preparar memoria, coordinación y ejecución segura únicamente en esta carpeta de Vídeos. El proyecto contiene el scaffold Flutter Linux (F0.4), controles de calidad (F0.5), medición inicial (F0.6), módulos del núcleo F1, catálogo/biblioteca/progreso y un player reutilizable. En S0-S se retiró AnimeHeaven y otros adapters antiguos; el root registra `AnimesDigitalPlaybackProvider` v1.0.0 como candidato junto al único normalizador `DirectMediaHostResolver` y el único engine media_kit/libmpv. El manager comparte contratos de identidad/episodios/fuentes, cache LRU de 128 resultados y circuitos LRU limitados a 128 hostnames. Los episodios 1180 y 1 de One Piece entregaron manifiesto/segmentos HLS por HTTP; las ventanas de libmpv mostraron negro/error de decodificación. No se confirma reproducción. El flujo ficha→manager→selector→ruta está conectado en código, pero el clic real y retorno no se probaron gráficamente. S0-S sigue parcial; Android/Windows y el equipo objetivo de 4 GB no se validaron. F0.4–F0.6 y demás estados de fase conservan sus condiciones de aceptación.
 
 ## Estado
 
-### S0-R — provider AnimeHeaven live sin frame — 2026-11-16
+### S0-S — limpieza y contratos source-first/host-first — 2026-11-16
 
-El composition root registra AnimeHeaven y su resolver MP4, usando el manager,
+Se retiraron del runtime los archivos/test/harness específicos de AnimeHeaven y
+se archivaron los READMEs de AnimeHeaven, AnimeAV1, TioAnime, AnimeGG, Miruro,
+AnimeOnline Ninja y `video_hosts`. No se modificó `media_kit`, libmpv, la UI ni
+las dependencias del player. Domain añade `AnimeIdentity`, match/episodio de
+proveedor y el bridge de tres fases `EpisodeSourceAdapter`; application mantiene
+un solo manager con registros versionados, cache LRU/TTL y breakers de
+descubrimiento por provider y resolución por hostname. Data registra
+`AnimesDigitalPlaybackProvider` v1.0.0 y el normalizador compartido
+`DirectMediaHostResolver`.
+
+Prueba live: One Piece ep. 1180 encontró una fuente pública HLS. El manifiesto
+respondió 200 (4,998 bytes, 142 segmentos) y el primer segmento 200 (67,258
+bytes, MPEG-TS). Ep. 1 también entregó manifiesto 200/5,313 bytes y segmento TS
+200/69,756 bytes. Ambas capturas de ventana mostraron pantalla negra/error de
+decodificación; no se declara reproducción funcional. La ruta de producto está
+conectada en código. La secuencia normal espera `Player.open()` antes de montar
+superficie; su relación con el fallo visual sigue sin prueba causal.
+
+La prueba de provider AnimesDigital pasó 7/7; la suite Flutter completa más
+reciente pasó 300 y omitió 7 casos optativos. Dart analyze y Flutter analyze no reportaron
+problemas. Se corrigió el timeout renovado por cada petición: cada operación
+comparte ahora 20 s y un test loopback lo verifica. Auditoría independiente
+post-fix completada. El build Linux debug, formato, checker/import tests, 40
+pruebas Python, `memory.py check` (`[]`) y `git diff --check` pasaron. Linux es
+lo único ejercitado; Android/Windows, mpv CLI, reproducción visible, rendimiento
+durante streaming y hardware de 4 GB están pendientes. No commit/push. Detalles en
+[informe S0-S](../ai-system/missions/S0-S-BASELINE-AND-IMPLEMENTATION.md),
+[STATUS](../ai-system/missions/KONGROO-RECONSTRUCTION-STATUS.md) y
+[HANDOFF](../ai-system/missions/KONGROO-RECONSTRUCTION-HANDOFF.md).
+
+Seguimiento posterior: una corrida `KONGROO_LIVE_FFPROBE=1` de ep. 1 observó
+rechazo de una referencia HLS `.webp` por `allowed_segment_extensions`. No
+prueba que libmpv falle por esa razón ni autoriza ampliar el filtro. La
+siguiente petición al provider terminó timeout. No se modificó el engine ni se
+cambiaron extensiones permitidas. Los tests offline del diagnóstico pasaron
+3/3 y Dart analyze no reportó issues.
+
+### Snapshot histórico — S0-R provider AnimeHeaven live sin frame — 2026-11-16
+
+En ese snapshot, el composition root registraba AnimeHeaven y su resolver MP4, usando el manager,
 la ruta y el único engine existentes. La búsqueda pública de One Piece, episodio
 1, publicó `cx`, `ct` y `ck`; los tres llegaron a libmpv y mostraron error de
 decodificación sin frame. Hay un provider implementado y cero reproducibles;

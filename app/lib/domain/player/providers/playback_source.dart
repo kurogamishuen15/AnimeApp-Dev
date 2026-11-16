@@ -1,14 +1,21 @@
 import 'package:anime_app/domain/catalog/anime_id.dart';
 import 'package:anime_app/domain/catalog/external_anime_id.dart';
 
+import 'anime_identity.dart';
+
 /// Provider-independent identity of an episode requested for playback.
 final class PlaybackEpisode {
   PlaybackEpisode({
     required this.animeId,
     required this.episodeNumber,
-    this.externalAnimeId,
+    ExternalAnimeId? externalAnimeId,
+    Iterable<ExternalAnimeId> externalAnimeIds = const [],
     Iterable<String> animeTitles = const [],
-  }) : animeTitles = List.unmodifiable(
+  }) : externalAnimeIds = List.unmodifiable(<ExternalAnimeId>{
+         ...externalAnimeIds,
+         ?externalAnimeId,
+       }),
+       animeTitles = List.unmodifiable(
          animeTitles
              .map((String title) => title.trim())
              .where((String title) => title.isNotEmpty)
@@ -22,20 +29,45 @@ final class PlaybackEpisode {
     }
   }
 
+  factory PlaybackEpisode.fromIdentity(
+    AnimeIdentity identity, {
+    required int episodeNumber,
+  }) => PlaybackEpisode(
+    animeId: identity.localId,
+    episodeNumber: episodeNumber,
+    externalAnimeIds: identity.externalIds,
+    animeTitles: identity.titles,
+  );
+
   final AnimeId animeId;
   final int episodeNumber;
-  final ExternalAnimeId? externalAnimeId;
+  final List<ExternalAnimeId> externalAnimeIds;
+  ExternalAnimeId? get externalAnimeId =>
+      externalAnimeIds.isEmpty ? null : externalAnimeIds.first;
   final List<String> animeTitles;
 
+  AnimeIdentity get identity => AnimeIdentity(
+    localId: animeId,
+    externalIds: externalAnimeIds,
+    titles: animeTitles,
+  );
+
   String get requestKey {
-    if (externalAnimeId == null && animeTitles.isEmpty) {
+    if (externalAnimeIds.isEmpty && animeTitles.isEmpty) {
       return '${animeId.value}:$episodeNumber';
     }
-    final String titles = animeTitles
-        .map((String title) => title.toLowerCase())
-        .toList()
-        .join('|');
-    return '${animeId.value}:$episodeNumber:${externalAnimeId?.canonicalKey ?? ''}:$titles';
+    final List<String> external =
+        externalAnimeIds.map((ExternalAnimeId id) => id.canonicalKey).toList()
+          ..sort();
+    final List<String> titles =
+        animeTitles.map((String title) => title.toLowerCase()).toSet().toList()
+          ..sort();
+    String frame(List<String> values) =>
+        '${values.length}[${values.map((String value) => '${value.length}:$value').join()}]';
+
+    final String localId = animeId.value;
+    return '${localId.length}:$localId;$episodeNumber;'
+        '${frame(external)}${frame(titles)}';
   }
 }
 
@@ -98,26 +130,61 @@ final class PlaybackSource {
   final List<PlaybackServer> servers;
 }
 
-/// A provider's server/endpoint alternative for one playback source.
-final class PlaybackServer {
-  PlaybackServer({
+enum PlaybackCandidateKind { media, embed, redirect }
+
+enum PlaybackMediaFormat { unknown, mp4, hls, dash }
+
+/// One provider-published endpoint candidate, including its host identity and
+/// presentation modality. `PlaybackServer` remains a source-compatible alias.
+final class SourceCandidate {
+  SourceCandidate({
     required this.id,
     required this.endpoint,
+    String? hostId,
     this.priority = 0,
+    this.kind = PlaybackCandidateKind.media,
+    this.declaredLanguage = 'unknown',
+    this.quality,
+    this.sourceEpisodeId,
+    this.expiresAt,
+    this.provenance = 'provider candidate',
     this.requestHeaders = const PlaybackRequestHeaders.empty(),
-  }) {
+  }) : hostId = (hostId ?? _hostIdFor(endpoint)).trim().toLowerCase() {
     if (id.trim().isEmpty ||
+        !RegExp(r'^[a-z0-9][a-z0-9._-]{0,127}$').hasMatch(this.hostId) ||
         !const {'http', 'https', 'file'}.contains(endpoint.scheme) ||
-        (endpoint.scheme != 'file' && endpoint.host.isEmpty)) {
+        (endpoint.scheme != 'file' && endpoint.host.isEmpty) ||
+        declaredLanguage.trim().isEmpty ||
+        (quality != null && quality!.length > 64) ||
+        (sourceEpisodeId != null &&
+            (sourceEpisodeId!.trim().isEmpty ||
+                sourceEpisodeId!.length > 256)) ||
+        provenance.trim().isEmpty ||
+        provenance.length > 512) {
       throw ArgumentError('Playback server is invalid.');
     }
   }
 
   final String id;
   final Uri endpoint;
+  final String hostId;
   final int priority;
+  final PlaybackCandidateKind kind;
+  final String declaredLanguage;
+  final String? quality;
+  final String? sourceEpisodeId;
+  final DateTime? expiresAt;
+  final String provenance;
   final PlaybackRequestHeaders requestHeaders;
+
+  /// Circuit key bound to the actual destination origin, not provider input.
+  String get hostKey => _hostIdFor(endpoint);
+
+  static String _hostIdFor(Uri uri) =>
+      uri.scheme == 'file' ? 'local' : uri.host.toLowerCase();
 }
+
+typedef PlaybackServer = SourceCandidate;
 
 /// Public, non-authentication HTTP context required by a media endpoint.
 ///
@@ -140,7 +207,7 @@ final class PlaybackRequestHeaders {
           uri.userInfo.isNotEmpty ||
           uri.hasQuery ||
           uri.hasFragment ||
-          !_isPublicHttpsOrigin(uri)) {
+          !_isPublicHttpsReferer(uri)) {
         throw ArgumentError('The public Referer header is invalid.');
       }
       validated['Referer'] = uri.toString();
@@ -156,7 +223,7 @@ final class PlaybackRequestHeaders {
 
   bool get isEmpty => values.isEmpty;
 
-  static bool _isPublicHttpsOrigin(Uri uri) {
+  static bool _isPublicHttpsReferer(Uri uri) {
     final String host = uri.host.toLowerCase();
     const Set<String> specialUseSuffixes = {
       'localhost',
@@ -174,7 +241,6 @@ final class PlaybackRequestHeaders {
     );
     return uri.scheme == 'https' &&
         uri.port == 443 &&
-        (uri.path.isEmpty || uri.path == '/') &&
         host.contains('.') &&
         !host.startsWith('.') &&
         !host.endsWith('.') &&
@@ -184,17 +250,24 @@ final class PlaybackRequestHeaders {
   }
 }
 
-/// Resolved data ready to pass to a playback coordinator; never owns a Player.
-final class ResolvedPlaybackStream {
-  ResolvedPlaybackStream({
+/// Normalized media ready for the existing playback coordinator; never owns a
+/// Player. Embeds and redirects are not valid playable sources.
+final class PlayableSource {
+  PlayableSource({
     required this.providerId,
     required this.sourceId,
     required this.serverId,
     required this.uri,
+    this.format = PlaybackMediaFormat.unknown,
+    this.expiresAt,
+    this.validatedAt,
+    this.provenance = 'host resolver',
     this.httpHeaders = const PlaybackRequestHeaders.empty(),
   }) {
     if (sourceId.trim().isEmpty ||
         serverId.trim().isEmpty ||
+        provenance.trim().isEmpty ||
+        provenance.length > 512 ||
         !const {'http', 'https', 'file'}.contains(uri.scheme) ||
         (uri.scheme != 'file' && uri.host.isEmpty)) {
       throw ArgumentError('Resolved playback stream is invalid.');
@@ -205,5 +278,14 @@ final class ResolvedPlaybackStream {
   final String sourceId;
   final String serverId;
   final Uri uri;
+  final PlaybackMediaFormat format;
+  final DateTime? expiresAt;
+  final DateTime? validatedAt;
+  final String provenance;
   final PlaybackRequestHeaders httpHeaders;
+
+  bool isExpiredAt(DateTime now) =>
+      expiresAt != null && !expiresAt!.isAfter(now);
 }
+
+typedef ResolvedPlaybackStream = PlayableSource;

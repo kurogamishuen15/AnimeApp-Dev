@@ -1,12 +1,12 @@
 # Arquitectura de AnimeApp
 
-Este documento conserva la arquitectura de referencia aprobada para F1.3 y registra las implementaciones locales posteriores. No todos los módulos conceptuales están implementados: el estado real se indica por módulo y en `PROGRESS.md`. El producto abre [Inicio](app/lib/app/home/README.md) dentro del shell de catálogo. La ficha está conectada a proveedores de reproducción y reutiliza el `SpikePlayerModule`/engine existentes; los streams externos encontrados hasta ahora no han demostrado reproducción exitosa. El progreso del player sigue sin integración.
+Este documento conserva la arquitectura de referencia aprobada para F1.3 y registra las implementaciones locales posteriores. No todos los módulos conceptuales están implementados: el estado real se indica por módulo y en `PROGRESS.md`. El producto abre [Inicio](app/lib/app/home/README.md) dentro del shell de catálogo. S0-S registra `AnimesDigitalPlaybackProvider` como candidato, conectado al manager y al engine existentes; obtuvo HLS/segmento públicos, pero una captura de libmpv mostró error de decodificación y pantalla negra. No hay reproducción externa de anime confirmada. El progreso del player sigue sin integración.
 
 ## Decisión de plataforma
 
-AnimeApp se construirá con un núcleo compartido y Fedora/Linux como primer destino de implementación y validación. Android, Android TV y Windows son destinos futuros. No se crearán ahora código, carpetas, adaptadores, servicios, interfaces ni dependencias específicos de esos destinos. Al incorporarlos se reutilizará el núcleo y se añadirán únicamente las piezas que una necesidad real de la plataforma justifique.
+AnimeApp se construirá con un núcleo compartido y Fedora/Linux como primer destino de implementación y validación. **La instrucción S0-S del 2026-11-16 establece compatibilidad arquitectónica obligatoria de los módulos de identidad, episodios, fuentes, resolutores y coordinación con Linux, Android y Windows desde ahora.** Android y Windows no se declaran ejecutados ni requieren crear anticipadamente adaptadores específicos si el contrato común es suficiente. Las funciones de red, almacenamiento, WebView y APIs nativas que sí varíen deben quedar en adaptadores independientes con contratos compartidos.
 
-El código general se escribirá en Dart reutilizable cuando sea técnicamente viable. Dominio y aplicación no dependerán de Flutter UI, Linux, plugins ni servicios externos. Flutter se utiliza en las capas de presentación y composición; las APIs del sistema y las bibliotecas concretas quedan en adaptadores. Esto conserva la independencia del dominio sin crear puertos abstractos que aún no tengan consumidor.
+El código general se escribirá en Dart reutilizable cuando sea técnicamente viable. Dominio y aplicación no dependerán de Flutter UI, Linux, plugins ni servicios externos. Flutter se utiliza en las capas de presentación y composición; las APIs del sistema y las bibliotecas concretas quedan en adaptadores. Los contratos de proveedores y fuentes deben poder reutilizarse en Linux, Android y Windows; solo hay ejecución validada en Linux a la fecha de S0-S.
 
 ## Diagrama de contexto
 
@@ -17,14 +17,14 @@ flowchart LR
   App[AnimeApp\nFlutter UI]
   Core[Núcleo compartido Dart]
   OS[Servicios y APIs Linux]
-  Future[Android · Android TV · Windows\nDESTINOS FUTUROS · NO IMPLEMENTADOS]
+  Future[Android · Windows\nCOMPATIBILIDAD DE CORE OBLIGATORIA · SIN VALIDACIÓN DE BUILD]
   User --> Linux --> App
   App --> Core
   App -->|adaptadores solo cuando se necesiten| OS
   Future -. reutiliza .-> Core
 ```
 
-La línea discontinua indica una dirección de portabilidad futura, no una integración actual.
+La línea discontinua indica que la implementación de UI/runner y la validación de Android/Windows siguen pendientes. La arquitectura de los módulos de providers/fuentes ya debe ser portable; no significa que la app completa haya pasado builds en esas plataformas.
 
 ## Diagrama de capas y dependencias
 
@@ -132,21 +132,21 @@ sequenceDiagram
   Engine-->>Route: estado del medio
 ```
 
-La ruta conserva `CatalogHomePage` → `PlaybackProviderManager` → selector → `ProviderPlaybackRoute` → el único `SpikePlayerModule`, `SpikePlayerCoordinator`, `MediaKitSpikeEngine` y `VideoController`. El composition root registra AnimeHeaven y su resolver MP4, pero los tres mirrors publicados (`cx`, `ct`, `ck`) para One Piece ep. 1 fallaron al abrir/decodificar y no presentaron imagen; no hay playback externo confirmado (0/70). El manager no controla libmpv. El entrypoint `main_player_spike.dart` sigue disponible para pruebas locales del motor; la superficie desactiva controles adaptativos y el player se cierra mediante su módulo. La vida nativa completa de `VideoController` aún carece de prueba end-to-end automatizada. Ver el [README de providers](app/lib/data/player/providers/README.md), el [README de AnimeHeaven](app/lib/data/player/providers/animeheaven/README.md), el [README del player](app/lib/app/player/README.md) y el [informe S0](docs/ai-system/missions/S0-REAL-PLAYBACK-REPORT.md).
+La ruta conserva `CatalogHomePage` → `PlaybackProviderManager` → selector → `ProviderPlaybackRoute` → el único `SpikePlayerModule`, `SpikePlayerCoordinator`, `MediaKitSpikeEngine` y `VideoController`. S0-S retiró AnimeHeaven y los adapters anteriores que no reprodujeron; `PlaybackProvidersModule` registra AnimesDigital únicamente como candidato y un normalizador `direct-media`. Su manifiesto y primer segmento HLS respondieron HTTP 200, pero el smoke del episodio en la ventana real mostró pantalla negra/error de decodificación y no representa playback. El manager no controla libmpv. El entrypoint `main_player_spike.dart` sigue disponible para pruebas locales del motor; la superficie desactiva controles adaptativos y el player se cierra mediante su módulo. La vida nativa completa de `VideoController` aún carece de prueba end-to-end automatizada. Ver los [READMEs de providers](app/lib/data/player/providers/README.md), [resolver directo](app/lib/data/player/providers/hosts/README.md), el [README del player](app/lib/app/player/README.md) y el [informe S0-S](docs/ai-system/missions/S0-S-BASELINE-AND-IMPLEMENTATION.md).
 
 ## Contratos y adaptadores
 
 - Mantener el dominio Dart puro; no importar Flutter, Dio, Drift, Supabase, `media_kit` ni APIs del sistema desde dominio.
 - La aplicación coordina casos de uso mediante contratos orientados a capacidades y resultados del negocio.
 - Un adaptador se justifica cuando una dependencia externa, almacenamiento, sistema operativo o mecanismo de presentación debe aislarse o sustituirse. Evitar interfaces espejo de cada clase de una biblioteca.
-- La capa de composición selecciona adaptadores Linux actuales y conecta implementaciones con contratos.
+- La composición conecta implementaciones con contratos compartidos; los providers y resolutores no pueden importar SDKs exclusivos de Linux, Android o Windows.
 - Preservar persistencia local-first. Sincronización remota es posterior y no almacena archivos de video.
 - El motor multimedia se valida antes de integrarse. `mobile_scanner` queda limitado a Android cuando esa plataforma se emprenda; no se incorpora en la etapa Linux.
 - Mantener cancelación, errores tipados, cierre de streams/controladores y liberación de memoria/recursos en el módulo propietario.
 
 ## Estructura futura propuesta para F1.4
 
-F1.4 implementará solamente el esqueleto necesario para Linux y los contratos compartidos que correspondan. Esta propuesta es el límite de planificación, no una autorización para adelantar implementaciones de F1.5 en adelante ni para añadir dependencias sin necesidad.
+La sección de F1.4 que sigue conserva el alcance histórico de esa fase. Para el núcleo de providers/fuentes, la orden S0-S posterior prevalece: contratos compartidos y Dart portable son obligatorios en Linux, Android y Windows. Esta actualización no adelanta interfaces de usuario ni runners Android/Windows.
 
 ### Conservar como base existente
 
