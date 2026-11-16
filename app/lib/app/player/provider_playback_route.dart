@@ -7,7 +7,9 @@ import '../../domain/player/providers/playback_source.dart';
 import 'playback_route_session.dart';
 import 'spike_player_module.dart';
 
-typedef PlaybackRouteSessionLoader = Future<PlaybackRouteSession> Function();
+typedef PlaybackRouteSessionLoader = Future<PlaybackRouteSession> Function(
+  PlaybackRouteOpenCancellation cancellation,
+);
 
 /// Plays a previously resolved public stream through the existing F2 player.
 /// The exact resolved URI list is passed as an allowlist to the existing
@@ -36,21 +38,28 @@ final class _ProviderPlaybackRouteState extends State<ProviderPlaybackRoute> {
   late final Future<PlaybackRouteSession> _moduleFuture =
       Future<PlaybackRouteSession>.sync(
         () =>
-            widget.moduleLoader?.call() ??
-            SpikePlayerModule.open(
-              null,
-              sourceProviderManager: widget.manager,
-              sourceEpisode: widget.episode,
-              initialResolvedSource: widget.initialStream,
-              trustedExternalSources: {
-                for (final ResolvedPlaybackStream stream in widget.streams)
-                  stream.uri,
-              },
+            widget.moduleLoader?.call(_openCancellation) ??
+            SpikePlayerModule.openForRoute(
+              () => SpikePlayerModule.open(
+                null,
+                sourceProviderManager: widget.manager,
+                sourceEpisode: widget.episode,
+                initialResolvedSource: widget.initialStream,
+                trustedExternalSources: {
+                  for (final ResolvedPlaybackStream stream in widget.streams)
+                    stream.uri,
+                },
+                startupCancellation: _openCancellation,
+              ),
             ),
       );
+  final PlaybackRouteOpenCancellation _openCancellation =
+      PlaybackRouteOpenCancellation();
   PlaybackRouteSession? _module;
   bool _closing = false;
   bool _disposed = false;
+  bool _startupCancellationRequested = false;
+  bool _safeToLeaveAfterCloseFailure = false;
   String? _closeError;
 
   @override
@@ -64,10 +73,25 @@ final class _ProviderPlaybackRouteState extends State<ProviderPlaybackRoute> {
     try {
       final PlaybackRouteSession module = _module ?? await _moduleFuture;
       await module.close();
+    } on SpikePlayerStartupCleanupFailure catch (failure) {
+      debugPrint(
+        'KONGROO_BACKGROUND_STARTUP_CLEANUP '
+        'native_player_still_owned=${failure.nativePlayerStillOwned} '
+        'non_native_cleanup_failed=${failure.nonNativeCleanupFailed}',
+      );
     } on Object {
       // Route teardown is best effort after removal; close failures are
       // already represented by the module's lifecycle contract.
     }
+  }
+
+  void _cancelPendingOpenAndReturn() {
+    if (_startupCancellationRequested || !mounted) return;
+    _openCancellation.request();
+    setState(() => _startupCancellationRequested = true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && !_disposed) Navigator.of(context).pop();
+    });
   }
 
   Future<void> _closeAndPop() async {
@@ -81,10 +105,21 @@ final class _ProviderPlaybackRouteState extends State<ProviderPlaybackRoute> {
       _module = module;
       await module.close();
       if (mounted && !_disposed) Navigator.of(context).pop();
+    } on PlaybackRouteCleanupFailure catch (failure) {
+      if (mounted) {
+        setState(() {
+          _closing = false;
+          _safeToLeaveAfterCloseFailure = !failure.nativePlayerStillOwned;
+          _closeError = failure.nativePlayerStillOwned
+              ? 'No se pudo confirmar la liberación del reproductor nativo. Reinicia la aplicación antes de volver a intentarlo.'
+              : 'El reproductor nativo se liberó, pero falló la limpieza de recursos secundarios. Puedes volver al catálogo.';
+        });
+      }
     } on Object {
       if (mounted) {
         setState(() {
           _closing = false;
+          _safeToLeaveAfterCloseFailure = false;
           _closeError = 'No se pudo cerrar el reproductor con seguridad.';
         });
       }
@@ -97,12 +132,18 @@ final class _ProviderPlaybackRouteState extends State<ProviderPlaybackRoute> {
     builder: (BuildContext context, AsyncSnapshot<PlaybackRouteSession> state) {
       final PlaybackRouteSession? module = state.data;
       if (module == null) {
-        final bool cleanupFailed =
-            state.error is SpikePlayerStartupCleanupFailure;
+        final SpikePlayerStartupCleanupFailure? cleanupFailure =
+            state.error is SpikePlayerStartupCleanupFailure
+            ? state.error! as SpikePlayerStartupCleanupFailure
+            : null;
+        final bool nativePlayerStillOwned =
+            cleanupFailure?.nativePlayerStillOwned ?? false;
         return PopScope<Object?>(
-          canPop: state.hasError && !cleanupFailed,
+          canPop:
+              _startupCancellationRequested ||
+              (state.hasError && !nativePlayerStillOwned),
           onPopInvokedWithResult: (bool didPop, Object? result) {
-            if (!didPop && !state.hasError) unawaited(_closeAndPop());
+            if (!didPop && !state.hasError) _cancelPendingOpenAndReturn();
           },
           child: Scaffold(
             body: Center(
@@ -111,12 +152,18 @@ final class _ProviderPlaybackRouteState extends State<ProviderPlaybackRoute> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          cleanupFailed
-                              ? 'No se pudo cerrar el reproductor con seguridad. Reinicia la aplicación antes de volver a intentarlo.'
+                          cleanupFailure != null
+                              ? nativePlayerStillOwned
+                                    ? 'No se pudo confirmar la liberación del reproductor nativo. Reinicia la aplicación antes de volver a intentarlo.'
+                                    : cleanupFailure.nonNativeCleanupFailed
+                                    ? 'El reproductor nativo se liberó, pero falló la limpieza de recursos secundarios.'
+                                    : 'No se pudo abrir el reproductor; el recurso nativo está liberado.'
+                              : state.error is PlaybackRoutePlayerBusy
+                              ? 'Un reproductor o una apertura anterior aún conserva el recurso nativo. Espera a que termine o reinicia la aplicación antes de reproducir de nuevo.'
                               : 'No se pudo abrir el reproductor.',
                           textAlign: TextAlign.center,
                         ),
-                        if (!cleanupFailed) ...[
+                        if (!nativePlayerStillOwned) ...[
                           const SizedBox(height: 16),
                           FilledButton.icon(
                             onPressed: () => Navigator.of(context).pop(),
@@ -126,16 +173,38 @@ final class _ProviderPlaybackRouteState extends State<ProviderPlaybackRoute> {
                         ],
                       ],
                     )
-                  : const Text('Abriendo reproducción…'),
+                  : Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          _startupCancellationRequested
+                              ? 'Cancelación solicitada. No se liberarán recursos nativos hasta que la apertura confirme que terminó; si no responde, reinicia la aplicación antes de intentar otra reproducción.'
+                              : 'Abriendo reproducción… La cancelación no interrumpe una llamada nativa que ya comenzó; si vuelves al catálogo, la sesión seguirá supervisada y conservará el lease hasta que responda. Reinicia la aplicación antes de reproducir de nuevo si no se recupera.',
+                          textAlign: TextAlign.center,
+                        ),
+                        if (!_startupCancellationRequested) ...[
+                          const SizedBox(height: 16),
+                          FilledButton.icon(
+                            onPressed: _cancelPendingOpenAndReturn,
+                            icon: const Icon(Icons.arrow_back),
+                            label: const Text(
+                              'Cancelar apertura y volver al catálogo',
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
             ),
           ),
         );
       }
       _module = module;
       return PopScope<Object?>(
-        canPop: false,
+        canPop: _safeToLeaveAfterCloseFailure,
         onPopInvokedWithResult: (bool didPop, Object? result) {
-          if (!didPop) unawaited(_closeAndPop());
+          if (!didPop && !_safeToLeaveAfterCloseFailure) {
+            unawaited(_closeAndPop());
+          }
         },
         child: Stack(
           fit: StackFit.expand,
@@ -146,8 +215,16 @@ final class _ProviderPlaybackRouteState extends State<ProviderPlaybackRoute> {
               left: 12,
               child: SafeArea(
                 child: IconButton.filledTonal(
-                  tooltip: _closing ? 'Cerrando' : 'Volver a la ficha',
-                  onPressed: _closing ? null : _closeAndPop,
+                  tooltip: _closing
+                      ? 'Cerrando'
+                      : _safeToLeaveAfterCloseFailure
+                      ? 'Volver al catálogo'
+                      : 'Volver a la ficha',
+                  onPressed: _closing
+                      ? null
+                      : _safeToLeaveAfterCloseFailure
+                      ? () => Navigator.of(context).pop()
+                      : _closeAndPop,
                   icon: _closing
                       ? const SizedBox.square(
                           dimension: 18,

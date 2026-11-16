@@ -1,12 +1,35 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:anime_app/app/player/playback_route_session.dart';
 import 'package:anime_app/app/player/spike_player_module.dart';
 import 'package:anime_app/data/player/engine/active_player_lease.dart';
+import 'package:anime_app/data/player/engine/media_kit_spike_engine.dart';
 import 'package:anime_app/domain/player/subtitles/external_subtitle_catalog.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('cancelled startup exits before acquiring native resources', () async {
+    final PlaybackRouteOpenCancellation cancellation =
+        PlaybackRouteOpenCancellation()..request();
+    bool engineFactoryCalled = false;
+
+    await expectLater(
+      SpikePlayerModule.open(
+        File('fixture.mkv'),
+        startupCancellation: cancellation,
+        engineFactory: () {
+          engineFactoryCalled = true;
+          throw StateError('engine factory should not run');
+        },
+      ),
+      throwsA(isA<PlaybackRouteOpenCancelled>()),
+    );
+
+    expect(engineFactoryCalled, isFalse);
+    expect(MediaKitSpikeEngine.hasActivePlayerLease, isFalse);
+  });
+
   test('invalid open arguments leave input catalogs caller-owned', () async {
     int disposeCalls = 0;
 
@@ -43,6 +66,13 @@ void main() {
     } finally {
       await concurrentOwner?.release(() async {});
     }
+  });
+
+  test('provider route receives a UI-safe lease contention error', () async {
+    await expectLater(
+      SpikePlayerModule.openForRoute(() => throw ActivePlayerLeaseInUse()),
+      throwsA(isA<PlaybackRoutePlayerBusy>()),
+    );
   });
 
   test(

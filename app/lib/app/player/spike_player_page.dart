@@ -89,8 +89,12 @@ final class _SpikePlayerPageState extends State<SpikePlayerPage> {
   void initState() {
     super.initState();
     _nerdVisible = widget.options.showNerdPanel;
-    _display.setFit(widget.options.initialFit);
-    _display.setAspect(widget.options.initialAspect);
+    if (widget.options.initialFit case final PlayerVideoFit fit) {
+      _display.setFit(fit);
+    }
+    if (widget.options.initialAspect case final PlayerVideoAspect aspect) {
+      _display.setAspect(aspect);
+    }
     if (widget.options.performanceDiagnosticsEnabled) {
       _frameTimingProbe = PlayerFrameTimingProbe();
       if (widget.performance

@@ -1,0 +1,176 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:anime_app/data/player/providers/miruro/miruro_catalog_api.dart';
+import 'package:anime_app/domain/player/providers/playback_provider_contract.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  group('DioMiruroCatalogApi', () {
+    test(
+      'uses the pinned public routes and only the required query fields',
+      () async {
+        final _RecordingAdapter adapter = _RecordingAdapter(
+          responses: [
+            _Response(200, '{"streaming":{"bee":{"label":"Bee"}}}'),
+            _Response(200, '{"data":[{"id":"title-1"}]}'),
+            _Response(200, '{"data":[],"has_more":false}'),
+            _Response(200, '{"tracks":[]}'),
+          ],
+        );
+        final Dio dio = Dio()..httpClientAdapter = adapter;
+        addTearDown(() => dio.close(force: true));
+        final DioMiruroCatalogApi api = DioMiruroCatalogApi(dio);
+        final PlaybackCancellationToken cancellation =
+            PlaybackCancellationToken();
+
+        await api.fetchConfig(cancellation);
+        await api.lookupAniListTitle(16498, cancellation);
+        await api.fetchEpisodes('title-1', null, cancellation);
+        await api.fetchEpisodePlay('title-1', 12, cancellation);
+
+        expect(adapter.requests, hasLength(4));
+        expect(adapter.requests[0].uri.host, 'www.miruro.to');
+        expect(adapter.requests[0].uri.path, '/api/config');
+        expect(adapter.requests[1].uri.path, '/api/v1/anime');
+        expect(adapter.requests[1].uri.queryParameters, {
+          'anilist_id_in': '16498',
+          'limit': '100',
+        });
+        expect(adapter.requests[2].uri.path, '/api/v1/anime/title-1/episodes');
+        expect(adapter.requests[2].uri.queryParameters, {'limit': '10000'});
+        expect(
+          adapter.requests[3].uri.path,
+          '/api/v1/anime/title-1/episodes/12/play',
+        );
+        expect(
+          adapter.requests.every(
+            (RequestOptions request) => !request.followRedirects,
+          ),
+          isTrue,
+        );
+        expect(
+          adapter.requests.every(
+            (RequestOptions request) => request.maxRedirects == 0,
+          ),
+          isTrue,
+        );
+        for (final RequestOptions request in adapter.requests) {
+          final Set<String> headerNames = request.headers.keys
+              .map((String key) => key.toLowerCase())
+              .toSet();
+          expect(
+            headerNames.intersection({'cookie', 'authorization'}),
+            isEmpty,
+          );
+        }
+      },
+    );
+
+    test('maps 403 and redirects without retrying another mirror', () async {
+      final _RecordingAdapter adapter = _RecordingAdapter(
+        responses: [
+          _Response(403, '<html>Access denied</html>', 'text/html'),
+          _Response(302, '', 'text/html'),
+        ],
+      );
+      final Dio dio = Dio()..httpClientAdapter = adapter;
+      addTearDown(() => dio.close(force: true));
+      final DioMiruroCatalogApi api = DioMiruroCatalogApi(dio);
+      final PlaybackCancellationToken cancellation =
+          PlaybackCancellationToken();
+
+      await expectLater(
+        api.fetchConfig(cancellation),
+        throwsA(
+          isA<MiruroCatalogApiException>().having(
+            (MiruroCatalogApiException error) => error.kind,
+            'kind',
+            PlaybackProviderFailureKind.unauthorized,
+          ),
+        ),
+      );
+      await expectLater(
+        api.lookupAniListTitle(16498, cancellation),
+        throwsA(
+          isA<MiruroCatalogApiException>().having(
+            (MiruroCatalogApiException error) => error.kind,
+            'kind',
+            PlaybackProviderFailureKind.unsupported,
+          ),
+        ),
+      );
+      expect(adapter.requests, hasLength(2));
+      expect(
+        adapter.requests.every(
+          (RequestOptions request) => request.uri.host == 'www.miruro.to',
+        ),
+        isTrue,
+      );
+    });
+
+    test('maps malformed JSON to invalidResponse', () async {
+      final _RecordingAdapter adapter = _RecordingAdapter(
+        responses: [_Response(200, '{broken', 'application/json')],
+      );
+      final Dio dio = Dio()..httpClientAdapter = adapter;
+      addTearDown(() => dio.close(force: true));
+
+      await expectLater(
+        DioMiruroCatalogApi(dio).fetchConfig(PlaybackCancellationToken()),
+        throwsA(
+          isA<MiruroCatalogApiException>().having(
+            (MiruroCatalogApiException error) => error.kind,
+            'kind',
+            PlaybackProviderFailureKind.invalidResponse,
+          ),
+        ),
+      );
+    });
+  });
+}
+
+final class _Response {
+  const _Response(
+    this.status,
+    this.body, [
+    this.contentType = 'application/json',
+  ]);
+
+  final int status;
+  final String body;
+  final String contentType;
+}
+
+final class _RecordingAdapter implements HttpClientAdapter {
+  _RecordingAdapter({required List<_Response> responses})
+    : _responses = List.of(responses);
+
+  final List<_Response> _responses;
+  final List<RequestOptions> requests = [];
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    requests.add(options);
+    if (_responses.isEmpty) throw StateError('No fake response remains.');
+    final _Response response = _responses.removeAt(0);
+    return ResponseBody.fromString(
+      response.body,
+      response.status,
+      headers: {
+        Headers.contentTypeHeader: [response.contentType],
+        Headers.contentLengthHeader: [
+          utf8.encode(response.body).length.toString(),
+        ],
+      },
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
+}

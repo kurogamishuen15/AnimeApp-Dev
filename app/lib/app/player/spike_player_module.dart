@@ -72,6 +72,7 @@ final class SpikePlayerModule implements PlaybackRouteSession {
         const SkipAutomationSettings(),
     EpisodeFillerEvidence? fillerEvidence,
     FutureOr<void> Function()? disposeSkipSegmentCatalog,
+    PlaybackRouteOpenCancellation? startupCancellation,
     @visibleForTesting MediaKitSpikeEngine Function()? engineFactory,
   }) async {
     // Ownership of supplied catalog disposers transfers only after argument
@@ -139,17 +140,23 @@ final class SpikePlayerModule implements PlaybackRouteSession {
     }
 
     try {
+      startupCancellation?.throwIfRequested();
       await MediaKitSpikeEngine.retryPendingDispose();
+      startupCancellation?.throwIfRequested();
     } on Object catch (error, stack) {
       await attemptCleanup(disposeCatalog);
       await attemptCleanup(disposeSkipCatalog);
-      if (cleanupError == null && error is ActivePlayerLeaseInUse) {
+      if (cleanupError == null &&
+          (error is ActivePlayerLeaseInUse ||
+              error is PlaybackRouteOpenCancelled)) {
         Error.throwWithStackTrace(error, stack);
       }
       Error.throwWithStackTrace(
         SpikePlayerStartupCleanupFailure(
           startupError: error,
           cleanupError: cleanupError ?? error,
+          nativePlayerStillOwned: MediaKitSpikeEngine.hasActivePlayerLease,
+          nonNativeCleanupFailed: cleanupError != null,
         ),
         cleanupStack ?? stack,
       );
@@ -170,7 +177,14 @@ final class SpikePlayerModule implements PlaybackRouteSession {
           windowController ?? GtkPlayerWindowController();
       engine.attachVideoSurface();
       await coordinator.initialize();
-      await coordinator.open(initialUri);
+      startupCancellation?.throwIfRequested();
+      await coordinator.open(
+        initialUri,
+        httpHeaders:
+            initialResolvedSource?.httpHeaders ??
+            const PlaybackRequestHeaders.empty(),
+      );
+      startupCancellation?.throwIfRequested();
       if (sourceProviderManager case final PlaybackProviderManager manager) {
         final ResolvedPlaybackStream initial = initialResolvedSource!;
         if (fixtureUri != null && initial.uri != fixtureUri) {
@@ -257,11 +271,25 @@ final class SpikePlayerModule implements PlaybackRouteSession {
           SpikePlayerStartupCleanupFailure(
             startupError: startupError,
             cleanupError: error,
+            nativePlayerStillOwned: MediaKitSpikeEngine.hasActivePlayerLease,
+            nonNativeCleanupFailed: true,
           ),
           cleanupStack!,
         );
       }
       Error.throwWithStackTrace(startupError, startupStack);
+    }
+  }
+
+  /// Opens the existing module for the provider route and translates the
+  /// low-level exclusive-player conflict into a presentation-safe error.
+  static Future<PlaybackRouteSession> openForRoute(
+    Future<PlaybackRouteSession> Function() open,
+  ) async {
+    try {
+      return await open();
+    } on ActivePlayerLeaseInUse catch (error, stack) {
+      Error.throwWithStackTrace(PlaybackRoutePlayerBusy(), stack);
     }
   }
 
@@ -284,40 +312,45 @@ final class SpikePlayerModule implements PlaybackRouteSession {
 
   @override
   Future<void> close() async {
-    try {
-      await windowController.dispose();
-    } finally {
+    Object? cleanupError;
+    StackTrace? cleanupStack;
+    Future<bool> attemptCleanup(FutureOr<void> Function() cleanup) async {
       try {
-        try {
-          await performance.dispose();
-        } finally {
-          try {
-            await sourceSwitchService?.dispose();
-          } finally {
-            try {
-              await automaticSkipController?.dispose();
-            } finally {
-              try {
-                await skipSegmentService?.dispose();
-              } finally {
-                await coordinator.dispose();
-              }
-            }
-          }
-        }
-      } finally {
-        try {
-          if (!_catalogDisposed) {
-            await _disposeExternalSubtitleCatalog?.call();
-            _catalogDisposed = true;
-          }
-        } finally {
-          if (!_skipCatalogDisposed) {
-            await _disposeSkipSegmentCatalog?.call();
-            _skipCatalogDisposed = true;
-          }
-        }
+        await cleanup();
+        return true;
+      } on Object catch (error, stack) {
+        cleanupError ??= error;
+        cleanupStack ??= stack;
+        return false;
       }
+    }
+
+    await attemptCleanup(windowController.dispose);
+    await attemptCleanup(performance.dispose);
+    await attemptCleanup(() => sourceSwitchService?.dispose());
+    await attemptCleanup(() => automaticSkipController?.dispose());
+    await attemptCleanup(() => skipSegmentService?.dispose());
+    await attemptCleanup(coordinator.dispose);
+    if (!_catalogDisposed) {
+      _catalogDisposed = await attemptCleanup(
+        () => _disposeExternalSubtitleCatalog?.call(),
+      );
+    }
+    if (!_skipCatalogDisposed) {
+      _skipCatalogDisposed = await attemptCleanup(
+        () => _disposeSkipSegmentCatalog?.call(),
+      );
+    }
+
+    if (cleanupError case final Object error) {
+      Error.throwWithStackTrace(
+        PlaybackRouteCleanupFailure(
+          cause: error,
+          nativePlayerStillOwned: MediaKitSpikeEngine.hasActivePlayerLease,
+          nonNativeCleanupFailed: true,
+        ),
+        cleanupStack!,
+      );
     }
   }
 }
@@ -330,8 +363,12 @@ final class SpikePlayerStartupCleanupFailure implements Exception {
   const SpikePlayerStartupCleanupFailure({
     required this.startupError,
     required this.cleanupError,
+    this.nativePlayerStillOwned = true,
+    this.nonNativeCleanupFailed = true,
   });
 
   final Object startupError;
   final Object cleanupError;
+  final bool nativePlayerStillOwned;
+  final bool nonNativeCleanupFailed;
 }

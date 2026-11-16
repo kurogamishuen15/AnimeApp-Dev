@@ -9,6 +9,9 @@ final class ActivePlayerLease {
 
   static ActivePlayerLease? _active;
 
+  /// Whether an allocated native player still owns the exclusive slot.
+  static bool get hasActiveLease => _active != null;
+
   static ActivePlayerLease acquire() {
     if (_active != null) throw ActivePlayerLeaseInUse();
     final ActivePlayerLease lease = ActivePlayerLease._();

@@ -504,7 +504,14 @@ void main() {
       final SpikePlayerCoordinator coordinator = SpikePlayerCoordinator(engine);
       await coordinator.initialize();
       final Uri sourceA = Uri.file('/a.mp4');
-      await coordinator.open(sourceA);
+      final Uri sourceB = Uri.file('/bad.mp4');
+      final PlaybackRequestHeaders headersA = PlaybackRequestHeaders({
+        'Referer': 'https://provider.example.com/',
+      });
+      final PlaybackRequestHeaders headersB = PlaybackRequestHeaders({
+        'Referer': 'https://mirror.example.com/',
+      });
+      await coordinator.open(sourceA, httpHeaders: headersA);
       engine.emit(
         const PlaybackSpikeSnapshot(
           position: Duration(seconds: 19),
@@ -514,7 +521,8 @@ void main() {
       engine.openFailuresRemaining = 1;
 
       final PlaybackSourceSwitchResult result = await coordinator.switchSource(
-        Uri.file('/bad.mp4'),
+        sourceB,
+        httpHeaders: headersB,
       );
 
       expect(
@@ -525,7 +533,13 @@ void main() {
       expect(coordinator.state.position, const Duration(seconds: 19));
       expect(coordinator.state.playing, isFalse);
       expect(coordinator.state.status, PlaybackSessionStatus.paused);
-      expect(engine.openedSources, [sourceA, Uri.file('/bad.mp4'), sourceA]);
+      expect(engine.openedSources, [sourceA, sourceB, sourceA]);
+      expect(
+        engine.openedHttpHeaders.map(
+          (PlaybackRequestHeaders value) => value.values,
+        ),
+        [headersA.values, headersB.values, headersA.values],
+      );
       expect(engine.seeks, [const Duration(seconds: 19)]);
       await coordinator.dispose();
     },
@@ -658,6 +672,9 @@ void main() {
       );
       final PlaybackProviderManager manager = PlaybackProviderManager(
         providers: [PlaybackProviderRegistration(provider: provider)],
+        videoHostResolvers: [
+          PlaybackVideoHostResolverRegistration(resolver: provider),
+        ],
         clock: () => DateTime.utc(2026),
       );
       final _FakeEngine engine = _FakeEngine()..emitSourceEvents = true;
@@ -722,6 +739,9 @@ void main() {
       );
       final PlaybackProviderManager manager = PlaybackProviderManager(
         providers: [PlaybackProviderRegistration(provider: provider)],
+        videoHostResolvers: [
+          PlaybackVideoHostResolverRegistration(resolver: provider),
+        ],
         clock: () => DateTime.utc(2026),
       );
       final _FakeEngine engine = _FakeEngine()..emitSourceEvents = true;
@@ -793,6 +813,9 @@ void main() {
       );
       final PlaybackProviderManager manager = PlaybackProviderManager(
         providers: [PlaybackProviderRegistration(provider: provider)],
+        videoHostResolvers: [
+          PlaybackVideoHostResolverRegistration(resolver: provider),
+        ],
         clock: () => DateTime.utc(2026),
       );
       final _FakeEngine engine = _FakeEngine()..emitSourceEvents = true;
@@ -1039,6 +1062,7 @@ final class _FakeEngine implements PlaybackSpikeEngine {
   final List<Duration> seeks = [];
   final List<double> volumes = [];
   final List<Uri> openedSources = [];
+  final List<PlaybackRequestHeaders> openedHttpHeaders = [];
   final Set<Uri> openFailureUris = {};
   bool emitSourceEvents = false;
   int disposeFailuresRemaining = 0;
@@ -1075,9 +1099,14 @@ final class _FakeEngine implements PlaybackSpikeEngine {
   }
 
   @override
-  Future<void> open(Uri source, {int sourceGeneration = 0}) async {
+  Future<void> open(
+    Uri source, {
+    int sourceGeneration = 0,
+    PlaybackRequestHeaders httpHeaders = const PlaybackRequestHeaders.empty(),
+  }) async {
     calls.add('open');
     openedSources.add(source);
+    openedHttpHeaders.add(httpHeaders);
     this.sourceGeneration = sourceGeneration;
     if (openStarted case final Completer<void> started
         when !started.isCompleted) {

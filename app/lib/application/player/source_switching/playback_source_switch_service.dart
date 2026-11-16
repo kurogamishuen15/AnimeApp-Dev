@@ -214,6 +214,7 @@ final class PlaybackSourceSwitchService {
       try {
         attempt = await _coordinator.switchSource(
           candidate.uri,
+          httpHeaders: candidate.httpHeaders,
           referencePosition: referencePosition,
           resumePlayback: resumePlayback,
         );
@@ -260,6 +261,7 @@ final class PlaybackSourceSwitchService {
         final PlaybackSourceSwitchResult restore = await _coordinator
             .switchSource(
               initialUri,
+              httpHeaders: initialSource.httpHeaders,
               referencePosition: referencePosition,
               resumePlayback: resumePlayback,
             );

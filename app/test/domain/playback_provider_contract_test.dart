@@ -18,7 +18,7 @@ void playbackSourceProviderContractTests(
       );
       expect(
         provider.capabilities,
-        contains(PlaybackProviderCapability.resolveServer),
+        isNot(contains(PlaybackProviderCapability.resolveServer)),
       );
     });
 
@@ -55,7 +55,7 @@ void playbackSourceProviderContractTests(
       final PlaybackSource source = sources.value.first;
       final PlaybackServer server = source.servers.first;
       final PlaybackProviderResult<ResolvedPlaybackStream> result =
-          await provider.resolveServer(
+          await provider.resolve(
             source,
             server,
             cancellation: PlaybackCancellationToken(),
@@ -127,5 +127,56 @@ void main() {
   test('provider identifiers reject invalid values', () {
     expect(() => PlaybackProviderId('../external'), throwsArgumentError);
     expect(PlaybackProviderId(' MOCK ').value, 'mock');
+  });
+
+  test('playback request context permits only a public HTTPS referer', () {
+    final PlaybackRequestHeaders headers = PlaybackRequestHeaders({
+      'referer': 'https://www.animegg.org/',
+    });
+    expect(headers.values, {'Referer': 'https://www.animegg.org/'});
+    expect(
+      () => PlaybackRequestHeaders({'Cookie': 'session=private'}),
+      throwsArgumentError,
+    );
+    expect(
+      () => PlaybackRequestHeaders({'Authorization': 'Bearer private'}),
+      throwsArgumentError,
+    );
+    expect(
+      () => PlaybackRequestHeaders({'Referer': 'http://example.org/'}),
+      throwsArgumentError,
+    );
+    for (final String nonPublicOrigin in [
+      'https://localhost/',
+      'https://provider.local/',
+      'https://provider.localhost/',
+      'https://provider.onion/',
+      'https://127.0.0.1/',
+      'https://[::1]/',
+      'https://provider.example:8443/',
+      'https://provider.example/episode/1',
+    ]) {
+      expect(
+        () => PlaybackRequestHeaders({'Referer': nonPublicOrigin}),
+        throwsArgumentError,
+        reason: 'Rejected non-public or non-origin Referer: $nonPublicOrigin',
+      );
+    }
+    expect(
+      () =>
+          PlaybackRequestHeaders({'Referer': 'https://example.org/?key=value'}),
+      throwsArgumentError,
+    );
+    expect(
+      () =>
+          PlaybackRequestHeaders({'Referer': 'https://user:pass@example.org/'}),
+      throwsArgumentError,
+    );
+    expect(
+      () => PlaybackRequestHeaders({
+        'Referer': 'https://example.org/\r\nCookie: x',
+      }),
+      throwsArgumentError,
+    );
   });
 }

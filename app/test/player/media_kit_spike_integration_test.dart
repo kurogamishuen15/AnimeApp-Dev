@@ -154,6 +154,145 @@ void main() {
     );
   }, timeout: const Timeout(Duration(minutes: 2)));
 
+  test(
+    'libmpv preserves a public Referer across open and replay after Stop',
+    () async {
+      final HttpServer server = await HttpServer.bind(
+        InternetAddress.loopbackIPv4,
+        0,
+      );
+      var requestCount = 0;
+      var validRefererSeen = false;
+      var sensitiveHeaderSeen = false;
+      final StreamSubscription<HttpRequest> requests = server.listen((
+        HttpRequest request,
+      ) async {
+        requestCount++;
+        validRefererSeen =
+            validRefererSeen ||
+            request.headers.value(HttpHeaders.refererHeader) ==
+                'https://www.animegg.org/';
+        sensitiveHeaderSeen =
+            sensitiveHeaderSeen ||
+            request.headers.value(HttpHeaders.cookieHeader) != null ||
+            request.headers.value(HttpHeaders.authorizationHeader) != null;
+        if (request.headers.value(HttpHeaders.refererHeader) !=
+            'https://www.animegg.org/') {
+          request.response.statusCode = HttpStatus.forbidden;
+          await request.response.close();
+          return;
+        }
+        final int fileLength = fixture.lengthSync();
+        request.response.headers.set('accept-ranges', 'bytes');
+        final String? range = request.headers.value(HttpHeaders.rangeHeader);
+        if (range != null) {
+          final RegExpMatch? match = RegExp(r'^bytes=(\d+)-(\d*)$')
+              .firstMatch(range);
+          final int? start = match == null
+              ? null
+              : int.tryParse(match.group(1)!);
+          final int? requestedEnd = match == null || match.group(2)!.isEmpty
+              ? fileLength - 1
+              : int.tryParse(match.group(2)!);
+          if (start == null ||
+              requestedEnd == null ||
+              start < 0 ||
+              start >= fileLength ||
+              requestedEnd < start) {
+            request.response.statusCode =
+                HttpStatus.requestedRangeNotSatisfiable;
+            request.response.headers.set(
+              'content-range',
+              'bytes */$fileLength',
+            );
+            await request.response.close();
+            return;
+          }
+          final int end = requestedEnd >= fileLength
+              ? fileLength - 1
+              : requestedEnd;
+          request.response.statusCode = HttpStatus.partialContent;
+          request.response.headers.set(
+            'content-range',
+            'bytes $start-$end/$fileLength',
+          );
+          request.response.headers.contentType = ContentType.binary;
+          request.response.contentLength = end - start + 1;
+          if (request.method != 'HEAD') {
+            await request.response.addStream(fixture.openRead(start, end + 1));
+          }
+          await request.response.close();
+          return;
+        }
+        request.response.headers.contentType = ContentType.binary;
+        request.response.contentLength = fileLength;
+        if (request.method != 'HEAD') {
+          await request.response.addStream(fixture.openRead());
+        }
+        await request.response.close();
+      });
+      final Uri source = Uri.http('127.0.0.1:${server.port}', '/episode.mkv');
+      final PlaybackRequestHeaders headers = PlaybackRequestHeaders({
+        'Referer': 'https://www.animegg.org/',
+      });
+      final MediaKitSpikeEngine engine = MediaKitSpikeEngine(
+        demoSources: {source},
+      );
+      final SpikePlayerCoordinator coordinator = SpikePlayerCoordinator(
+        engine,
+        demoSources: {source},
+      );
+      try {
+        await coordinator.initialize();
+        await coordinator.open(source, httpHeaders: headers);
+        stdout.writeln(
+          'Referer media open completed; requests=$requestCount; '
+          'expected_referer_seen=$validRefererSeen',
+        );
+        await coordinator.play();
+        final PlaybackSessionSnapshot firstPlayback;
+        try {
+          firstPlayback = await coordinator.states
+              .firstWhere(
+                (snapshot) =>
+                    snapshot.position > Duration.zero || snapshot.error != null,
+              )
+              .timeout(const Duration(seconds: 12));
+        } on Object catch (error) {
+          stdout.writeln(
+            'Referer media failed=$error; requests=$requestCount; '
+            'expected_referer_seen=$validRefererSeen; '
+            'engine_error=${engine.currentSnapshot.error != null}',
+          );
+          rethrow;
+        }
+        stdout.writeln('Referer media error=${firstPlayback.error != null}');
+        expect(firstPlayback.error, isNull);
+        stdout.writeln(
+          'Referer media advanced=${firstPlayback.position.inMilliseconds}ms; '
+          'requests=$requestCount; expected_referer_seen=$validRefererSeen',
+        );
+        await coordinator.stop();
+        await coordinator.play();
+        await coordinator.states
+            .firstWhere(
+              (snapshot) =>
+                  snapshot.position > Duration.zero || snapshot.error != null,
+            )
+            .timeout(const Duration(seconds: 12));
+        expect(validRefererSeen, isTrue);
+        expect(sensitiveHeaderSeen, isFalse);
+        expect(requestCount, greaterThanOrEqualTo(2));
+      } finally {
+        await coordinator.dispose();
+        await requests.cancel();
+        await server.close(force: true);
+      }
+    },
+    skip: Platform.environment['KONGROO_TEST_HTTP_REFERER'] != '1',
+    timeout: const Timeout(Duration(seconds: 90)),
+  );
+
   test('real libmpv uses DEMO HTTP ranges and rolls back a 503', () async {
     final Directory root = fixture.parent.parent.parent.parent;
     final Process server = await Process.start('python3', [
@@ -847,6 +986,9 @@ for url in sys.argv[1:]:
     );
     final PlaybackProviderManager manager = PlaybackProviderManager(
       providers: [PlaybackProviderRegistration(provider: provider)],
+      videoHostResolvers: [
+        PlaybackVideoHostResolverRegistration(resolver: provider),
+      ],
       clock: () => DateTime.utc(2026),
     );
     final PlaybackEpisode episode = PlaybackEpisode(

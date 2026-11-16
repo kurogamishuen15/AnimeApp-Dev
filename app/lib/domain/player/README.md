@@ -11,8 +11,8 @@ observables. La implementación del motor permanece fuera del dominio.
 
 | Ruta | Responsabilidad | Contratos y límites |
 |---|---|---|
-| `providers/playback_source.dart` | Anime/episodio, proveedor, fuente concreta, servidor y stream resuelto | Modelos normalizados; no contiene JSON de proveedor ni API del motor |
-| `providers/playback_provider_contract.dart` | Discovery y resolución de streams | Capacidades, cancelación cooperativa, resultado y error tipados |
+| `providers/playback_source.dart` | Anime/episodio, proveedor, fuente concreta, servidor, stream resuelto y contexto HTTP público permitido | Modelos normalizados; solo admite un `Referer` HTTPS sin credenciales/query/fragmento; no contiene JSON de proveedor ni API del motor |
+| `providers/playback_provider_contract.dart` | Contrato `PlaybackSourceProvider` para descubrir fuentes y `PlaybackVideoHostResolver` para resolverlas | Capacidades, cancelación cooperativa, resultado y error tipados; anime provider, host y engine son límites separados |
 | `video_track_info.dart` | Metadatos observados de una pista de video de la fuente activa | ID efímero, resolución, códec, título y FPS/bitrate opcionales; no declara una escalera ABR |
 | `subtitles/subtitle_track_info.dart` | Metadatos observables de una pista | ID de sesión, etiqueta, idioma/codec opcionales, tipo, default/selección |
 | `subtitles/subtitle_style.dart` | Valores de presentación permitidos | Validación de tipo y rangos; no ejecuta ni persiste opciones mpv |

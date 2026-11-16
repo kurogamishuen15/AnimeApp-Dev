@@ -201,6 +201,22 @@ void main() {
     await _disposePage(tester, coordinator);
   });
 
+  testWidgets('default page options preserve injected display preferences', (
+    tester,
+  ) async {
+    final engine = _FakeEngine();
+    final coordinator = await _initializedCoordinator(engine);
+    final display = PlayerVideoDisplayController()
+      ..setFit(PlayerVideoFit.cover)
+      ..setAspect(PlayerVideoAspect.cinema);
+
+    await _pumpPage(tester, coordinator, display: display);
+
+    expect(display.value.fit, PlayerVideoFit.cover);
+    expect(display.value.aspect, PlayerVideoAspect.cinema);
+    await _disposePage(tester, coordinator);
+  });
+
   testWidgets(
     'stale audio menu cannot send an old native track after source change',
     (tester) async {
@@ -386,6 +402,9 @@ void main() {
     );
     final PlaybackProviderManager manager = PlaybackProviderManager(
       providers: [PlaybackProviderRegistration(provider: provider)],
+      videoHostResolvers: [
+        PlaybackVideoHostResolverRegistration(resolver: provider),
+      ],
       clock: () => DateTime.utc(2026),
     );
     final PlaybackSourceSwitchService service = PlaybackSourceSwitchService(
@@ -1023,7 +1042,11 @@ final class _FakeEngine
   Future<void> initialize() async {}
 
   @override
-  Future<void> open(Uri source, {int sourceGeneration = 0}) async {
+  Future<void> open(
+    Uri source, {
+    int sourceGeneration = 0,
+    PlaybackRequestHeaders httpHeaders = const PlaybackRequestHeaders.empty(),
+  }) async {
     this.sourceGeneration = sourceGeneration;
     sourceOpenCalls.add(source);
     if (source == failingSource) throw StateError('503');

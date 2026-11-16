@@ -1,0 +1,14 @@
+# AnimeApp initial Linux measurement
+# measured_at_utc	2026-11-16T05:27:29Z
+# app_version	1.0.0+1
+# mode	release
+# os_kernel	Linux 6.19.10-300.fc44.x86_64
+# cpu_arch	x86_64
+# online_cpu_count	8
+# memory_total_kib	7852856
+# window_observer	unavailable-wayland-session
+# cpu_ticks_per_second	100
+# pub_cache	.ai-local/pub-cache
+run	spawn_pid	process_identity	first_frame_ms	window_status	launch_to_window_ms	rss_after_frame_kib	idle_seconds	rss_after_idle_kib	cpu_idle_avg_percent_one_core
+# status	collecting; only status=complete is a valid full run
+# incomplete	first Flutter frame was not observed in run 1

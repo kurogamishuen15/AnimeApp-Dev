@@ -6,6 +6,39 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  test(
+    'auxiliary cleanup failure does not retain a disposed native Player',
+    () async {
+      int auxiliaryCleanupCalls = 0;
+      final MediaKitSpikeEngine engine = MediaKitSpikeEngine.forTesting(
+        disposePlayer: (player) => player.dispose(),
+        auxiliaryCleanupForTesting: () async {
+          auxiliaryCleanupCalls++;
+          if (auxiliaryCleanupCalls == 1) {
+            throw StateError('injected auxiliary cleanup failure');
+          }
+        },
+      );
+
+      await expectLater(
+        engine.dispose(),
+        throwsA(
+          isA<MediaKitSpikeEngineDisposeFailure>().having(
+            (MediaKitSpikeEngineDisposeFailure failure) =>
+                failure.nativePlayerStillOwned,
+            'nativePlayerStillOwned',
+            isFalse,
+          ),
+        ),
+      );
+      expect(MediaKitSpikeEngine.hasActivePlayerLease, isFalse);
+
+      await engine.dispose();
+      expect(auxiliaryCleanupCalls, 2);
+      expect(MediaKitSpikeEngine.hasActivePlayerLease, isFalse);
+    },
+  );
+
   test('adapter closes its stream and quarantines a failed dispose', () async {
     int disposeCalls = 0;
     final MediaKitSpikeEngine engine = MediaKitSpikeEngine.forTesting(

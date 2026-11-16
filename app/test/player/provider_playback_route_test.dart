@@ -4,7 +4,6 @@ import 'package:anime_app/app/player/playback_route_session.dart';
 import 'package:anime_app/app/player/provider_playback_route.dart';
 import 'package:anime_app/app/player/spike_player_module.dart';
 import 'package:anime_app/application/player/providers/playback_provider_manager.dart';
-import 'package:anime_app/data/player/engine/active_player_lease.dart';
 import 'package:anime_app/domain/catalog/anime_id.dart';
 import 'package:anime_app/domain/player/providers/playback_source.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -20,13 +19,18 @@ void main() {
     await tester.pumpWidget(
       _catalogApp(
         onBuild: (BuildContext _) {},
-        moduleLoader: () => throw ActivePlayerLeaseInUse(),
+        moduleLoader: (_) => throw PlaybackRoutePlayerBusy(),
         input: input,
       ),
     );
     await tester.tap(find.byKey(const ValueKey('open-playback')));
     await tester.pumpAndSettle();
-    expect(find.text('No se pudo abrir el reproductor.'), findsOneWidget);
+    expect(
+      find.text(
+        'Un reproductor o una apertura anterior aún conserva el recurso nativo. Espera a que termine o reinicia la aplicación antes de reproducir de nuevo.',
+      ),
+      findsOneWidget,
+    );
     expect(find.text('Volver al catálogo'), findsOneWidget);
 
     await tester.tap(find.text('Volver al catálogo'));
@@ -46,9 +50,11 @@ void main() {
     await tester.pumpWidget(
       _catalogApp(
         onBuild: (BuildContext context) => catalogContext = context,
-        moduleLoader: () async => throw SpikePlayerStartupCleanupFailure(
+        moduleLoader: (_) async => throw SpikePlayerStartupCleanupFailure(
           startupError: StateError('startup failure'),
           cleanupError: StateError('dispose failure'),
+          nativePlayerStillOwned: true,
+          nonNativeCleanupFailed: false,
         ),
         input: input,
       ),
@@ -57,7 +63,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       find.text(
-        'No se pudo cerrar el reproductor con seguridad. Reinicia la aplicación antes de volver a intentarlo.',
+        'No se pudo confirmar la liberación del reproductor nativo. Reinicia la aplicación antes de volver a intentarlo.',
       ),
       findsOneWidget,
     );
@@ -68,6 +74,84 @@ void main() {
     expect(find.text('Catálogo'), findsNothing);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'pending startup can be cancelled and a late session closes safely',
+    (tester) async {
+      final ({PlaybackEpisode episode, ResolvedPlaybackStream stream}) input =
+          _playbackInput();
+      final Completer<PlaybackRouteSession> opening =
+          Completer<PlaybackRouteSession>();
+      final _ControlledSession lateSession = _ControlledSession(
+        Future<void>.value(),
+      );
+      PlaybackRouteOpenCancellation? cancellation;
+
+      await tester.pumpWidget(
+        _catalogApp(
+          onBuild: (BuildContext _) {},
+          moduleLoader: (PlaybackRouteOpenCancellation token) {
+            cancellation = token;
+            return opening.future;
+          },
+          input: input,
+        ),
+      );
+      await tester.tap(find.byKey(const ValueKey('open-playback')));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Abriendo reproducción…'), findsOneWidget);
+      expect(
+        find.text('Cancelar apertura y volver al catálogo'),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.text('Cancelar apertura y volver al catálogo'));
+      await tester.pumpAndSettle();
+      expect(cancellation?.isRequested, isTrue);
+      expect(find.text('Catálogo'), findsOneWidget);
+
+      opening.complete(lateSession);
+      await tester.pumpAndSettle();
+      expect(lateSession.closeCalls, 1);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'released native player allows return after accessory cleanup failure',
+    (tester) async {
+      final ({PlaybackEpisode episode, ResolvedPlaybackStream stream}) input =
+          _playbackInput();
+      late BuildContext catalogContext;
+
+      await tester.pumpWidget(
+        _catalogApp(
+          onBuild: (BuildContext context) => catalogContext = context,
+          moduleLoader: (_) async => throw SpikePlayerStartupCleanupFailure(
+            startupError: StateError('startup failure'),
+            cleanupError: StateError('catalog disposal failure'),
+            nativePlayerStillOwned: false,
+            nonNativeCleanupFailed: true,
+          ),
+          input: input,
+        ),
+      );
+      await tester.tap(find.byKey(const ValueKey('open-playback')));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text(
+          'El reproductor nativo se liberó, pero falló la limpieza de recursos secundarios.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Volver al catálogo'), findsOneWidget);
+      await Navigator.of(catalogContext).maybePop();
+      await tester.pumpAndSettle();
+      expect(find.text('Catálogo'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('leaving an open session waits for its close future', (
     tester,
@@ -81,7 +165,7 @@ void main() {
     await tester.pumpWidget(
       _catalogApp(
         onBuild: (BuildContext context) => catalogContext = context,
-        moduleLoader: () async => session,
+        moduleLoader: (_) async => session,
         input: input,
       ),
     );
@@ -112,7 +196,7 @@ void main() {
     await tester.pumpWidget(
       _catalogApp(
         onBuild: (BuildContext _) {},
-        moduleLoader: () async => session,
+        moduleLoader: (_) async => session,
         input: input,
       ),
     );
@@ -135,6 +219,40 @@ void main() {
     expect(find.text('Player session'), findsNothing);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'released native player lets the user leave after close cleanup failure',
+    (tester) async {
+      final ({PlaybackEpisode episode, ResolvedPlaybackStream stream}) input =
+          _playbackInput();
+      final _ReleasedPlayerCloseFailureSession session =
+          _ReleasedPlayerCloseFailureSession();
+
+      await tester.pumpWidget(
+        _catalogApp(
+          onBuild: (BuildContext _) {},
+          moduleLoader: (_) async => session,
+          input: input,
+        ),
+      );
+      await tester.tap(find.byKey(const ValueKey('open-playback')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Volver a la ficha'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text(
+          'El reproductor nativo se liberó, pero falló la limpieza de recursos secundarios. Puedes volver al catálogo.',
+        ),
+        findsOneWidget,
+      );
+      await tester.tap(find.byTooltip('Volver al catálogo'));
+      await tester.pumpAndSettle();
+      expect(find.text('Catálogo'), findsOneWidget);
+      expect(session.closeCalls, 2);
+      expect(tester.takeException(), isNull);
+    },
+  );
 }
 
 Widget _catalogApp({
@@ -215,5 +333,22 @@ final class _FailThenSucceedSession implements PlaybackRouteSession {
   Future<void> close() async {
     closeCalls++;
     if (closeCalls == 1) throw StateError('injected close failure');
+  }
+}
+
+final class _ReleasedPlayerCloseFailureSession implements PlaybackRouteSession {
+  int closeCalls = 0;
+
+  @override
+  Widget build() => const Scaffold(body: Center(child: Text('Player session')));
+
+  @override
+  Future<void> close() async {
+    closeCalls++;
+    throw PlaybackRouteCleanupFailure(
+      cause: StateError('accessory cleanup failure'),
+      nativePlayerStillOwned: false,
+      nonNativeCleanupFailed: true,
+    );
   }
 }

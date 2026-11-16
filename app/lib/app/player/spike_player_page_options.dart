@@ -8,8 +8,8 @@ final class SpikePlayerPageOptions {
   const SpikePlayerPageOptions({
     this.showNerdPanel = false,
     this.performanceDiagnosticsEnabled = false,
-    this.initialFit = PlayerVideoFit.contain,
-    this.initialAspect = PlayerVideoAspect.automatic,
+    this.initialFit,
+    this.initialAspect,
   });
 
   factory SpikePlayerPageOptions.fromEnvironment(
@@ -23,21 +23,21 @@ final class SpikePlayerPageOptions {
         'cover' => PlayerVideoFit.cover,
         'fill' => PlayerVideoFit.fill,
         'original' => PlayerVideoFit.originalSize,
-        _ => PlayerVideoFit.contain,
+        _ => null,
       },
       initialAspect: switch (environment['KONGROO_DEMO_ASPECT']) {
         '16:9' => PlayerVideoAspect.widescreen,
         '4:3' => PlayerVideoAspect.classic,
         '21:9' => PlayerVideoAspect.cinema,
-        _ => PlayerVideoAspect.automatic,
+        _ => null,
       },
     );
   }
 
   final bool showNerdPanel;
   final bool performanceDiagnosticsEnabled;
-  final PlayerVideoFit initialFit;
-  final PlayerVideoAspect initialAspect;
+  final PlayerVideoFit? initialFit;
+  final PlayerVideoAspect? initialAspect;
 
   @override
   bool operator ==(Object other) =>

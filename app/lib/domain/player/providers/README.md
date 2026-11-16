@@ -7,6 +7,12 @@ API externa o motor. Un **proveedor** entrega fuentes; una **fuente** identifica
 una alternativa para un episodio; un **servidor** es un endpoint elegido dentro
 de una fuente; el **motor** reproduce el URI resuelto y no conoce proveedores.
 
+Los contratos permanecen neutrales. AnimeHeaven implementa los puertos en data
+y su resolver se registra separado del provider; la existencia de esa
+integración no confirma playback externo. El estado y los componentes
+retirados están documentados en la
+[auditoría de limpieza](../../../../../docs/ai-system/audits/S0-provider-cleanup-audit-2026-11-15.md).
+
 ## Archivos y contratos
 
 | Archivo | Responsabilidad | Contrato principal |

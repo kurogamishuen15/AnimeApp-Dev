@@ -1,29 +1,136 @@
 # Transferencia a otra IA
 
 Fuente: auditoría local autorizada y referencias enlazadas
-Fecha: 2026-11-11
+Fecha: 2026-11-16
 Módulo: infraestructura IA
 Estado: vigente
 Decisión: AI-001, AI-002
 Evidencia: Herramientas, docs y resultados reproducibles
 
+### Último handoff: S0-R AnimeHeaven live — 2026-11-16
+
+AnimeHeaven está registrado en `PlaybackProvidersModule`; su código vive en
+`app/lib/data/player/providers/animeheaven/`. El recorrido público de One Piece
+ep. 1 ofreció `mirror-cx`, `mirror-ct` y `mirror-ck`; los tres se abrieron
+secuencialmente por la ruta real y libmpv mostró error genérico sin imagen.
+Resultado: 1 provider implementado, 0 reproducibles, 0/70. Capturas en
+`.ai-local/review/s0r-animeheaven-visible.png`,
+`s0r-animeheaven-mirror-switch.png`, `s0-animeheaven-mirror-cx.png` y
+`s0-animeheaven-mirror-ck.png`. No almacenar ni imprimir URIs efímeras.
+
+13 tests focalizados y 48 regresiones centradas en provider/manager/route,
+Flutter analyze completo y Dart analyze focalizado pasan.
+El propietario respondió «Autorizar manualmente en KDE»; después, la captura ya
+no mostró el diálogo, aunque Wayland MCP siguió desconectado (`Transport
+closed`). No se simuló entrada: el harness seleccionó cada ID por entorno. No
+repetir esos tres mirrors sin evidencia nueva; `ax` y `cy` no fueron publicados
+por el episodio y no deben inferirse. No hay medición del stream ni en el equipo
+objetivo de 4 GB. Las rutas live ya probadas no aportaron otra fuente elegible,
+pero el inventario completo no está agotado: la revisión de Anivexa enumera 28
+candidatos y solo sondeó AniChan, AniPM y Zoko. El siguiente paso es inspeccionar
+estáticamente un candidato no probado; solo hacer como máximo un GET si revela
+un host distinto y una ruta pública ordinaria sin sesión, autenticación,
+challenge ni transformación protegida. S0 sigue parcial. Preservar cambios; sin
+staging, commit ni push. Ver STATUS, HANDOFF e informe S0.
+
+### Handoff histórico: S0-R Gates 0–1 — 2026-11-16
+
+El Gate 0 y sus medidas locales están en
+[S0R-BASELINE](../ai-system/missions/S0R-BASELINE.md). Gate 1 revisó
+referencias de Anilili, Aimi y clientes CLI, más un candidato AniWorld. Seis
+GET iniciales devolvieron 403; AniWorld dio búsqueda/ficha/episodio públicos,
+pero Doodstream, Filemoon y Vidmoly dieron 403 y VOE publicó una redirección
+con lectura opcional de `localStorage`, sin exponer media estática. No se usó
+sesión, cookie, challenge, cambio de agente ni automatización de JS. No se copió código ni se integró
+proveedor: en ese corte, runtime 0 y reproducción externa 0/70. Ver
+[S0R-REFERENCE-REVIEW](../ai-system/missions/S0R-REFERENCE-REVIEW-2026-11-16.md).
+
+**Siguiente paso histórico:** inspeccionar licencia/protocolo de una fuente
+independiente no probada; hacer una solicitud ordinaria solo si no requiere
+challenge, autenticación, descifrado o impersonación. Este handoff fue
+reemplazado por la entrada vigente AnimeHeaven de arriba.
+
+### Handoff histórico: Gate 0 baseline — 2026-11-16
+
+La orden vigente es el adjunto S0-R indexado en
+[`S0R-MASTER-MISSION.md`](../ai-system/missions/S0R-MASTER-MISSION.md). Gate 0
+quedó `PARTIAL`: libmpv pasó pruebas locales y una demo sintética con imagen en
+movimiento/subtítulo se observó en Wayland. No se probó fuente externa (`0/70`).
+El proceso release midió 245,708–258,440 KiB RSS y 28.84% de un núcleo durante
+8 s con 480×270/24 fps de archivo, pero en host de 7.5 GiB, no 4 GB; el render
+fue software. 268 Flutter y 40 tests Python, analyze, formato, checker y
+memoria pasaron. `scripts/measure.sh` no produjo una medida completa para el
+entrypoint spike y su TSV quedó marcado incomplete. Ver
+[`baseline`](../ai-system/missions/S0R-BASELINE.md),
+[`STATUS`](../ai-system/missions/KONGROO-RECONSTRUCTION-STATUS.md) y
+[`HANDOFF`](../ai-system/missions/KONGROO-RECONSTRUCTION-HANDOFF.md).
+
+**Siguiente acción:** Gate 1; verificar commits/licencias actuales y técnicas
+concretas en Anilili Android/Desktop, Aimi y dos herramientas CLI, elegir una
+vía legítima para integrar y documentar matriz. No iniciar con stubs ni afirmar
+provider operativo; conservar todo el estado Git sucio y no hacer commit/push.
+
+### Handoff histórico: limpieza posterior a S0-A — 2026-11-15
+
+Se retiraron el provider Miruro, su cliente Dio y el resolver directo. Los GET
+públicos previos devolvieron 403; no hubo episodio, media ni reproducción
+externa (`0/70`). El composition root actual tiene cero providers externos y
+cero resolutores concretos. Las pruebas específicas se archivaron como
+`.dart.txt`; solo continúa activo el test del composition root vacío y las
+pruebas genéricas del manager/contratos. Se ejecutaron 24 tests focalizados y
+la suite Flutter completa (268 pass, 6 optativas omitidas), Flutter/Dart
+analyze, 40 tests Python, checker, formato, memoria y diff check; todo pasó.
+
+Se preservaron `PlaybackSourceProvider`, `PlaybackVideoHostResolver`, el manager
+y su fallback/circuit breakers, `PlaybackSourceSwitchService`, el motor único
+media_kit/libmpv, los READMEs y las evidencias previas. No se cambió `pubspec`:
+`dio` todavía tiene consumidores en AniList, AniSkip y OpenSubtitles. S0 sigue
+incompleta; G1/T03 no se acepta ni F1 se inicia. La próxima acción es esperar
+el siguiente prompt de integración. Ver la
+[auditoría de limpieza de seguimiento](../ai-system/audits/S0-provider-cleanup-followup-audit-2026-11-15.md),
+[STATUS](../ai-system/missions/KONGROO-RECONSTRUCTION-STATUS.md) y
+[HANDOFF](../ai-system/missions/KONGROO-RECONSTRUCTION-HANDOFF.md).
+
+### Handoff histórico: misión S0-A Anilili/Miruro — 2026-11-15
+
+Se portó el catálogo Miruro de los commits fijados de Anilili a un provider y
+resolver modulares conectados al manager y engine existentes. Miruro respondió
+403 a config/lookup con requests públicos ordinarios; no se evadió el bloqueo,
+no hubo episodios/URI accesible ni reproducción libmpv. Anivexa sigue pendiente;
+S0 continúa incompleta y playback externo permanece `0/70`.
+
+Con Flutter 3.50.0-0.4.pre/Dart 3.14.0 aislado, `scripts/ci.sh` pasó 40 pruebas
+Python, 288 Flutter y 7 optativas omitidas. Análisis, formato, checker y memoria
+pasaron. No se probó UI Wayland, fuente externa, ni rendimiento de este provider
+en equipo de 4 GB. La segunda pasada local detectó y corrigió el filtro IPv6 de
+direcciones especiales; DNS TOCTOU permanece. No hubo commit ni push.
+
+Continuar revisando estáticamente el alcance Anivexa y probar solo accesos
+públicos ordinarios; no repetir los GET 403 sin evidencia nueva. Para retomar,
+leer [S0-A](../ai-system/missions/S0-ANILILI-PORT-REPORT.md), [auditoría](../ai-system/audits/S0-ANILILI-port-audit-2026-11-15.md), [STATUS](../ai-system/missions/KONGROO-RECONSTRUCTION-STATUS.md) y [HANDOFF](../ai-system/missions/KONGROO-RECONSTRUCTION-HANDOFF.md).
+
 ### Último handoff: reconstrucción Kongroo Bloque A — 2026-11-15
 
-Esta sesión completó T00–T03 y G1 según `docs/ai-system/missions/`; se detuvo
-antes de T04/B. Rama `main`; base `33ceaef5b996c55577524c3448bbb4bee5363952`.
-El propietario autorizó commit/push al repositorio privado `AnimeApp-Dev`; la
-referencia actual se consulta con `git rev-parse HEAD`. La CI final pasó: 40 pruebas Python + 262
-opt-in omitidas; Flutter/Dart analyze, formato, checker, memoria y diff pasan.
-La auditoría independiente no encontró P0/P1/P2 abiertos. La prueba de doble
-apertura con libmpv real agotó 45 s y no se cuenta como evidencia. La integración
-local confirma lease ocupado con libmpv real, junto con las pruebas
-deterministas de contención/rollback. Falta una prueba E2E automatizada del
-ciclo nativo completo de `VideoController`. No se probó provider externo aquí,
-conteo `0/70`. No sobreescribir los cambios existentes ni el ZIP/paquete de
-misión inicialmente sin seguimiento. Detalle reproducible en
+La reevaluación externa A-EXT-01–06 terminó con los criterios técnicos de
+Bloque A/G1 pasando; G1 queda `AUDITING` hasta aceptación propietaria. No se
+inició T04/B.
+Rama `main`; base `33ceaef5b996c55577524c3448bbb4bee5363952`; HEAD continúa
+`b1bd952ac03c8711ce50cf22d249fa448d2e2880`. El propietario autorizó commit/push
+del Bloque A original al repositorio privado; esta reevaluación quedó sin
+commit/push. CI final pasó con Flutter 3.47.9 aislado: 40 pruebas Python y 269
+Flutter; 6 opt-in omitidas. También pasan analyze, formato, checker, memoria y
+diff. La revisión externa fue anterior a los fixes; la segunda pasada post-fix
+fue local, no independiente. El intento de dos aperturas nativas agotó 45 s y
+sigue sin aprobar; la prueba controlada de libmpv reprodujo con un único Player
+y rechazó un segundo constructor. El ciclo E2E completo de `VideoController`
+sigue sin prueba automatizada. A-EXT-03 permanece
+`UNATTRIBUTED / NOT_REPRODUCED`; los logs originales y bundle histórico faltan,
+y los logs nuevos están en `.ai-local/review/block-a-reassessment-2026-11-15/`.
+No hubo reproducción externa, conteo `0/70`. Preservar ZIP y misión sin
+seguimiento. Detalle reproducible en
 [`STATUS`](../ai-system/missions/KONGROO-RECONSTRUCTION-STATUS.md),
 [`HANDOFF`](../ai-system/missions/KONGROO-RECONSTRUCTION-HANDOFF.md) y la
-[auditoría](../ai-system/audits/KONGROO-reconstruction-A-2026-11-15.md).
+[auditoría de reevaluación](../ai-system/audits/KONGROO-reconstruction-A-reassessment-2026-11-15.md).
 
 ### Handoff: fidelidad visual de la cabecera de ficha — 2026-11-15
 
@@ -45,7 +152,36 @@ declarar fidelidad visual final ni continuar otras secciones hasta que el
 propietario abra la ficha, vuelva a adjuntar referencias si exige comparación
 píxel a píxel y apruebe manualmente la cabecera.
 
-### Handoff: proveedores reales de reproducción — 2026-11-14
+### Handoff: limpieza S0 de providers — estado 2026-11-15
+
+S0 permanece incompleta; la implementación externa está en pausa hasta el
+siguiente prompt del propietario, sin cerrar G1/T03. El informe con la matriz
+histórica de 22 candidatos es
+[`S0-REAL-PLAYBACK-REPORT.md`](../ai-system/missions/S0-REAL-PLAYBACK-REPORT.md).
+No hay providers externos ni resolutores concretos activos; los adaptadores
+AnimeAV1/TioAnime/AnimeGG y el resolver estático anterior se retiraron. La
+arquitectura conserva contratos `AnimeProvider`, `VideoHostResolver`, el manager
+y la reproducción con el `PlaybackEngine` existente. Playback externo sigue
+0/70.
+AnimeGG/vidcache avanzó 5311 ms y detectó audio, sin dimensiones de video;
+TioAnime recorrió Mega, StreamSB, YourUpload, OK.ru y Netu sin fuente válida;
+AnimeAV1/Zilla fue `unauthorized`; AniZone/vid-cdn devolvió 404 por Range y GET,
+y 419 en Livewire. FileStream/Bee/Goma no aparecieron en las fuentes revisadas.
+FlixCloud tiene referencia upstream a token/stream por API y segmentos XOR en
+proxy local; no se verificó ni implementó un flujo directo. Las pruebas y logs
+de los adaptadores ya retirados son evidencia histórica, no checks del árbol
+actual. Ver la [auditoría de limpieza](../ai-system/audits/S0-provider-cleanup-audit-2026-11-15.md),
+[auditoría de hosts](../ai-system/audits/S0-video-host-audit-2026-11-15.md),
+[STATUS](../ai-system/missions/KONGROO-RECONSTRUCTION-STATUS.md) y
+[HANDOFF](../ai-system/missions/KONGROO-RECONSTRUCTION-HANDOFF.md).
+
+Tras la limpieza se ejecutaron Flutter analyze, Dart analyze y la suite Flutter
+completa con Flutter 3.50.0-0.4.pre/Dart 3.14.0 aislados: 267 pasaron y 6
+optativas se omitieron. No se hicieron solicitudes a proveedores en esta
+ejecución. El runtime está preparado para recibir una arquitectura nueva, pero
+S0 sigue sin reproducción externa.
+
+### Handoff histórico: proveedores reales de reproducción — 2026-11-14
 
 AnimeAV1/TioAnime están implementados y registrados. La ficha AniList crea un
 `PlaybackEpisode` tipado y abre el player media_kit existente por el selector de

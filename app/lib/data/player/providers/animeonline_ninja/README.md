@@ -14,5 +14,13 @@ but also contains Cloudflare/VRF handling. Kongroo will not port or enable
 interception/challenge logic. A future adapter must pass ordinary HTTPS calls
 and return a direct public media URI before it can be enabled.
 
+On 2026-11-15, ordinary GETs to both the older `ww3` host and the upstream
+proposed canonical `ww4` host returned HTTP 403. The [public extension PR
+#1274](https://github.com/yuzono/anime-extensions/pull/1274) reports that its
+own manual verification stops at an interactive Cloudflare
+challenge. No retry, challenge route, header impersonation, or alternate access
+method was attempted. The current evidence remains `BLOCKED_EXTERNAL`; see the
+[S0 evidence matrix](../../../../../../docs/ai-system/missions/S0-REAL-PLAYBACK-REPORT.md).
+
 No code has been copied. Reference inspected:
 [AnimeOnline Ninja extension](https://github.com/yuzono/anime-extensions/blob/master/src/es/animeonlineninja/src/eu/kanade/tachiyomi/animeextension/es/animeonlineninja/AnimeOnlineNinja.kt).

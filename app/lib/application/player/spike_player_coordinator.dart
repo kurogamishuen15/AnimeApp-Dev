@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:anime_app/domain/player/providers/playback_source.dart';
 import 'package:anime_app/domain/player/subtitles/external_subtitle_catalog.dart';
 import 'package:anime_app/domain/player/subtitles/hardsub_policy.dart';
 import 'package:anime_app/domain/player/subtitles/subtitle_style.dart';
@@ -41,6 +42,8 @@ final class SpikePlayerCoordinator implements ExternalSubtitleLoader {
   Duration _observedPosition = Duration.zero;
   double? _volumeTarget;
   Uri? _sourceUri;
+  PlaybackRequestHeaders _sourceHttpHeaders =
+      const PlaybackRequestHeaders.empty();
   int _mediaContextRevision = 0;
 
   /// Changes synchronously when an open, source switch, or Stop is requested,
@@ -75,7 +78,10 @@ final class SpikePlayerCoordinator implements ExternalSubtitleLoader {
     _publishState(playback, status: _statusFor(playback));
   });
 
-  Future<void> open(Uri source) {
+  Future<void> open(
+    Uri source, {
+    PlaybackRequestHeaders httpHeaders = const PlaybackRequestHeaders.empty(),
+  }) {
     _mediaContextRevision++;
     return _serialize(() async {
       _ensureInitialized();
@@ -99,7 +105,11 @@ final class SpikePlayerCoordinator implements ExternalSubtitleLoader {
         sourceGeneration: generation,
       );
       try {
-        await _engine.open(source, sourceGeneration: generation);
+        await _engine.open(
+          source,
+          sourceGeneration: generation,
+          httpHeaders: httpHeaders,
+        );
       } catch (_) {
         if (generation == _sourceGeneration) {
           _emitError('Could not open the selected media source.');
@@ -108,6 +118,7 @@ final class SpikePlayerCoordinator implements ExternalSubtitleLoader {
       }
       _hasOpenedSource = true;
       _sourceUri = source;
+      _sourceHttpHeaders = httpHeaders;
       _observedPosition = Duration.zero;
       _seekTarget = null;
       _seekAnchor = null;
@@ -129,6 +140,7 @@ final class SpikePlayerCoordinator implements ExternalSubtitleLoader {
   /// in media_kit 1.2.6, so asynchronous errors cannot be perfectly attributed.
   Future<PlaybackSourceSwitchResult> switchSource(
     Uri target, {
+    PlaybackRequestHeaders httpHeaders = const PlaybackRequestHeaders.empty(),
     Duration? referencePosition,
     bool? resumePlayback,
     Duration? rollbackPosition,
@@ -159,7 +171,9 @@ final class SpikePlayerCoordinator implements ExternalSubtitleLoader {
           referencePosition ?? _seekTarget ?? _observedPosition;
       final bool wasPlaying = resumePlayback ?? _state.playing;
       final PlaybackSpikeSnapshot previousTracks = _state.playback;
-      if (target == previous) {
+      final PlaybackRequestHeaders previousHttpHeaders = _sourceHttpHeaders;
+      if (target == previous &&
+          _sameHeaders(httpHeaders.values, previousHttpHeaders.values)) {
         return PlaybackSourceSwitchResult(
           disposition: PlaybackSourceSwitchDisposition.unchanged,
           previousSource: previous,
@@ -189,7 +203,11 @@ final class SpikePlayerCoordinator implements ExternalSubtitleLoader {
 
       try {
         if (wasPlaying) await _engine.pause();
-        await _engine.open(target, sourceGeneration: generation);
+        await _engine.open(
+          target,
+          sourceGeneration: generation,
+          httpHeaders: httpHeaders,
+        );
         await _waitForSwitchSnapshot(
           generation,
           (PlaybackSessionSnapshot snapshot) =>
@@ -219,6 +237,7 @@ final class SpikePlayerCoordinator implements ExternalSubtitleLoader {
           throw StateError('The source failed during switch.');
         }
         _sourceUri = target;
+        _sourceHttpHeaders = httpHeaders;
         _hasOpenedSource = true;
         _requestedPlaying = null;
         _seekTarget = null;
@@ -250,6 +269,7 @@ final class SpikePlayerCoordinator implements ExternalSubtitleLoader {
               rollbackPosition ?? reference,
               wasPlaying,
               previousTracks,
+              previousHttpHeaders,
             );
         if (restored) {
           return PlaybackSourceSwitchResult(
@@ -264,6 +284,7 @@ final class SpikePlayerCoordinator implements ExternalSubtitleLoader {
           );
         }
         _sourceUri = null;
+        _sourceHttpHeaders = const PlaybackRequestHeaders.empty();
         _hasOpenedSource = false;
         _emitError(
           'The selected source and previous source could not be restored.',
@@ -645,6 +666,9 @@ final class SpikePlayerCoordinator implements ExternalSubtitleLoader {
   }
 
   void _emitError(String message, {bool clearSourceUri = false}) {
+    if (clearSourceUri) {
+      _sourceHttpHeaders = const PlaybackRequestHeaders.empty();
+    }
     _publishState(
       _state.playback.copyWith(error: message),
       status: PlaybackSessionStatus.error,
@@ -832,6 +856,7 @@ final class SpikePlayerCoordinator implements ExternalSubtitleLoader {
     Duration reference,
     bool wasPlaying,
     PlaybackSpikeSnapshot? previousTracks,
+    PlaybackRequestHeaders httpHeaders,
   ) async {
     final int generation = ++_sourceGeneration;
     _seekTarget = null;
@@ -850,7 +875,11 @@ final class SpikePlayerCoordinator implements ExternalSubtitleLoader {
       sourceGeneration: generation,
     );
     try {
-      await _engine.open(source, sourceGeneration: generation);
+      await _engine.open(
+        source,
+        sourceGeneration: generation,
+        httpHeaders: httpHeaders,
+      );
       await _waitForSwitchSnapshot(
         generation,
         (PlaybackSessionSnapshot snapshot) =>
@@ -876,6 +905,7 @@ final class SpikePlayerCoordinator implements ExternalSubtitleLoader {
       }
       if (_state.error != null) return false;
       _sourceUri = source;
+      _sourceHttpHeaders = httpHeaders;
       _hasOpenedSource = true;
       _requestedPlaying = null;
       _seekTarget = null;
@@ -893,6 +923,15 @@ final class SpikePlayerCoordinator implements ExternalSubtitleLoader {
       return false;
     }
   }
+
+  static bool _sameHeaders(
+    Map<String, String> first,
+    Map<String, String> second,
+  ) =>
+      first.length == second.length &&
+      first.entries.every(
+        (MapEntry<String, String> entry) => second[entry.key] == entry.value,
+      );
 
   PlaybackSessionStatus _statusFor(PlaybackSpikeSnapshot playback) {
     if (playback.error != null) return PlaybackSessionStatus.error;

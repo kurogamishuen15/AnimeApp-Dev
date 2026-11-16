@@ -110,8 +110,18 @@ abstract interface class PlaybackSourceProvider {
     PlaybackEpisode episode, {
     required PlaybackCancellationToken cancellation,
   });
+}
 
-  Future<PlaybackProviderResult<ResolvedPlaybackStream>> resolveServer(
+/// Resolves an episode server independently from the anime catalog provider.
+///
+/// Implementations own HTTP host protocols only; they never discover anime,
+/// create a playback engine, or own a native player.
+abstract interface class PlaybackVideoHostResolver {
+  String get resolverId;
+
+  bool supports(PlaybackServer server);
+
+  Future<PlaybackProviderResult<ResolvedPlaybackStream>> resolve(
     PlaybackSource source,
     PlaybackServer server, {
     required PlaybackCancellationToken cancellation,

@@ -1,6 +1,6 @@
 # Código Flutter
 
-La aplicación sigue una separación por capas; `main.dart` y los composition roots conectan implementaciones concretas. La ficha conecta AnimeAV1/TioAnime con el player `SpikePlayerModule` existente. La ruta de playback está implementada, pero la reproducción de un episodio externo real sigue sin validación exitosa; el progreso todavía no está integrado con el player.
+La aplicación sigue una separación por capas; `main.dart` y los composition roots conectan implementaciones concretas. La ficha conserva la ruta al player `SpikePlayerModule` y el runtime registra AnimeHeaven con su resolver MP4 separado. La reproducción de un episodio externo aún no está confirmada; el progreso todavía no está integrado con el player.
 
 | Carpeta | Responsabilidad | Guía |
 |---|---|---|

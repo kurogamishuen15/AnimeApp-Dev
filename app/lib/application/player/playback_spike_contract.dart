@@ -1,4 +1,5 @@
 import 'package:anime_app/domain/player/audio_track_info.dart';
+import 'package:anime_app/domain/player/providers/playback_source.dart';
 import 'package:anime_app/domain/player/subtitles/hardsub_policy.dart';
 import 'package:anime_app/domain/player/subtitles/subtitle_style.dart';
 import 'package:anime_app/domain/player/subtitles/subtitle_track_info.dart';
@@ -13,7 +14,11 @@ abstract interface class PlaybackSpikeEngine {
   Stream<PlaybackSpikeSnapshot> get snapshots;
 
   Future<void> initialize();
-  Future<void> open(Uri source, {int sourceGeneration = 0});
+  Future<void> open(
+    Uri source, {
+    int sourceGeneration = 0,
+    PlaybackRequestHeaders httpHeaders = const PlaybackRequestHeaders.empty(),
+  });
   Future<void> play();
   Future<void> pause();
   Future<void> seek(Duration position);

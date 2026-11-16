@@ -18,9 +18,57 @@
 
 **Pruebas:** diferenciar `tests unitarios con fakes`, `tests de contrato`, `HTTP loopback`, `libmpv con medios locales permitidos`, `smoke real externo` y `verificación gráfica Fedora`. No confundir estos niveles. Ejecutar pruebas focalizadas durante cambios; CI completa al gate del bloque y al final. No afirmar pruebas que no se ejecutaron.
 
+## 0.1 Prioridad temporal S0 — recuperación de proveedores reales
+
+Desde el 2026-11-15, la misión S0 solicitada por el propietario es el orden
+temporal prioritario para proveedores y servidores reales. Mientras S0 siga
+activa, investigar, implementar y verificar los proveedores del inventario y
+las alternativas de servidor con evidencia real; el primer episodio o primer
+proveedor reproducible solo cierra su propio hito y no cierra S0. Los bloques
+B–F permanecen en el plan y no se eliminan, pero su orden normal queda
+suspendido durante esta prioridad.
+
+S0 no marca G1 aceptado retroactivamente: G1 permanece en revisión propietaria,
+pero la orden explícita S0 permite continuar técnicamente con los proveedores.
+No declarar `PLAYBACK_VERIFIED` por búsqueda, HTML, URL, manifiesto ni HTTP 200;
+exigir primer frame, avance y cierre por libmpv. No evadir DRM, autenticación,
+CAPTCHA ni restricciones de acceso. Si un host falla, registrar evidencia y
+continuar con otros proveedores; no repetir indefinidamente solicitudes. El
+inventario, la matriz de estados y cada reproducción se mantienen en
+[`S0-REAL-PLAYBACK-REPORT.md`](S0-REAL-PLAYBACK-REPORT.md), con continuidad en
+STATUS y HANDOFF; la auditoría técnica está en
+[`S0-provider-audit-2026-11-15.md`](../audits/S0-provider-audit-2026-11-15.md).
+**Ejecución S0-A del 2026-11-15:** se adaptó el catálogo Miruro y un resolver
+directo HLS/MP4 dentro del manager existente. Miruro devolvió 403 a los GET
+ordinarios de config/lookup; no hubo episodio, URI accesible ni playback. El
+estado queda `IMPLEMENTED / BLOCKED_EXTERNAL`, con reproducción global `0/70`.
+La CI local pasó 40 pruebas Python y 288 Flutter, con 7 pruebas optativas
+omitidas. Anivexa no está integrado y el gate S0 sigue abierto. Ver el
+[informe S0-A](S0-ANILILI-PORT-REPORT.md) y su
+[auditoría](../audits/S0-ANILILI-port-audit-2026-11-15.md).
+
+**Limpieza posterior S0-A — 2026-11-15:** se retiraron del runtime los archivos
+Dart de Miruro y sus registros; las pruebas específicas se archivaron como
+`.dart.txt` no ejecutable. El composition root actual no registra providers ni
+resolutores externos. Los contratos, manager, source switch y engine se
+conservan. S0 sigue incompleta (`0/70`) y el trabajo de integración queda en
+espera del siguiente prompt. Ver la
+[auditoría de limpieza](../audits/S0-provider-cleanup-followup-audit-2026-11-15.md).
+
+**Snapshot de limpieza previo al nuevo prompt:** la instrucción del 2026-11-15 retiró
+los adaptadores AnimeAV1/TioAnime/AnimeGG y el resolver concreto. S0 sigue
+incompleta. La pausa terminó con la autorización S0-A posterior y la matriz
+anterior es histórica; ver la
+[auditoría de limpieza](../audits/S0-provider-cleanup-audit-2026-11-15.md).
+
+El cambio de estado del runtime tras S0-A se registra en la
+[auditoría de limpieza de seguimiento](../audits/S0-provider-cleanup-followup-audit-2026-11-15.md);
+la sección de estado inicial abajo es un inventario de la misión, no una lista
+de integraciones activas.
+
 ## 1. Estado inicial constatado (revisar si cambiaron los archivos)
 
-- Registro de producción: `AnimeAv1PlaybackProvider` y `TioAnimePlaybackProvider`; sin evidencia de episodio externo reproducido en la auditoría del 14–15/11/2026.
+- Registro previo a la limpieza: `AnimeAv1PlaybackProvider` y `TioAnimePlaybackProvider`; sin evidencia de episodio externo reproducido en la auditoría del 14–15/11/2026. Los adapters se retiraron en S0; ver la auditoría de limpieza.
 - AnimeOnline Ninja tiene documentación de bloqueo, no adaptador registrado.
 - `PlaybackProviderManager._validateSources()` exige `sourceAlternatives` cuando un proveedor devuelve múltiples servidores; TioAnime no lo declara pese a devolver alternativas. Posible rechazo `invalidResponse` comprobable mediante test.
 - La pestaña de episodios puede construir tarjetas desde el total informado por AniList, no desde disponibilidad confirmada.
@@ -286,7 +334,7 @@ Desde la raíz, y siempre tras comprobar el toolchain local vigente (los comando
  flutter analyze --no-pub
  flutter test --no-pub test/domain/playback_provider_contract_test.dart \
    test/application/playback_provider_manager_test.dart
- flutter test --no-pub test/data/player/providers/public_playback_provider_test.dart
+ flutter test --no-pub test/data/player/providers/playback_providers_module_test.dart
 ```
 
 Pruebas con medios externos, libmpv y GUI se ejecutan solo con entorno y fuentes disponibles/autorizadas; registrar comando, ruta de evidencia y resultado. Las pruebas de T21 requieren matriz de 70 títulos y validaciones observadas, no el simple éxito del comando.

@@ -17,6 +17,52 @@ Los controles integrados se describen en [scripts/README.md](scripts/README.md);
 
 ## Aplicación Flutter
 
+### Estado actual de providers S0-R (2026-11-16)
+
+AnimeHeaven está registrado en `PlaybackProvidersModule`. Desde `app/`, las
+pruebas deterministas focalizadas se ejecutan así:
+
+```bash
+../.ai-local/toolchains/flutter/bin/flutter test --no-pub \
+  test/data/player/providers/animeheaven \
+  test/data/player/providers/playback_providers_module_test.dart
+```
+
+En esta ejecución pasaron 13/13; una suite de regresión de 48/48 también cubrió
+provider, manager, contratos, ruta y módulo del player. `flutter analyze
+--no-pub` pasó para el paquete completo y `dart analyze` pasó para provider,
+resolver, tests, composición y harness. La prueba live usa la ventana descrita en
+[`app/tool/README.md`](app/tool/README.md): One Piece ep. 1 publicó `cx`, `ct`
+y `ck`; los tres llegaron a libmpv y mostraron error genérico sin frame. No
+cuenta como reproducción. Las capturas están en `.ai-local/review/` con los
+nombres listados en esa guía. El propietario indicó «Autorizar manualmente en
+KDE»; una captura posterior no mostró el diálogo, pero Wayland MCP siguió con
+`Transport closed`. No se simuló entrada: el harness eligió cada mirror por
+variable de entorno. No se midió rendimiento del stream, y 0/70 títulos siguen
+reproducidos externamente.
+
+### Estado histórico de providers tras limpieza S0 (2026-11-15)
+
+El runtime no registra providers externos ni resolutores concretos. La prueba
+ejecutable del composition root confirma que la lista de adapters está vacía;
+las pruebas genéricas del manager y contratos siguen disponibles. Desde `app/`:
+
+```bash
+../.ai-local/toolchains/flutter/bin/flutter test --no-pub \
+  test/data/player/providers/playback_providers_module_test.dart \
+  test/application/playback_provider_manager_test.dart \
+  test/domain/playback_provider_contract_test.dart
+```
+
+Los 22 tests deterministas y el smoke Miruro de la ejecución S0-A son evidencia
+histórica. Sus fuentes se archivaron como `.dart.txt` no ejecutables en
+[`docs/ai-system/archive/S0-A-miruro-tests-2026-11-15/`](docs/ai-system/archive/S0-A-miruro-tests-2026-11-15/);
+el smoke ordinario obtuvo HTTP 403 y no acreditó episodio, media ni playback.
+El reporte está en el [informe S0-A](docs/ai-system/missions/S0-ANILILI-PORT-REPORT.md)
+y la [auditoría de limpieza posterior](docs/ai-system/audits/S0-provider-cleanup-followup-audit-2026-11-15.md).
+No hay proveedores activos que probar en vivo; reproducción externa continúa
+0/70.
+
 ### SDK, causa y estado del arreglo LSP
 
 Diagnóstico repetido el 2026-11-08 desde `app/`: Flutter 3.47.9 stable (`c197ca5199e9ee5661e865596c9c07294dfab51c`), Dart 3.13.7. `dart analyze lib test` pasa; `flutter analyze --no-pub` falla con exit 255 y `FormatException: Unexpected end of input` en `LspByteStreamServerChannel._readMessage`, leyendo truncado el mensaje LSP `initialize`. `flutter doctor -v` confirma toolchain Linux; Android SDK falta y no forma parte del destino F0.
@@ -442,39 +488,30 @@ subfase.
 
 ## Providers de reproducción desde ficha — 2026-11-14
 
-Selecciona Flutter aislado del proyecto desde `app/`:
+Históricamente se ejecutaron smokes live de AnimeAV1/TioAnime. Esos adaptadores
+y su archivo de pruebas se retiraron en la limpieza S0; los resultados/logs
+anteriores se conservan en el informe y la auditoría. Esta sección ya no ofrece
+comandos ejecutables para esos proveedores.
+
+Para probar los contratos que permanecen desde `app/`:
 
 ```bash
 unset FLUTTER_ROOT
 export PATH="../.ai-local/toolchains/flutter-3.47.9/bin:$PATH"
 export PUB_CACHE="../.ai-local/pub-cache"
 flutter analyze --no-pub
-flutter test --no-pub test/data/player/providers/public_playback_provider_test.dart \
+flutter test --no-pub test/data/player/providers/playback_providers_module_test.dart \
   test/domain/playback_provider_contract_test.dart \
   test/application/playback_provider_manager_test.dart
 ```
 
-La corrida reproducible actual: analyze limpio y 25 pruebas focalizadas
-aprobadas; suite completa 250 aprobadas y 6 omitidas por gates opt-in. Una
-prueba live queda omitida por defecto. Para ejecutar red real y abrir streams
-mediante libmpv:
-
-```bash
-KONGROO_LIVE_PROVIDER_SMOKE=1 flutter test --no-pub \
-  test/data/player/providers/public_playback_provider_test.dart \
-  --plain-name 'live TioAnime search'
-```
-
-La live prueba el anime `Shingeki no Kyojin`, episodio 1, desde la búsqueda a
-los servidores y la apertura/reproducción real. El resultado actual es fallo:
-TioAnime lista cinco servidores, pero ninguno reprodujo en libmpv (Mega y otros
-formatos no compatibles, StreamSB timeout, YourUpload MP4 no abrió, OK.ru/Netu
-sin URL directa). AnimeAV1 devuelve el iframe y su GET responde 403. No convertir
-respuestas HTTP o metadatos de episodios en criterio de playback aprobado.
-Ninja y JKAnime devolvieron 403 ante requests corrientes; AnimeJara tiene
-catálogo público, pero no se confirmaron rutas de episodio/servidor. La prueba
-live es un gate explícito y puede fallar cuando el proveedor no publica una
-fuente reproducible.
+La corrida histórica de los adaptadores produjo 25 pruebas focalizadas
+aprobadas y seis omitidas en la suite total de ese momento; esos conteos no
+describen el árbol después de la limpieza. TioAnime listó cinco servidores y
+ninguno reprodujo; AnimeAV1 fue denegado al resolver el iframe. Los logs y los
+límites por host permanecen en
+[`S0-REAL-PLAYBACK-REPORT.md`](docs/ai-system/missions/S0-REAL-PLAYBACK-REPORT.md)
+y [`S0-provider-cleanup-audit`](docs/ai-system/audits/S0-provider-cleanup-audit-2026-11-15.md).
 
 El build Linux release de la app pasó con el SDK aislado. Para repetirlo:
 
@@ -485,11 +522,11 @@ flutter build linux --release --no-pub
 La prueba live no verifica interacción gráfica en una ventana Kongroo ni
 recorrido manual desde la ficha. Registrar esas comprobaciones por separado.
 
-## Reconstrucción Kongroo T00–T03 — 2026-11-15
+## Reconstrucción Kongroo T00–T03 — reevaluación 2026-11-15
 
 La evidencia, los límites del diagnóstico y el siguiente punto de trabajo están
 en [`KONGROO-RECONSTRUCTION-STATUS.md`](docs/ai-system/missions/KONGROO-RECONSTRUCTION-STATUS.md)
-y en la [auditoría del Bloque A](docs/ai-system/audits/KONGROO-reconstruction-A-2026-11-15.md).
+y en la [auditoría de reevaluación](docs/ai-system/audits/KONGROO-reconstruction-A-reassessment-2026-11-15.md).
 La CI se ejecutó con el toolchain aislado del proyecto
 `.ai-local/toolchains/flutter-3.47.9` (framework revision `c197ca5199`) y
 resolución de paquetes offline. El SDK externo/global no se modificó; la
@@ -514,10 +551,136 @@ export -f flutter
 bash scripts/ci.sh
 ```
 
-En esta ejecución la CI terminó correctamente (exit 0): 40 pruebas Python y 262
-Flutter pasaron; 6 pruebas opt-in se omitieron. `flutter analyze --no-pub`, Dart
-analyze, el checker de imports, el formato y la integridad de memoria pasaron.
-También se ejecutaron pruebas focalizadas de ruta/lease/rollback y una prueba de
-integración con libmpv real sobre una fixture local. Esto no valida reproducción
-de episodios externos ni la integración del ciclo nativo completo de
-`VideoController` con el compositor. Ver [auditoría del Bloque A](docs/ai-system/audits/KONGROO-reconstruction-A-2026-11-15.md).
+En la reevaluación, `scripts/ci.sh` terminó exit 0: 40 pruebas Python y 269
+Flutter pasaron; 6 opt-in se omitieron. `flutter analyze --no-pub`, `dart
+analyze lib test`, checker (30 archivos player/34 domain), formato e integridad
+de memoria pasaron. Las 43 pruebas focalizadas cubren cancelación cooperativa,
+cierre tardío, lease nativo retenido, limpieza auxiliar y preferencias
+inyectadas. La prueba de integración libmpv single-owner pasó 1/1: abrió y
+avanzó una fixture local, y rechazó construir un segundo Player. El primer CI
+de reevaluación encontró una dependencia UI→data; se movió la traducción de
+contención al composition root y el rerun completo pasó.
+
+`pub get --offline` alteró temporalmente `pubspec.lock`; se restauró al archivo
+previo y se comprobó el mismo SHA-256. El timeout histórico de 45 s con dos
+aperturas no se repitió ni se aprueba. No se probaron proveedores externos:
+`0/70`. Tampoco se automatizó el ciclo completo de `VideoController` con el
+compositor. Los logs nuevos se guardaron en
+`.ai-local/review/block-a-reassessment-2026-11-15/`; los logs originales del
+timeout/incidente y el bundle histórico no estaban disponibles. Ver la
+[auditoría de reevaluación](docs/ai-system/audits/KONGROO-reconstruction-A-reassessment-2026-11-15.md).
+
+## Registro histórico de pruebas S0 — antes del port Anilili/Miruro — 2026-11-15
+
+Este registro conserva resultados de la limpieza previa al prompt S0-A. En ese
+corte se habían retirado los adaptadores y tests de red previos; el árbol
+posterior registra el provider Miruro, descrito en la sección S0-A al inicio de
+este documento. Los comandos de los adaptadores retirados ya no existen. El
+manager y los contratos genéricos permanecen.
+
+Desde `app/`, suite focalizada:
+
+```bash
+unset FLUTTER_ROOT
+export PATH="$PWD/../.ai-local/toolchains/flutter-3.47.9/bin:$PATH"
+flutter test --no-pub test/application/playback_provider_manager_test.dart
+flutter test --no-pub test/data/player/providers/playback_providers_module_test.dart \
+  test/application/playback_provider_manager_test.dart \
+  test/domain/playback_provider_contract_test.dart
+flutter analyze --no-pub
+```
+
+La suite combinada final de esta ejecución pasó 22 pruebas y omitió los dos smokes
+live por defecto; Flutter analyze pasó. La regresión fake de fallback y el
+cambio de fuente con libmpv usando fixtures locales pasaron por separado (1/1
+cada una); ninguno prueba un proveedor externo. Los smokes de TioAnime y
+AnimeAV1 que produjeron esos resultados ya no son ejecutables tras retirar sus
+adaptadores. No se repiten sin una nueva integración y evidencia de acceso.
+Ninguna evidencia acredita primer frame visible, audio audible o seek. AnimeJara
+`/catalogo/` y Latanime respondieron 403; Henaojara redirigió a AnimeJara sin
+seguirla; Animeflv.one permitió buscar One Piece, pero dos fichas no expusieron
+rutas de episodio. AnimeKai mirrors no resolvieron DNS; AllAnime raíz dio 200 sin
+rutas parseables. Salidas sanitizadas en
+`.ai-local/review/s0-real-playback-2026-11-15/` y el estado consolidado en
+[informe S0](docs/ai-system/missions/S0-REAL-PLAYBACK-REPORT.md). La auditoría
+de calidad está en [S0-provider-audit](docs/ai-system/audits/S0-provider-audit-2026-11-15.md).
+
+### Continuación de S0 — AnimeGG y KickAssAnime — 2026-11-15
+
+Flutter 3.47.9 del toolchain del proyecto: `flutter analyze --no-pub` limpio;
+provider fixtures 7/7, contrato domain 6/6, manager 16/16 y coordinator 28/28.
+La integración opt-in local del `Referer` con libmpv pasó 1/1: vio la cabecera
+en la solicitud HTTP inicial y tras Stop→Play, con tres requests loopback.
+Esto valida transporte local, no una fuente AnimeGG.
+
+El smoke histórico de AnimeGG se ejecutó una vez, con límite de tres minutos y
+una resolución por servidor. One Piece episodio 1 mostró cinco variantes (subbed
+1080/720/480/360p y dubbed 360p); las cinco terminaron en
+`PlaybackProviderFailureKind.network`. El test salió 1 porque ninguna fuente
+alcanzó libmpv. No hubo reintento adicional, primer frame externo, audio, seek
+ni ventana gráfica. La prueba y el adaptador quedaron retirados; la salida
+sanitizada permanece en `.ai-local/review/s0-real-playback-2026-11-15/`.
+
+El probe de KickAssAnime `kaa.lt` verificó búsqueda, detalle, idioma, episodio 1
+y un servidor CatStream con GET/POST públicos ordinarios. La página pública del
+player devolvió 200 sin un manifiesto o URI estática reconocible; no se ejecutó
+firma, AES, JavaScript de extracción ni otro método de evasión. Las evidencias
+consolidadas y clasificación están en el [informe S0](docs/ai-system/missions/S0-REAL-PLAYBACK-REPORT.md).
+CI completa y build release no se ejecutaron en esta continuación.
+
+### Continuación de S0 — resolutores reutilizables de hosts — 2026-11-15
+
+La herramienta usada en esta verificación fue el Flutter 3.50.0-0.4.pre y Dart
+3.14.0 beta aislados bajo `.ai-local/toolchains/flutter`; no se cambió el SDK
+global ni `pubspec.lock`. Desde `app/`:
+
+```bash
+../.ai-local/toolchains/flutter/bin/flutter test --no-pub \
+  test/data/player/providers/playback_providers_module_test.dart \
+  test/application/playback_provider_manager_test.dart \
+  test/domain/playback_provider_contract_test.dart
+KONGROO_TEST_HTTP_REFERER=1 \
+  ../.ai-local/toolchains/flutter/bin/flutter test --no-pub \
+  test/player/media_kit_spike_integration_test.dart \
+  --plain-name 'libmpv preserves a public Referer across open and replay after Stop'
+../.ai-local/toolchains/flutter/bin/flutter analyze --no-pub
+../.ai-local/toolchains/flutter/bin/dart analyze lib test
+```
+
+Resultado actual: la suite resolver/proveedores+manager/domain dio **41 pass y
+3 live omitidas**, y route/coordinator dio **35/35**;
+la integración HTTP loopback + libmpv dio **1/1**, con `Referer` observado y
+posición a 43 ms; Flutter/Dart analyze limpios. HLS usa GET acotado sin Range y
+comprueba `#EXTM3U`; MP4 prueba Range y repite una sola vez con GET ordinario
+ante 405/416/5xx. Fakes cubren redirecciones permitidas/no permitidas,
+cabeceras, URLs expiradas, HLS inválido y SAMPLE-AES.
+
+Los smokes live TioAnime y AnimeGG terminaron anteriormente con fallos de
+aceptación; las pruebas se retiraron junto con los adaptadores. Los logs
+sanitizados siguen en `.ai-local/review/s0-real-playback-2026-11-15/`.
+
+TioAnime recorrió cinco hosts: Mega/OK.ru/Netu `unsupported`, StreamSB timeout
+y YourUpload error de red. AnimeGG resolvió a `vidcache.net`; libmpv avanzó
+5311 ms y detectó audio, pero no dimensiones de video. Ambas salidas live son
+**fallos de aceptación**, no pruebas aprobadas. AnimeAV1/Zilla permaneció en
+`unauthorized`; AniZone/vid-cdn devolvió 404 por Range y GET ordinario y 419 en
+la acción Livewire. No repetir estos hosts sin evidencia nueva. Ver la
+[auditoría de hosts](docs/ai-system/audits/S0-video-host-audit-2026-11-15.md).
+No se ejecutó CI completa, build release ni recorrido visual externo.
+
+### Verificación después de la limpieza — 2026-11-15
+
+Con el mismo SDK aislado, desde `app/` se ejecutó la suite completa sobre el
+runtime ya limpio:
+
+```bash
+../.ai-local/toolchains/flutter/bin/flutter analyze --no-pub
+../.ai-local/toolchains/flutter/bin/dart analyze lib test
+../.ai-local/toolchains/flutter/bin/flutter test --no-pub
+```
+
+Los dos análisis terminaron sin issues y la suite pasó con **267 pruebas y 6
+optativas omitidas**. La composición registra cero providers externos. Esta
+verificación no hizo requests a hosts ni acredita playback externo; la
+integración queda pausada hasta el siguiente prompt. Ver el
+[informe de limpieza](docs/ai-system/audits/S0-provider-cleanup-audit-2026-11-15.md).

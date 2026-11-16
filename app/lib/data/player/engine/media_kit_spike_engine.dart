@@ -8,6 +8,7 @@ import 'package:media_kit_video/media_kit_video.dart';
 import '../../../application/player/diagnostics/playback_performance.dart';
 import '../../../application/player/playback_spike_contract.dart';
 import '../../../domain/player/audio_track_info.dart';
+import '../../../domain/player/providers/playback_source.dart';
 import '../../../domain/player/subtitles/hardsub_policy.dart';
 import '../../../domain/player/subtitles/subtitle_style.dart';
 import '../../../domain/player/subtitles/subtitle_track_info.dart';
@@ -50,7 +51,7 @@ final class MediaKitSpikeEngine
       Object? playerDisposeFailure;
       StackTrace? playerDisposeFailureStack;
 
-      Future<void> rollback() async {
+      Future<void> rollbackNativePlayer() async {
         if (allocatedPlayer != null && !playerDisposeAttempted) {
           playerDisposeAttempted = true;
           try {
@@ -60,22 +61,24 @@ final class MediaKitSpikeEngine
             playerDisposeFailureStack = disposeStack;
           }
         }
-
-        Object? failure = playerDisposeFailure;
-        StackTrace? failureStack = playerDisposeFailureStack;
-        try {
-          if (!snapshots.isClosed) await snapshots.close();
-        } catch (closeError, closeStack) {
-          failure ??= closeError;
-          failureStack ??= closeStack;
+        if (playerDisposeFailure != null) {
+          Error.throwWithStackTrace(
+            playerDisposeFailure!,
+            playerDisposeFailureStack!,
+          );
         }
-        if (failure != null) Error.throwWithStackTrace(failure, failureStack!);
       }
 
       unawaited(
         lease
-            .release(rollback)
+            .release(rollbackNativePlayer)
             .then<void>((_) {}, onError: (Object _, StackTrace _) {}),
+      );
+      unawaited(
+        snapshots.close().then<void>(
+          (_) {},
+          onError: (Object _, StackTrace _) {},
+        ),
       );
       Error.throwWithStackTrace(error, stack);
     }
@@ -85,6 +88,7 @@ final class MediaKitSpikeEngine
   @visibleForTesting
   factory MediaKitSpikeEngine.forTesting({
     required Future<void> Function(Player player) disposePlayer,
+    Future<void> Function()? auxiliaryCleanupForTesting,
   }) {
     final ActivePlayerLease lease = ActivePlayerLease.acquire();
     final StreamController<PlaybackSpikeSnapshot> snapshots =
@@ -101,31 +105,41 @@ final class MediaKitSpikeEngine
         snapshots,
         lease,
         disposePlayer: () => disposePlayer(createdPlayer),
+        auxiliaryCleanupForTesting: auxiliaryCleanupForTesting,
       );
     } catch (error, stack) {
       final Player? allocatedPlayer = player;
-      Future<void> rollback() async {
-        Object? failure;
-        StackTrace? failureStack;
-        try {
-          if (allocatedPlayer != null) await allocatedPlayer.dispose();
-        } catch (disposeError, disposeStack) {
-          failure = disposeError;
-          failureStack = disposeStack;
+      var playerDisposeAttempted = false;
+      Object? playerDisposeFailure;
+      StackTrace? playerDisposeFailureStack;
+      Future<void> rollbackNativePlayer() async {
+        if (allocatedPlayer != null && !playerDisposeAttempted) {
+          playerDisposeAttempted = true;
+          try {
+            await allocatedPlayer.dispose();
+          } catch (disposeError, disposeStack) {
+            playerDisposeFailure = disposeError;
+            playerDisposeFailureStack = disposeStack;
+          }
         }
-        try {
-          if (!snapshots.isClosed) await snapshots.close();
-        } catch (closeError, closeStack) {
-          failure ??= closeError;
-          failureStack ??= closeStack;
+        if (playerDisposeFailure != null) {
+          Error.throwWithStackTrace(
+            playerDisposeFailure!,
+            playerDisposeFailureStack!,
+          );
         }
-        if (failure != null) Error.throwWithStackTrace(failure, failureStack!);
       }
 
       unawaited(
         lease
-            .release(rollback)
+            .release(rollbackNativePlayer)
             .then<void>((_) {}, onError: (Object _, StackTrace _) {}),
+      );
+      unawaited(
+        snapshots.close().then<void>(
+          (_) {},
+          onError: (Object _, StackTrace _) {},
+        ),
       );
       Error.throwWithStackTrace(error, stack);
     }
@@ -138,11 +152,15 @@ final class MediaKitSpikeEngine
   static Future<void> retryPendingDispose() =>
       ActivePlayerLease.retryPendingRelease();
 
+  /// Whether a live or quarantined native Player still owns the exclusive slot.
+  static bool get hasActivePlayerLease => ActivePlayerLease.hasActiveLease;
+
   MediaKitSpikeEngine._(
     Player player,
     this._snapshots,
     this._lease, {
     Future<void> Function()? disposePlayer,
+    this._auxiliaryCleanupForTesting,
     Set<Uri> demoSources = const {},
     Set<Uri> trustedExternalSources = const {},
   }) : _demoSources = Set.unmodifiable(demoSources),
@@ -154,11 +172,13 @@ final class MediaKitSpikeEngine
   final Set<Uri> _trustedExternalSources;
   final Player _player;
   final Future<void> Function() _disposePlayer;
+  final Future<void> Function()? _auxiliaryCleanupForTesting;
   final ActivePlayerLease _lease;
   final StreamController<PlaybackSpikeSnapshot> _snapshots;
   VideoController? _videoController;
   final List<StreamSubscription<Object?>> _subscriptions = [];
   StreamSubscription<String>? _sourceErrorSubscription;
+  Future<void>? _disposeFuture;
   PlaybackSpikeSnapshot _state = const PlaybackSpikeSnapshot();
   bool _initialized = false;
   bool _disposed = false;
@@ -169,6 +189,8 @@ final class MediaKitSpikeEngine
   int _nativeErrorRevision = 0;
   int _sourceGeneration = 0;
   Uri? _currentSource;
+  PlaybackRequestHeaders _currentHttpHeaders =
+      const PlaybackRequestHeaders.empty();
   bool _stopped = false;
   bool _automaticVideoSelection = false;
   int _positionEventCount = 0;
@@ -261,7 +283,11 @@ final class MediaKitSpikeEngine
   }
 
   @override
-  Future<void> open(Uri source, {int sourceGeneration = 0}) async {
+  Future<void> open(
+    Uri source, {
+    int sourceGeneration = 0,
+    PlaybackRequestHeaders httpHeaders = const PlaybackRequestHeaders.empty(),
+  }) async {
     _ensureReady();
     await _validateSource(source);
     _sourceGeneration = sourceGeneration;
@@ -281,8 +307,9 @@ final class MediaKitSpikeEngine
       selectedSubtitleId: 'auto',
       clearError: true,
     );
-    await _openValidated(source, play: false);
+    await _openValidated(source, play: false, httpHeaders: httpHeaders);
     _currentSource = source;
+    _currentHttpHeaders = httpHeaders;
     _stopped = false;
     _copy(
       stopped: false,
@@ -333,9 +360,16 @@ final class MediaKitSpikeEngine
     }
   }
 
-  Future<void> _openValidated(Uri source, {required bool play}) async {
+  Future<void> _openValidated(
+    Uri source, {
+    required bool play,
+    PlaybackRequestHeaders httpHeaders = const PlaybackRequestHeaders.empty(),
+  }) async {
     final int errorRevisionAtOpen = _nativeErrorRevision;
-    await _player.open(Media(source.toString()), play: play);
+    await _player.open(
+      Media(source.toString(), httpHeaders: httpHeaders.values),
+      play: play,
+    );
     // Clear an old failure only if this open attempt did not report a new
     // stream error before its Future completed.
     if (_nativeErrorRevision == errorRevisionAtOpen) _copy(clearError: true);
@@ -366,7 +400,11 @@ final class MediaKitSpikeEngine
         throw StateError('No media source is available after Stop.');
       }
       await _validateSource(source);
-      await _openValidated(source, play: true);
+      await _openValidated(
+        source,
+        play: true,
+        httpHeaders: _currentHttpHeaders,
+      );
       _stopped = false;
       _copy(
         stopped: false,
@@ -514,56 +552,111 @@ final class MediaKitSpikeEngine
 
   @override
   Future<void> dispose() {
+    final Future<void>? current = _disposeFuture;
+    if (current != null) return current;
     _disposed = true;
-    return _lease.release(() async {
-      Object? failure;
-      StackTrace? failureStack;
-      try {
-        await _sourceErrorSubscription?.cancel();
-        _sourceErrorSubscription = null;
-      } catch (error, stack) {
-        failure = error;
-        failureStack = stack;
-      }
-      while (_subscriptions.isNotEmpty) {
-        try {
-          await _subscriptions.first.cancel();
-          _subscriptions.removeAt(0);
-        } catch (error, stack) {
-          failure ??= error;
-          failureStack ??= stack;
-          break;
-        }
-      }
-      if (!_playerDisposed) {
+    final Future<void> future = _disposeResources();
+    _disposeFuture = future;
+    unawaited(
+      future.then<void>(
+        (_) => _clearDisposeFuture(future),
+        onError: (Object _, StackTrace _) => _clearDisposeFuture(future),
+      ),
+    );
+    return future;
+  }
+
+  void _clearDisposeFuture(Future<void> future) {
+    if (identical(_disposeFuture, future)) _disposeFuture = null;
+  }
+
+  Future<void> _disposeResources() async {
+    Object? nativeFailure;
+    StackTrace? nativeFailureStack;
+    try {
+      await _lease.release(() async {
+        if (_playerDisposed) return;
         if (_playerDisposeFailure != null) {
-          failure ??= _playerDisposeFailure;
-          failureStack ??= _playerDisposeFailureStack;
-        } else if (!_playerDisposeAttempted) {
-          _playerDisposeAttempted = true;
-          try {
-            await _disposePlayer();
-            _playerDisposed = true;
-          } catch (error, stack) {
-            // media_kit's native dispose sets its disposed flag partway
-            // through teardown. Calling it again after an exception can throw
-            // immediately while leaving native cleanup incomplete. Quarantine
-            // the lease instead of risking a second active libmpv instance.
-            _playerDisposeFailure = error;
-            _playerDisposeFailureStack = stack;
-            failure ??= error;
-            failureStack ??= stack;
-          }
+          Error.throwWithStackTrace(
+            _playerDisposeFailure!,
+            _playerDisposeFailureStack!,
+          );
         }
-      }
+        if (_playerDisposeAttempted) {
+          throw StateError(
+            'Native player disposal was attempted without confirmed completion.',
+          );
+        }
+        _playerDisposeAttempted = true;
+        try {
+          await _disposePlayer();
+          _playerDisposed = true;
+        } catch (error, stack) {
+          // A partially failed media_kit dispose is not safely retryable.
+          // Keep the native lease quarantined instead of risking a second
+          // active libmpv instance.
+          _playerDisposeFailure = error;
+          _playerDisposeFailureStack = stack;
+          Error.throwWithStackTrace(error, stack);
+        }
+      });
+    } catch (error, stack) {
+      nativeFailure = error;
+      nativeFailureStack = stack;
+    }
+    _currentSource = null;
+    _currentHttpHeaders = const PlaybackRequestHeaders.empty();
+
+    Object? auxiliaryFailure;
+    StackTrace? auxiliaryFailureStack;
+    Future<void> attemptAuxiliaryCleanup(
+      Future<void> Function() cleanup,
+    ) async {
       try {
-        if (!_snapshots.isClosed) await _snapshots.close();
+        await cleanup();
       } catch (error, stack) {
-        failure ??= error;
-        failureStack ??= stack;
+        auxiliaryFailure ??= error;
+        auxiliaryFailureStack ??= stack;
       }
-      if (failure != null) Error.throwWithStackTrace(failure, failureStack!);
-    });
+    }
+
+    final StreamSubscription<String>? sourceErrors = _sourceErrorSubscription;
+    if (sourceErrors != null) {
+      await attemptAuxiliaryCleanup(() async {
+        await sourceErrors.cancel();
+        _sourceErrorSubscription = null;
+      });
+    }
+    while (_subscriptions.isNotEmpty) {
+      final StreamSubscription<Object?> subscription = _subscriptions.first;
+      try {
+        await subscription.cancel();
+        _subscriptions.removeAt(0);
+      } catch (error, stack) {
+        auxiliaryFailure ??= error;
+        auxiliaryFailureStack ??= stack;
+        break;
+      }
+    }
+    if (_auxiliaryCleanupForTesting
+        case final Future<void> Function() cleanup) {
+      await attemptAuxiliaryCleanup(cleanup);
+    }
+    if (!_snapshots.isClosed) {
+      await attemptAuxiliaryCleanup(_snapshots.close);
+    }
+
+    if (nativeFailure != null || auxiliaryFailure != null) {
+      final Object cause = nativeFailure ?? auxiliaryFailure!;
+      final StackTrace? causeStack = nativeFailure != null
+          ? nativeFailureStack
+          : auxiliaryFailureStack;
+      throw MediaKitSpikeEngineDisposeFailure(
+        nativePlayerStillOwned: !_playerDisposed,
+        cause: cause,
+        causeStack: causeStack,
+      );
+    }
   }
 
   void _listen<T>(Stream<T> stream, void Function(T) update) {
@@ -773,4 +866,21 @@ final class MediaKitSpikeEngine
   void _ensureNotDisposed() {
     if (_disposed) throw StateError('Engine is disposed.');
   }
+}
+
+/// Cleanup failed after all safe cleanup steps were attempted.
+///
+/// [nativePlayerStillOwned] is true only while the native-player lease remains
+/// quarantined. Auxiliary stream cleanup failures do not retain that lease
+/// after `Player.dispose()` has completed successfully.
+final class MediaKitSpikeEngineDisposeFailure extends StateError {
+  MediaKitSpikeEngineDisposeFailure({
+    required this.nativePlayerStillOwned,
+    required this.cause,
+    this.causeStack,
+  }) : super('MediaKit engine cleanup failed.');
+
+  final bool nativePlayerStillOwned;
+  final Object cause;
+  final StackTrace? causeStack;
 }

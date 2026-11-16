@@ -71,23 +71,38 @@ intencional.
 El composition root `SpikePlayerModule` es el único punto que convierte las
 variables `KONGROO_DEMO_SHOW_NERD`, `KONGROO_DEMO_FIT`,
 `KONGROO_DEMO_ASPECT` y `KONGROO_PERF_DIAGNOSTIC` en
-`SpikePlayerPageOptions`. La página recibe opciones inmutables y no depende de
-`dart:io`; valores ausentes o desconocidos conservan la presentación normal.
-Los tests unitarios de opciones cubren defaults, valores admitidos y entradas
-desconocidas.
+`SpikePlayerPageOptions`. `initialFit` y `initialAspect` son overrides
+opcionales: si el entorno no los define, la página conserva los ajustes de un
+`PlayerVideoDisplayController` inyectado. Las opciones no acceden a `dart:io`;
+los tests cubren defaults, valores admitidos, entradas desconocidas y la
+precedencia del controlador compartido.
 
-Si la composición o inicialización falla, `SpikePlayerModule.open` intenta
-liberar todos los recursos que alcanzó a crear, espera también el lease nativo
-si el constructor síncrono del engine falla, y libera ambos catálogos recibidos,
-incluso si falla el preflight por un player ya activo. Si la limpieza termina,
-la ruta permite volver. Si algún dispose falla, `SpikePlayerStartupCleanupFailure`
-mantiene la ruta bloqueada y pide reiniciar antes de crear otro player; un
-`ActivePlayerLeaseInUse` por otra sesión viva se trata como error recuperable y
-permite volver. Con una sesión abierta, `PopScope` espera `close()` antes de
-navegar y conserva la ruta si el cierre falla para que se pueda reintentar.
-`app/test/player/provider_playback_route_test.dart` cubre fallo recuperable,
-limpieza incompleta y cierre controlado antes de navegar. La limpieza nativa
-parcial de libmpv sigue sin una inyección automatizada en la prueba de ruta.
+`ProviderPlaybackRoute` entrega a su loader un token de cancelación cooperativa.
+Al cancelar una apertura pendiente se vuelve al catálogo y la ruta supervisa
+el Future original: si este entrega una sesión tarde, la cierra. El token no
+interrumpe una operación nativa ni libera el lease. `SpikePlayerModule.open`
+comprueba el token en los puntos seguros después de cada espera de inicialización
+y apertura; al observar la cancelación, ejecuta el cleanup antes de completar su
+Future. Si una llamada nativa no responde, el lease permanece reservado y un
+intento posterior muestra que hay una apertura anterior activa; se debe esperar
+o reiniciar la aplicación antes de reproducir de nuevo. El composition root
+traduce `ActivePlayerLeaseInUse` a `PlaybackRoutePlayerBusy`; la ruta no importa
+el adaptador `data` ni depende de la clase concreta del lease. No se usa
+`timeout` para simular cancelación nativa.
+
+Los fallos de cleanup informan por separado `nativePlayerStillOwned` y
+`nonNativeCleanupFailed`. `SpikePlayerStartupCleanupFailure` bloquea volver solo
+cuando el lease nativo sigue retenido; si el Player se liberó y solo falló un
+recurso auxiliar, la UI permite volver con un aviso. El cierre de una sesión usa
+`PlaybackRouteCleanupFailure` con la misma distinción. `MediaKitSpikeEngine`
+retiene el lease si falla `Player.dispose()`, pero lo libera cuando el dispose
+nativo se confirma, aunque falle después una suscripción o stream auxiliar.
+`app/test/player/provider_playback_route_test.dart`,
+`spike_player_module_test.dart` y `media_kit_spike_dispose_failure_test.dart`
+cubren apertura pendiente/cancelación, cierre tardío, retorno seguro y
+cuarentena nativa. El ciclo end-to-end completo de `VideoController` con plugin
+Linux sigue sin prueba automatizada.
+
 La propiedad de los catálogos se transfiere después de validar los argumentos:
 si `open` los rechaza, el caller conserva la responsabilidad de cerrar esos
 catálogos; `spike_player_module_test.dart` fija este contrato.
@@ -442,10 +457,10 @@ episodio al `PlaybackSourceSwitchService` existente para cambiar de servidor.
 La resolución vive en `data/player/providers`; los widgets no conocen los
 scrapers ni su HTML.
 
-La ficha presenta el selector de servidor después de que el manager devuelva
-una fuente. Si no hay un stream directo, no abre el player. La prueba live
-opcional `KONGROO_LIVE_PROVIDER_SMOKE=1` en
-`test/data/player/providers/public_playback_provider_test.dart` utiliza
-libmpv real: la última corrida encontró servidores TioAnime, pero ninguna
-reprodujo el episodio 1. No afirmar operatividad hasta que pase esa prueba en
-Fedora con un episodio real.
+La ruta y el selector genéricos se conservan, pero la limpieza S0 dejó el
+composition root sin proveedores externos; por ahora no hay una fuente real que
+mostrar desde la ficha. Se retiró el smoke
+`KONGROO_LIVE_PROVIDER_SMOKE=1` junto con los adaptadores no verificados. Sus
+resultados históricos permanecen en el
+[informe S0](../../../../docs/ai-system/missions/S0-REAL-PLAYBACK-REPORT.md)
+y la [auditoría de limpieza](../../../../docs/ai-system/audits/S0-provider-cleanup-audit-2026-11-15.md).

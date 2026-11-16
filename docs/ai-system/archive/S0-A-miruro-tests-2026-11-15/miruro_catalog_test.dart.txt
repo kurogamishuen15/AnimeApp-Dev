@@ -1,0 +1,280 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:anime_app/data/player/providers/miruro/miruro_catalog.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  group('MiruroCatalogParser', () {
+    test(
+      'reads dynamic provider order, labels, visibility, and embed parents',
+      () {
+        final List<MiruroProviderDefinition> config =
+            MiruroCatalogParser.parseConfig({
+              'providerOrder': ['sun', 'bee', 'twin'],
+              'streaming': {
+                'bee': {'label': 'Bee', 'visible': true},
+                'sun': {'label': 'Sun', 'visible': true},
+                'twin': {
+                  'label': 'Twin',
+                  'visible': true,
+                  'relationship': 'embed',
+                  'parent': 'bee',
+                },
+                'hidden': {'label': 'Hidden', 'visible': false},
+              },
+            });
+
+        expect(config.map((MiruroProviderDefinition item) => item.key), [
+          'sun',
+          'bee',
+          'twin',
+          'hidden',
+        ]);
+        expect(config.first.label, 'Sun');
+        expect(config[2].isEmbed, isTrue);
+        expect(config[2].parent, 'bee');
+        expect(config.last.visible, isFalse);
+      },
+    );
+
+    test('maps AniList lookup and excludes specials from episode numbers', () {
+      expect(
+        MiruroCatalogParser.parseMiruroTitleId({
+          'data': [
+            {
+              'id': 'miruro-title-1',
+              'episode_counts': {'sub': 12, 'dub': 10},
+            },
+          ],
+        }),
+        'miruro-title-1',
+      );
+      expect(
+        MiruroCatalogParser.parseMiruroTitleId({'data': <Object?>[]}),
+        isNull,
+      );
+
+      final MiruroEpisodePage page = MiruroCatalogParser.parseEpisodes({
+        'data': [
+          {'episode_number': 1, 'kind': 'regular'},
+          {'episode_number': 20001, 'kind': 'special'},
+          {'episode_number': 2},
+        ],
+        'has_more': true,
+        'next_cursor': 'next-page',
+      });
+      expect(page.numbers, [1, 2]);
+      expect(page.nextCursor, 'next-page');
+    });
+
+    test('keeps native streams separate from embed children', () {
+      final List<MiruroProviderDefinition> config =
+          MiruroCatalogParser.parseConfig({
+            'providerOrder': ['bee', 'sun', 'twin'],
+            'streaming': {
+              'bee': {'label': 'Bee', 'visible': true},
+              'sun': {'label': 'Sun', 'visible': true},
+              'twin': {
+                'label': 'Twin',
+                'visible': true,
+                'relationship': 'embed',
+                'parent': 'bee',
+              },
+            },
+          });
+      final List<MiruroPlaybackOption>
+      options = MiruroCatalogParser.parsePlaybackOptions(
+        config: config,
+        value: {
+          'tracks': [
+            {
+              'track': 'sub',
+              'providers': [
+                {
+                  'provider': 'bee',
+                  'servers': [
+                    {
+                      'server': 'Primary',
+                      'headers': {'Referer': 'https://watch.example.org/'},
+                      'embed': {'url': 'https://player.example.org/embed/1'},
+                      'streams': [
+                        {
+                          'url':
+                              'https://cdn.example.org/master.m3u8?sig=fixture',
+                          'format': 'hls',
+                          'quality': '1080p',
+                        },
+                        {
+                          'embed': {
+                            'url': 'https://player.example.org/embed/2',
+                          },
+                        },
+                      ],
+                    },
+                  ],
+                },
+                {
+                  'provider': 'sun',
+                  'servers': [
+                    {
+                      'server': 'Secondary',
+                      'streams': [
+                        {
+                          'url': 'https://cdn.example.org/video.mp4',
+                          'format': 'mp4',
+                          'quality': '720p',
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      );
+
+      expect(options, hasLength(4));
+      expect(
+        options.where((MiruroPlaybackOption option) => !option.isEmbed),
+        hasLength(2),
+      );
+      expect(
+        options.where((MiruroPlaybackOption option) => option.isEmbed),
+        hasLength(2),
+      );
+      expect(options.first.url.queryParameters, {'sig': 'fixture'});
+      expect(options.first.referer, 'https://watch.example.org/');
+      expect(
+        options.map((MiruroPlaybackOption option) => option.format),
+        containsAll(['hls', 'mp4', 'embed', 'embed']),
+      );
+      expect(options.last.providerKey, 'twin');
+    });
+
+    test(
+      'rejects non-HTTPS and unknown media formats, but retains safe embeds',
+      () {
+        final List<MiruroProviderDefinition> config =
+            MiruroCatalogParser.parseConfig({
+              'streaming': {
+                'bee': {'visible': true},
+                'twin': {
+                  'visible': true,
+                  'relationship': 'embed',
+                  'parent': 'bee',
+                },
+              },
+            });
+        final List<MiruroPlaybackOption> options =
+            MiruroCatalogParser.parsePlaybackOptions(
+              config: config,
+              value: {
+                'tracks': [
+                  {
+                    'track': 'sub',
+                    'providers': [
+                      {
+                        'provider': 'bee',
+                        'servers': [
+                          {
+                            'server': 'Bee',
+                            'streams': [
+                              {'url': 'http://cdn.example.org/video.mp4'},
+                              {
+                                'url': 'https://cdn.example.org/video.mpd',
+                                'format': 'dash',
+                              },
+                              {'embed': 'https://player.example.org/embed/ep'},
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            );
+        expect(options, hasLength(1));
+        expect(options.single.isEmbed, isTrue);
+        expect(options.single.format, 'embed');
+      },
+    );
+
+    test(
+      'decodes the upstream XOR and gzip JSON envelope within size limits',
+      () async {
+        const String json = '{"data":[{"id":"fixture"}]}';
+        final List<int> compressed = GZipCodec().encode(utf8.encode(json));
+        const List<int> key = [
+          109,
+          105,
+          114,
+          117,
+          114,
+          111,
+          47,
+          99,
+          97,
+          116,
+          97,
+          108,
+          111,
+          103,
+        ];
+        final List<int> encoded = List<int>.generate(
+          compressed.length,
+          (int index) => compressed[index] ^ key[index % key.length],
+        );
+
+        expect(
+          await MiruroCatalogParser.decodeJsonResponse(
+            encoded,
+            'application/octet-stream',
+          ),
+          {
+            'data': [
+              {'id': 'fixture'},
+            ],
+          },
+        );
+        expect(
+          await MiruroCatalogParser.decodeJsonResponse(
+            utf8.encode(json),
+            'application/json',
+          ),
+          {
+            'data': [
+              {'id': 'fixture'},
+            ],
+          },
+        );
+        await expectLater(
+          MiruroCatalogParser.decodeJsonResponse(
+            List<int>.filled(MiruroCatalogParser.maxEncodedBytes + 1, 0),
+            'application/json',
+          ),
+          throwsFormatException,
+        );
+      },
+    );
+
+    test(
+      'rejects invalid object shapes rather than returning empty sources',
+      () {
+        expect(
+          () => MiruroCatalogParser.parseEpisodes({'data': null}),
+          throwsFormatException,
+        );
+        expect(
+          () => MiruroCatalogParser.parsePlaybackOptions(
+            value: {'tracks': null},
+            config: const [],
+          ),
+          throwsFormatException,
+        );
+      },
+    );
+  });
+}

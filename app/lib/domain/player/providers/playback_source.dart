@@ -104,6 +104,7 @@ final class PlaybackServer {
     required this.id,
     required this.endpoint,
     this.priority = 0,
+    this.requestHeaders = const PlaybackRequestHeaders.empty(),
   }) {
     if (id.trim().isEmpty ||
         !const {'http', 'https', 'file'}.contains(endpoint.scheme) ||
@@ -115,6 +116,72 @@ final class PlaybackServer {
   final String id;
   final Uri endpoint;
   final int priority;
+  final PlaybackRequestHeaders requestHeaders;
+}
+
+/// Public, non-authentication HTTP context required by a media endpoint.
+///
+/// Only a `Referer` is currently supported. Cookies, authorization
+/// credentials, and arbitrary caller-supplied headers are rejected.
+final class PlaybackRequestHeaders {
+  factory PlaybackRequestHeaders(Map<String, String> values) {
+    final Map<String, String> validated = <String, String>{};
+    for (final MapEntry<String, String> entry in values.entries) {
+      if (entry.key.trim().toLowerCase() != 'referer' ||
+          validated.containsKey('Referer')) {
+        throw ArgumentError('Only one public Referer header is supported.');
+      }
+      final String value = entry.value.trim();
+      final Uri? uri = Uri.tryParse(value);
+      if (value.length > 2048 ||
+          value.contains('\r') ||
+          value.contains('\n') ||
+          uri == null ||
+          uri.userInfo.isNotEmpty ||
+          uri.hasQuery ||
+          uri.hasFragment ||
+          !_isPublicHttpsOrigin(uri)) {
+        throw ArgumentError('The public Referer header is invalid.');
+      }
+      validated['Referer'] = uri.toString();
+    }
+    return PlaybackRequestHeaders._(Map.unmodifiable(validated));
+  }
+
+  const PlaybackRequestHeaders.empty() : values = const {};
+
+  const PlaybackRequestHeaders._(this.values);
+
+  final Map<String, String> values;
+
+  bool get isEmpty => values.isEmpty;
+
+  static bool _isPublicHttpsOrigin(Uri uri) {
+    final String host = uri.host.toLowerCase();
+    const Set<String> specialUseSuffixes = {
+      'localhost',
+      'local',
+      'internal',
+      'test',
+      'invalid',
+      'example',
+      'onion',
+    };
+    final bool looksLikeIpLiteral =
+        host.contains(':') || RegExp(r'^[0-9.]+$').hasMatch(host);
+    final bool specialUseHost = specialUseSuffixes.any(
+      (String suffix) => host == suffix || host.endsWith('.$suffix'),
+    );
+    return uri.scheme == 'https' &&
+        uri.port == 443 &&
+        (uri.path.isEmpty || uri.path == '/') &&
+        host.contains('.') &&
+        !host.startsWith('.') &&
+        !host.endsWith('.') &&
+        !host.contains('_') &&
+        !looksLikeIpLiteral &&
+        !specialUseHost;
+  }
 }
 
 /// Resolved data ready to pass to a playback coordinator; never owns a Player.
@@ -124,6 +191,7 @@ final class ResolvedPlaybackStream {
     required this.sourceId,
     required this.serverId,
     required this.uri,
+    this.httpHeaders = const PlaybackRequestHeaders.empty(),
   }) {
     if (sourceId.trim().isEmpty ||
         serverId.trim().isEmpty ||
@@ -137,4 +205,5 @@ final class ResolvedPlaybackStream {
   final String sourceId;
   final String serverId;
   final Uri uri;
+  final PlaybackRequestHeaders httpHeaders;
 }

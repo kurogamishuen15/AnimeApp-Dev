@@ -8,7 +8,7 @@
 
 | Archivo | Propósito | Entrada/salida | Dependencias |
 |---|---|---|---|
-| `playback_spike_contract.dart` | Puerto temporal del motor, capacidad opcional `PlaybackVideoSelection` y snapshot inmutable con pistas de video | URI/comandos → stream de estado | Dart, `VideoTrackInfo` |
+| `playback_spike_contract.dart` | Puerto temporal del motor, capacidad opcional `PlaybackVideoSelection`, contexto HTTP aprobado y snapshot inmutable con pistas de video | URI/comandos → stream de estado | Dart, `VideoTrackInfo`, `PlaybackRequestHeaders` |
 | `spike_player_coordinator.dart` | Orden FIFO, selección de pista de video/audio, límites, rollback y cierre | comandos async y `states` | Puerto de este módulo |
 | `README.md` | Ciclo de vida, contratos y pruebas | desarrollador → guía | ADR-002, módulos vecinos |
 

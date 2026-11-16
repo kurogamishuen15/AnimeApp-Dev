@@ -59,6 +59,40 @@ void main() {
   });
 
   test(
+    'tries later servers before counting an exhausted resolution request',
+    () async {
+      final _MultiServerProvider provider = _MultiServerProvider(
+        failedServerIds: const {'server-1', 'server-2', 'server-3'},
+      );
+      final PlaybackProviderManager manager = _manager([provider]);
+
+      final PlaybackProviderResult<ResolvedPlaybackStream> result =
+          await manager.resolveBestStream(
+            _episode(),
+            cancellation: PlaybackCancellationToken(),
+          );
+
+      expect(result, isA<PlaybackProviderSuccess<ResolvedPlaybackStream>>());
+      expect(
+        (result as PlaybackProviderSuccess<ResolvedPlaybackStream>)
+            .value
+            .serverId,
+        'server-4',
+      );
+      expect(provider.attemptedServerIds, [
+        'server-1',
+        'server-2',
+        'server-3',
+        'server-4',
+      ]);
+      expect(
+        manager.diagnostics.single.resolutionCircuit,
+        ProviderCircuitState.closed,
+      );
+    },
+  );
+
+  test(
     'falls back from unavailable and empty providers in configured order',
     () async {
       final MockPlaybackProvider unavailable = MockPlaybackProvider(
@@ -104,11 +138,13 @@ void main() {
         (healthy, 10),
       ]);
 
-      final PlaybackProviderSuccess<ResolvedPlaybackStream> result =
+      final PlaybackProviderResult<ResolvedPlaybackStream> rawResult =
           await manager.resolveBestStream(
             _episode(),
             cancellation: PlaybackCancellationToken(),
-          ) as PlaybackProviderSuccess<ResolvedPlaybackStream>;
+          );
+      final PlaybackProviderSuccess<ResolvedPlaybackStream> result =
+          rawResult as PlaybackProviderSuccess<ResolvedPlaybackStream>;
       expect(result.value.providerId, healthy.id);
       expect(unavailableSource.resolveCalls, 1);
       expect(manager.diagnostics.first.resolutionConsecutiveFailures, 1);
@@ -547,17 +583,34 @@ void main() {
 PlaybackProviderManager _manager(
   Iterable<Object> entries, {
   _MutableClock? clock,
-}) => PlaybackProviderManager(
-  providers: entries.map((Object entry) {
-    if (entry is MockPlaybackProvider) {
-      return PlaybackProviderRegistration(provider: entry);
+}) {
+  final List<(PlaybackSourceProvider, int)> registrations = entries.map((
+    Object entry,
+  ) {
+    if (entry is PlaybackSourceProvider) {
+      return (entry, 0);
     }
-    final (MockPlaybackProvider, int) typed =
-        entry as (MockPlaybackProvider, int);
-    return PlaybackProviderRegistration(provider: typed.$1, priority: typed.$2);
-  }),
-  clock: clock == null ? () => DateTime.utc(2026, 11, 10) : clock.call,
-);
+    final (PlaybackSourceProvider, int) typed =
+        entry as (PlaybackSourceProvider, int);
+    return typed;
+  }).toList();
+  return PlaybackProviderManager(
+    providers: registrations.map(
+      ((PlaybackSourceProvider, int) entry) =>
+          PlaybackProviderRegistration(provider: entry.$1, priority: entry.$2),
+    ),
+    videoHostResolvers: registrations
+        .where((entry) => entry.$1 is PlaybackVideoHostResolver)
+        .map(
+          ((PlaybackSourceProvider, int) entry) =>
+              PlaybackVideoHostResolverRegistration(
+                resolver: entry.$1 as PlaybackVideoHostResolver,
+                priority: entry.$2,
+              ),
+        ),
+    clock: clock == null ? () => DateTime.utc(2026, 11, 10) : clock.call,
+  );
+}
 
 PlaybackEpisode _episode({int number = 1}) =>
     PlaybackEpisode(animeId: AnimeId('test-series'), episodeNumber: number);
@@ -567,4 +620,70 @@ final class _MutableClock {
 
   DateTime call() => now;
   void advance(Duration delta) => now = now.add(delta);
+}
+
+final class _MultiServerProvider
+    implements PlaybackSourceProvider, PlaybackVideoHostResolver {
+  _MultiServerProvider({required this._failedServerIds});
+
+  final Set<String> _failedServerIds;
+  final List<String> attemptedServerIds = [];
+
+  @override
+  final PlaybackProviderId id = PlaybackProviderId('multi-server');
+
+  @override
+  Set<PlaybackProviderCapability> get capabilities => const {
+    PlaybackProviderCapability.episodeSources,
+    PlaybackProviderCapability.sourceAlternatives,
+  };
+
+  @override
+  String get resolverId => 'test-multi-server-resolver';
+
+  @override
+  bool supports(PlaybackServer server) => true;
+
+  @override
+  Future<PlaybackProviderResult<List<PlaybackSource>>> findSources(
+    PlaybackEpisode episode, {
+    required PlaybackCancellationToken cancellation,
+  }) async => PlaybackProviderSuccess([
+    PlaybackSource(
+      id: 'multi-server-source',
+      providerId: id,
+      episode: episode,
+      language: 'ja',
+      quality: 'auto',
+      servers: [
+        for (int index = 1; index <= 4; index++)
+          PlaybackServer(
+            id: 'server-$index',
+            endpoint: Uri.https('media.example', '/$index'),
+          ),
+      ],
+    ),
+  ]);
+
+  @override
+  Future<PlaybackProviderResult<ResolvedPlaybackStream>> resolve(
+    PlaybackSource source,
+    PlaybackServer server, {
+    required PlaybackCancellationToken cancellation,
+  }) async {
+    attemptedServerIds.add(server.id);
+    if (_failedServerIds.contains(server.id)) {
+      return const PlaybackProviderFailed(
+        PlaybackProviderFailure(PlaybackProviderFailureKind.network),
+      );
+    }
+    return PlaybackProviderSuccess(
+      ResolvedPlaybackStream(
+        providerId: id,
+        sourceId: source.id,
+        serverId: server.id,
+        uri: server.endpoint,
+      ),
+    );
+  }
 }

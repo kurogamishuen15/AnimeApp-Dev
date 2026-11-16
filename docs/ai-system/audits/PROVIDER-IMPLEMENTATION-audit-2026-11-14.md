@@ -1,5 +1,9 @@
 # Auditoría — implementación de proveedores reales
 
+> **Evidencia histórica:** los adapters AnimeAV1/TioAnime descritos aquí fueron
+> retirados en la limpieza S0; no están registrados en el runtime actual. Ver
+> la [auditoría de limpieza vigente](S0-provider-cleanup-followup-audit-2026-11-15.md).
+
 Fecha: 2026-11-14
 Estado: trabajo implementado; resultado funcional pendiente
 Recomendación: **no aceptar el flujo como operativo** hasta reproducir un episodio real en Fedora.

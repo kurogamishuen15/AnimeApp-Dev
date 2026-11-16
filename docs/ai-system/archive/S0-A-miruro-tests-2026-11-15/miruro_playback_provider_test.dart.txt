@@ -1,0 +1,545 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:anime_app/data/player/providers/miruro/miruro_catalog_api.dart';
+import 'package:anime_app/data/player/providers/miruro/miruro_playback_provider.dart';
+import 'package:anime_app/domain/catalog/anime_id.dart';
+import 'package:anime_app/domain/catalog/external_anime_id.dart';
+import 'package:anime_app/domain/player/providers/playback_provider_contract.dart';
+import 'package:anime_app/domain/player/providers/playback_source.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  group('MiruroPlaybackProvider', () {
+    test(
+      'maps verified AniList ID, episode, audio, quality, and server options',
+      () async {
+        final _FakeMiruroApi api = _FakeMiruroApi();
+        final MiruroPlaybackProvider provider = MiruroPlaybackProvider(
+          api: api,
+          clock: () => DateTime.utc(2026, 11, 15),
+        );
+        final PlaybackEpisode episode = _episode(
+          external: ExternalAnimeId(
+            providerId: MetadataProviderId('anilist'),
+            value: '16498',
+          ),
+        );
+
+        final PlaybackProviderResult<List<PlaybackSource>> result =
+            await provider.findSources(
+              episode,
+              cancellation: PlaybackCancellationToken(),
+            );
+
+        expect(result, isA<PlaybackProviderSuccess<List<PlaybackSource>>>());
+        final List<PlaybackSource> sources =
+            (result as PlaybackProviderSuccess<List<PlaybackSource>>).value;
+        expect(sources, hasLength(3));
+        final PlaybackSource sub = sources.firstWhere(
+          (PlaybackSource source) => source.language == 'SUB (hard-sub)',
+        );
+        final PlaybackSource softSub = sources.firstWhere(
+          (PlaybackSource source) => source.language == 'SUB (soft-sub)',
+        );
+        final PlaybackSource dub = sources.firstWhere(
+          (PlaybackSource source) => source.language == 'DUB',
+        );
+        expect(sub.quality, '1080p');
+        expect(sub.servers, hasLength(2));
+        expect(softSub.servers, hasLength(1));
+        expect(
+          sub.servers.map((PlaybackServer server) => server.id),
+          contains('miruro-stream:bee:Bee:sub:hls'),
+        );
+        expect(sub.servers.first.requestHeaders.values, {
+          'Referer': 'https://www.miruro.to/',
+        });
+        expect(dub.servers, hasLength(1));
+        expect(api.lookupIds, [16498]);
+        expect(api.episodeTitleIds, ['miruro-title-1']);
+        expect(api.playRequests, [('miruro-title-1', 1)]);
+      },
+    );
+
+    test('does not call the API without an AniList identity', () async {
+      final _FakeMiruroApi api = _FakeMiruroApi();
+      final MiruroPlaybackProvider provider = MiruroPlaybackProvider(api: api);
+      final PlaybackProviderResult<List<PlaybackSource>> result = await provider
+          .findSources(
+            _episode(
+              external: ExternalAnimeId(
+                providerId: MetadataProviderId('other'),
+                value: '123',
+              ),
+            ),
+            cancellation: PlaybackCancellationToken(),
+          );
+
+      expect(result, isA<PlaybackProviderUnsupported<List<PlaybackSource>>>());
+      expect(api.lookupIds, isEmpty);
+    });
+
+    test(
+      'returns empty when the requested regular episode is absent',
+      () async {
+        final _FakeMiruroApi api = _FakeMiruroApi(
+          includeRequestedEpisode: false,
+        );
+        final MiruroPlaybackProvider provider = MiruroPlaybackProvider(
+          api: api,
+        );
+        final PlaybackProviderResult<List<PlaybackSource>> result =
+            await provider.findSources(
+              _episode(
+                external: ExternalAnimeId(
+                  providerId: MetadataProviderId('anilist'),
+                  value: '16498',
+                ),
+              ),
+              cancellation: PlaybackCancellationToken(),
+            );
+
+        expect(result, isA<PlaybackProviderEmpty<List<PlaybackSource>>>());
+        expect(api.configRequests, 0);
+        expect(api.playRequests, isEmpty);
+      },
+    );
+
+    test(
+      'maps a public 403 response to a typed authorization failure',
+      () async {
+        final _FakeMiruroApi api = _FakeMiruroApi(
+          lookupFailure: const MiruroCatalogApiException(
+            PlaybackProviderFailureKind.unauthorized,
+            statusCode: 403,
+          ),
+        );
+        final MiruroPlaybackProvider provider = MiruroPlaybackProvider(
+          api: api,
+        );
+        final PlaybackProviderResult<List<PlaybackSource>> result =
+            await provider.findSources(
+              _episode(
+                external: ExternalAnimeId(
+                  providerId: MetadataProviderId('anilist'),
+                  value: '16498',
+                ),
+              ),
+              cancellation: PlaybackCancellationToken(),
+            );
+
+        expect(result, isA<PlaybackProviderFailed<List<PlaybackSource>>>());
+        expect(
+          (result as PlaybackProviderFailed<List<PlaybackSource>>).failure.kind,
+          PlaybackProviderFailureKind.unauthorized,
+        );
+        expect(api.configRequests, 0);
+        expect(api.playRequests, isEmpty);
+      },
+    );
+
+    test('cancellation prevents any catalog request', () async {
+      final _FakeMiruroApi api = _FakeMiruroApi();
+      final MiruroPlaybackProvider provider = MiruroPlaybackProvider(api: api);
+      final PlaybackCancellationToken cancellation = PlaybackCancellationToken()
+        ..cancel();
+      final PlaybackProviderResult<List<PlaybackSource>> result = await provider
+          .findSources(
+            _episode(
+              external: ExternalAnimeId(
+                providerId: MetadataProviderId('anilist'),
+                value: '16498',
+              ),
+            ),
+            cancellation: cancellation,
+          );
+
+      expect(result, isA<PlaybackProviderFailed<List<PlaybackSource>>>());
+      expect(
+        (result as PlaybackProviderFailed<List<PlaybackSource>>).failure.kind,
+        PlaybackProviderFailureKind.cancelled,
+      );
+      expect(api.lookupIds, isEmpty);
+    });
+
+    test(
+      'reports embed-only results as unsupported for the internal player',
+      () async {
+        final _FakeMiruroApi api = _FakeMiruroApi(embedOnly: true);
+        final MiruroPlaybackProvider provider = MiruroPlaybackProvider(
+          api: api,
+        );
+        final PlaybackProviderResult<List<PlaybackSource>> result =
+            await provider.findSources(
+              _episode(
+                external: ExternalAnimeId(
+                  providerId: MetadataProviderId('anilist'),
+                  value: '16498',
+                ),
+              ),
+              cancellation: PlaybackCancellationToken(),
+            );
+
+        expect(
+          result,
+          isA<PlaybackProviderUnsupported<List<PlaybackSource>>>(),
+        );
+      },
+    );
+  });
+
+  group('MiruroDirectMediaResolver', () {
+    test(
+      'passes through an HTTPS HLS source after public DNS validation',
+      () async {
+        final MiruroDirectMediaResolver resolver = MiruroDirectMediaResolver(
+          lookup: (String _) async => [InternetAddress('93.184.216.34')],
+        );
+        final PlaybackSource source = _source();
+        final PlaybackServer server = source.servers.single;
+
+        final PlaybackProviderResult<ResolvedPlaybackStream> result =
+            await resolver.resolve(
+              source,
+              server,
+              cancellation: PlaybackCancellationToken(),
+            );
+
+        expect(resolver.supports(server), isTrue);
+        expect(
+          resolver.supports(
+            PlaybackServer(
+              id: 'miruro-stream:bee:opaque:sub:hls',
+              endpoint: Uri.parse(
+                'https://cdn.example.org/manifest?token=fixture',
+              ),
+            ),
+          ),
+          isTrue,
+        );
+        expect(result, isA<PlaybackProviderSuccess<ResolvedPlaybackStream>>());
+        final ResolvedPlaybackStream stream =
+            (result as PlaybackProviderSuccess<ResolvedPlaybackStream>).value;
+        expect(stream.uri, server.endpoint);
+        expect(stream.httpHeaders.values, {
+          'Referer': 'https://www.miruro.to/',
+        });
+      },
+    );
+
+    test('rejects local addresses and unsupported media schemes', () async {
+      final MiruroDirectMediaResolver resolver = MiruroDirectMediaResolver(
+        lookup: (String _) async => [InternetAddress('127.0.0.1')],
+      );
+      final PlaybackSource source = _source();
+      final PlaybackProviderResult<ResolvedPlaybackStream> result =
+          await resolver.resolve(
+            source,
+            source.servers.single,
+            cancellation: PlaybackCancellationToken(),
+          );
+
+      expect(
+        result,
+        isA<PlaybackProviderUnsupported<ResolvedPlaybackStream>>(),
+      );
+      expect(
+        resolver.supports(
+          PlaybackServer(
+            id: 'miruro-stream:bee:server:sub:hls',
+            endpoint: Uri.parse('http://cdn.example.org/master.m3u8'),
+          ),
+        ),
+        isFalse,
+      );
+      expect(
+        resolver.supports(
+          PlaybackServer(
+            id: 'miruro-stream:bee:server:sub:dash',
+            endpoint: Uri.parse('https://cdn.example.org/master.mpd'),
+          ),
+        ),
+        isFalse,
+      );
+    });
+
+    test('rejects IANA non-global IPv6 special-purpose prefixes', () async {
+      for (final String addressText in [
+        '2001:2::1', // Benchmarking
+        '2001:10::1', // Deprecated ORCHID
+        '2001:db8::1', // Documentation
+        '2002:c000:0201::1', // 6to4 transition
+        '3fff::1', // Documentation
+        '5f00::1', // SRv6 SID space
+      ]) {
+        final MiruroDirectMediaResolver resolver = MiruroDirectMediaResolver(
+          lookup: (String _) async => [InternetAddress(addressText)],
+        );
+        final PlaybackSource source = _source();
+        final PlaybackProviderResult<ResolvedPlaybackStream> result =
+            await resolver.resolve(
+              source,
+              source.servers.single,
+              cancellation: PlaybackCancellationToken(),
+            );
+
+        expect(
+          result,
+          isA<PlaybackProviderUnsupported<ResolvedPlaybackStream>>(),
+          reason: addressText,
+        );
+      }
+    });
+
+    test('bounds a stalled DNS lookup', () async {
+      final MiruroDirectMediaResolver resolver = MiruroDirectMediaResolver(
+        lookup: (String _) => Completer<List<InternetAddress>>().future,
+        lookupTimeout: const Duration(milliseconds: 1),
+      );
+      final PlaybackSource source = _source();
+      final PlaybackProviderResult<ResolvedPlaybackStream> result =
+          await resolver.resolve(
+            source,
+            source.servers.single,
+            cancellation: PlaybackCancellationToken(),
+          );
+
+      expect(result, isA<PlaybackProviderFailed<ResolvedPlaybackStream>>());
+      expect(
+        (result as PlaybackProviderFailed<ResolvedPlaybackStream>).failure.kind,
+        PlaybackProviderFailureKind.timeout,
+      );
+    });
+
+    test('does not make a DNS request after cancellation', () async {
+      bool lookedUp = false;
+      final MiruroDirectMediaResolver resolver = MiruroDirectMediaResolver(
+        lookup: (String _) async {
+          lookedUp = true;
+          return [InternetAddress('93.184.216.34')];
+        },
+      );
+      final PlaybackCancellationToken cancellation = PlaybackCancellationToken()
+        ..cancel();
+      final PlaybackSource source = _source();
+      final PlaybackProviderResult<ResolvedPlaybackStream> result =
+          await resolver.resolve(
+            source,
+            source.servers.single,
+            cancellation: cancellation,
+          );
+
+      expect(lookedUp, isFalse);
+      expect(result, isA<PlaybackProviderFailed<ResolvedPlaybackStream>>());
+    });
+  });
+}
+
+PlaybackEpisode _episode({required ExternalAnimeId external}) =>
+    PlaybackEpisode(
+      animeId: AnimeId('test-anime'),
+      episodeNumber: 1,
+      externalAnimeId: external,
+      animeTitles: const ['Fixture title'],
+    );
+
+PlaybackSource _source() => PlaybackSource(
+  id: 'miruro:1:sub:1080p',
+  providerId: MiruroPlaybackProvider.providerId,
+  episode: _episode(
+    external: ExternalAnimeId(
+      providerId: MetadataProviderId('anilist'),
+      value: '16498',
+    ),
+  ),
+  language: 'SUB (hard-sub)',
+  quality: '1080p',
+  servers: [
+    PlaybackServer(
+      id: 'miruro-stream:bee:server:sub:hls',
+      endpoint: Uri.parse('https://cdn.example.org/master.m3u8?fixture=1'),
+      requestHeaders: PlaybackRequestHeaders({
+        'Referer': 'https://www.miruro.to/',
+      }),
+    ),
+  ],
+);
+
+final class _FakeMiruroApi implements MiruroCatalogApi {
+  _FakeMiruroApi({
+    this.includeRequestedEpisode = true,
+    this.embedOnly = false,
+    this.lookupFailure,
+  });
+
+  final bool includeRequestedEpisode;
+  final bool embedOnly;
+  final MiruroCatalogApiException? lookupFailure;
+  final List<int> lookupIds = [];
+  final List<String> episodeTitleIds = [];
+  final List<(String, int)> playRequests = [];
+  int configRequests = 0;
+
+  @override
+  Future<Map<String, Object?>> fetchConfig(
+    PlaybackCancellationToken cancellation,
+  ) async {
+    configRequests++;
+    return {
+      'providerOrder': ['bee', 'sun', 'twin'],
+      'streaming': {
+        'bee': {'label': 'Bee', 'visible': true},
+        'sun': {'label': 'Sun', 'visible': true},
+        'twin': {
+          'label': 'Twin',
+          'visible': true,
+          'relationship': 'embed',
+          'parent': 'bee',
+        },
+      },
+    };
+  }
+
+  @override
+  Future<Map<String, Object?>> lookupAniListTitle(
+    int aniListId,
+    PlaybackCancellationToken cancellation,
+  ) async {
+    lookupIds.add(aniListId);
+    if (lookupFailure case final MiruroCatalogApiException failure) {
+      throw failure;
+    }
+    return {
+      'data': [
+        {
+          'id': 'miruro-title-1',
+          'episode_counts': {'sub': 12, 'dub': 10},
+        },
+      ],
+    };
+  }
+
+  @override
+  Future<Map<String, Object?>> fetchEpisodes(
+    String miruroTitleId,
+    String? cursor,
+    PlaybackCancellationToken cancellation,
+  ) async {
+    episodeTitleIds.add(miruroTitleId);
+    return {
+      'data': [
+        if (includeRequestedEpisode) {'episode_number': 1, 'kind': 'regular'},
+        {'episode_number': 20001, 'kind': 'special'},
+      ],
+      'has_more': false,
+    };
+  }
+
+  @override
+  Future<Map<String, Object?>> fetchEpisodePlay(
+    String miruroTitleId,
+    int episodeNumber,
+    PlaybackCancellationToken cancellation,
+  ) async {
+    playRequests.add((miruroTitleId, episodeNumber));
+    return {
+      'tracks': [
+        {
+          'track': 'sub',
+          'providers': [
+            {
+              'provider': 'bee',
+              'servers': [
+                if (embedOnly)
+                  {
+                    'server': 'Bee',
+                    'embed': {'url': 'https://player.example.org/embed/ep'},
+                  }
+                else
+                  {
+                    'server': 'Bee',
+                    'headers': {
+                      'Referer': 'https://www.miruro.to/',
+                      'Origin': 'https://www.miruro.to',
+                      'Cookie': 'fixture-cookie',
+                    },
+                    'streams': [
+                      {
+                        'url': 'https://cdn.example.org/master.m3u8',
+                        'format': 'hls',
+                        'quality': '1080p',
+                      },
+                      {
+                        'url': 'https://cdn.example.org/alternate.m3u8',
+                        'format': 'hls',
+                        'quality': '1080p',
+                      },
+                    ],
+                  },
+              ],
+            },
+            if (!embedOnly)
+              {
+                'provider': 'sun',
+                'servers': [
+                  {
+                    'server': 'Sun',
+                    'streams': [
+                      {
+                        'url': 'https://cdn.example.org/second.m3u8',
+                        'format': 'hls',
+                        'quality': '1080p',
+                      },
+                    ],
+                  },
+                ],
+              },
+          ],
+        },
+        if (!embedOnly)
+          {
+            'track': 'ssub',
+            'providers': [
+              {
+                'provider': 'bee',
+                'servers': [
+                  {
+                    'server': 'Bee Soft Sub',
+                    'streams': [
+                      {
+                        'url': 'https://cdn.example.org/soft-sub.m3u8',
+                        'format': 'hls',
+                        'quality': '1080p',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        if (!embedOnly)
+          {
+            'track': 'dub',
+            'providers': [
+              {
+                'provider': 'bee',
+                'servers': [
+                  {
+                    'server': 'Bee Dub',
+                    'streams': [
+                      {
+                        'url': 'https://cdn.example.org/dub.mp4',
+                        'format': 'mp4',
+                        'quality': '1080p',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+      ],
+    };
+  }
+}

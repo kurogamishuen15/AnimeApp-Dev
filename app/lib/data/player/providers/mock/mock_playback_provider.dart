@@ -16,7 +16,8 @@ enum MockPlaybackScenario {
 }
 
 /// Deterministic provider fixture. It performs no HTTP or filesystem access.
-final class MockPlaybackProvider implements PlaybackSourceProvider {
+final class MockPlaybackProvider
+    implements PlaybackSourceProvider, PlaybackVideoHostResolver {
   MockPlaybackProvider({
     required this.id,
     this.scenario = MockPlaybackScenario.valid,
@@ -53,8 +54,15 @@ final class MockPlaybackProvider implements PlaybackSourceProvider {
       const {
         PlaybackProviderCapability.episodeSources,
         PlaybackProviderCapability.sourceAlternatives,
-        PlaybackProviderCapability.resolveServer,
       };
+
+  @override
+  String get resolverId => 'mock-${id.value}';
+
+  @override
+  bool supports(PlaybackServer server) =>
+      server.endpoint.scheme == 'file' ||
+      server.endpoint.host == '${id.value}.mock.invalid';
 
   @override
   Future<PlaybackProviderResult<List<PlaybackSource>>> findSources(
@@ -121,7 +129,7 @@ final class MockPlaybackProvider implements PlaybackSourceProvider {
   }
 
   @override
-  Future<PlaybackProviderResult<ResolvedPlaybackStream>> resolveServer(
+  Future<PlaybackProviderResult<ResolvedPlaybackStream>> resolve(
     PlaybackSource source,
     PlaybackServer server, {
     required PlaybackCancellationToken cancellation,
@@ -210,7 +218,7 @@ final class MockPlaybackProvider implements PlaybackSourceProvider {
     id: serverId,
     endpoint:
         serverEndpoints[serverId] ??
-        Uri.https('mock.invalid', '/stream/$serverId'),
+        Uri.https('${id.value}.mock.invalid', '/stream/$serverId'),
     priority: priority,
   );
 }
