@@ -25,11 +25,11 @@ abstract final class HtmlPlaybackParsers {
 
   /// Visible text of an HTML fragment, tags stripped and entities decoded.
   static String stripTags(String html) => decodeEntities(
-        html
-            .replaceAll(RegExp('<[^>]*>'), ' ')
-            .replaceAll(RegExp(r'\s+'), ' ')
-            .trim(),
-      );
+    html
+        .replaceAll(RegExp('<[^>]*>'), ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim(),
+  );
 
   /// Named and numeric entity decoding plus JS backslash-slash normalization.
   static String decodeEntities(String value) {
@@ -43,9 +43,7 @@ abstract final class HtmlPlaybackParsers {
         .replaceAll('&nbsp;', ' ');
     decoded = decoded.replaceAllMapped(RegExp('&#(\\d+);'), (match) {
       final int? code = int.tryParse(match.group(1)!);
-      return code == null
-          ? match.group(0)!
-          : String.fromCharCode(code);
+      return code == null ? match.group(0)! : String.fromCharCode(code);
     });
     decoded = decoded.replaceAllMapped(
       RegExp('&#x([0-9a-f]+);', caseSensitive: false),
@@ -99,19 +97,19 @@ abstract final class HtmlPlaybackParsers {
 
   /// Every HLS-looking URL in an HTML fragment, entities and JS slashes
   /// decoded, protocol-relative forms upgraded to https.
-  static List<String> hlsUrls(String html) => RegExp(
-        '(?:https?:)?(?:\\\\/|/)[^"\'\\s<>]+?\\.m3u8[^"\'\\s<>]*',
-        caseSensitive: false,
-      )
-      .allMatches(html)
-      .map((RegExpMatch match) => match.group(0)!)
-      .map(decodeEntities)
-      .map(
-        (String value) =>
-            value.startsWith('//') ? 'https:$value' : value,
-      )
-      .toSet()
-      .toList();
+  static List<String> hlsUrls(String html) =>
+      RegExp(
+            '(?:https?:)?(?:\\\\/|/)[^"\'\\s<>]+?\\.m3u8[^"\'\\s<>]*',
+            caseSensitive: false,
+          )
+          .allMatches(html)
+          .map((RegExpMatch match) => match.group(0)!)
+          .map(decodeEntities)
+          .map(
+            (String value) => value.startsWith('//') ? 'https:$value' : value,
+          )
+          .toSet()
+          .toList();
 
   /// Decodes the escaped JSON that AniZone-style servers embed inside
   /// `wire:snapshot` attributes and `JSON.parse('...')` strings:
@@ -119,15 +117,14 @@ abstract final class HtmlPlaybackParsers {
   /// `\/` variants become plain slashes, and `\uXXXX` becomes its character.
   static String decodeJsonEscapes(String raw) {
     String decoded = raw.replaceAll(RegExp(r'\\{1,3}u0022'), '"');
-    decoded = decoded.replaceAllMapped(
-      RegExp(r'\\u([0-9a-fA-F]{4})'),
-      (Match match) {
-        final int? code = int.tryParse(match.group(1)!, radix: 16);
-        return code == null || code < 0 || code > 0x10ffff
-            ? match.group(0)!
-            : String.fromCharCode(code);
-      },
-    );
+    decoded = decoded.replaceAllMapped(RegExp(r'\\u([0-9a-fA-F]{4})'), (
+      Match match,
+    ) {
+      final int? code = int.tryParse(match.group(1)!, radix: 16);
+      return code == null || code < 0 || code > 0x10ffff
+          ? match.group(0)!
+          : String.fromCharCode(code);
+    });
     return decoded.replaceAll(RegExp(r'\\{1,3}/'), '/');
   }
 }

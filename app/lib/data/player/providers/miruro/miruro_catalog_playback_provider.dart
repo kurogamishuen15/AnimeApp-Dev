@@ -6,6 +6,7 @@ import 'package:anime_app/domain/player/providers/episode_source.dart';
 import 'package:anime_app/domain/player/providers/playback_provider_contract.dart';
 import 'package:anime_app/domain/player/providers/playback_source.dart';
 
+import '../episode_source_support.dart';
 import '../public_playback_http.dart';
 import 'miruro_catalog_api.dart';
 import 'miruro_catalog_parser.dart';
@@ -61,8 +62,8 @@ final class MiruroCatalogPlaybackProvider extends EpisodeSourceAdapter {
   Future<PlaybackProviderResult<List<SourceAnimeMatch>>> searchAnime(
     AnimeIdentity identity, {
     required PlaybackCancellationToken cancellation,
-  }) => _read(() async {
-    if (cancellation.isCancelled) throw _cancelled();
+  }) => EpisodeSourceSupport.read(() async {
+    EpisodeSourceSupport.check(cancellation);
     final int? anilistId = _anilistId(identity);
     if (anilistId == null) return null;
     final MiruroTitleRecord? title = await _title(anilistId, cancellation);
@@ -77,8 +78,8 @@ final class MiruroCatalogPlaybackProvider extends EpisodeSourceAdapter {
   Future<PlaybackProviderResult<List<PlaybackSource>>> findSources(
     PlaybackEpisode requested, {
     required PlaybackCancellationToken cancellation,
-  }) => _read(() async {
-    if (cancellation.isCancelled) throw _cancelled();
+  }) => EpisodeSourceSupport.read(() async {
+    EpisodeSourceSupport.check(cancellation);
     if (requested.episodeNumber < 1) return null;
     final int? anilistId = _anilistId(requested.identity);
     if (anilistId == null) return null;
@@ -95,8 +96,8 @@ final class MiruroCatalogPlaybackProvider extends EpisodeSourceAdapter {
   Future<PlaybackProviderResult<List<EpisodeRef>>> listEpisodes(
     SourceAnimeMatch match, {
     required PlaybackCancellationToken cancellation,
-  }) => _read(() async {
-    if (cancellation.isCancelled) throw _cancelled();
+  }) => EpisodeSourceSupport.read(() async {
+    EpisodeSourceSupport.check(cancellation);
     if (!_validMatch(match)) return null;
     final List<MiruroCatalogEpisode> records = await _episodes(
       match.sourceAnimeId,
@@ -137,8 +138,8 @@ final class MiruroCatalogPlaybackProvider extends EpisodeSourceAdapter {
   Future<PlaybackProviderResult<List<PlaybackSource>>> findEpisodeSources(
     EpisodeRef episode, {
     required PlaybackCancellationToken cancellation,
-  }) => _read(() async {
-    if (cancellation.isCancelled) throw _cancelled();
+  }) => EpisodeSourceSupport.read(() async {
+    EpisodeSourceSupport.check(cancellation);
     if (!_validEpisode(episode)) return null;
     final List<MiruroProviderConfig> config = await _providerConfig(
       cancellation,
@@ -150,7 +151,7 @@ final class MiruroCatalogPlaybackProvider extends EpisodeSourceAdapter {
     EpisodeRef episode,
     PlaybackCancellationToken cancellation,
   ) async {
-    if (cancellation.isCancelled) throw _cancelled();
+    EpisodeSourceSupport.check(cancellation);
     if (!_validEpisode(episode)) return null;
     final List<MiruroProviderConfig> config = await _providerConfig(
       cancellation,
@@ -170,7 +171,7 @@ final class MiruroCatalogPlaybackProvider extends EpisodeSourceAdapter {
       cancellation: cancellation,
       stage: PlaybackHttpStage.episode,
     );
-    if (cancellation.isCancelled) throw _cancelled();
+    EpisodeSourceSupport.check(cancellation);
     final List<PlaybackSource> sources = _parser.parsePlaybackSources(
       body: body,
       config: config,
@@ -276,7 +277,7 @@ final class MiruroCatalogPlaybackProvider extends EpisodeSourceAdapter {
     final Set<String> cursors = <String>{};
     String? cursor;
     do {
-      if (cancellation.isCancelled) throw _cancelled();
+      EpisodeSourceSupport.check(cancellation);
       final String body = await _api.get(
         'v1/anime/$titleId/episodes',
         query: <String, String>{
@@ -344,29 +345,6 @@ final class MiruroCatalogPlaybackProvider extends EpisodeSourceAdapter {
     }
     return const PlaybackProviderEmpty<EpisodeRef>();
   }
-
-  Future<PlaybackProviderResult<T>> _read<T>(
-    Future<T?> Function() request,
-  ) async {
-    try {
-      final T? value = await request();
-      if (value == null) return PlaybackProviderEmpty<T>();
-      return PlaybackProviderSuccess<T>(value);
-    } on PublicPlaybackFailure catch (failure) {
-      return failure.result<T>();
-    } on FormatException {
-      return PlaybackProviderFailed<T>(
-        PlaybackProviderFailure(PlaybackProviderFailureKind.invalidResponse),
-      );
-    } on ArgumentError {
-      return PlaybackProviderFailed<T>(
-        PlaybackProviderFailure(PlaybackProviderFailureKind.invalidResponse),
-      );
-    }
-  }
-
-  static PublicPlaybackFailure _cancelled() =>
-      const PublicPlaybackFailure(PlaybackProviderFailureKind.cancelled);
 
   static PlaybackProviderFailed<T> _failedCancelled<T>() =>
       PlaybackProviderFailed<T>(

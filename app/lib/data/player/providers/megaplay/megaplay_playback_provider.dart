@@ -8,6 +8,7 @@ import '../../../../domain/player/providers/anime_identity.dart';
 import '../../../../domain/player/providers/episode_source.dart';
 import '../../../../domain/player/providers/playback_provider_contract.dart';
 import '../../../../domain/player/providers/playback_source.dart';
+import '../episode_source_support.dart';
 import '../hosts/direct_media_host_resolver.dart';
 import '../public_playback_http.dart';
 
@@ -105,9 +106,8 @@ final class MegaPlayPlaybackProvider extends EpisodeSourceAdapter {
 
   /// MegaPlay's MyAnimeList-keyed route, as used by Anilili's `anikoto`
   /// fallback and by 2Dhive's own embeds (verified live 2026-11-17).
-  Uri _embedMal(int malId, int number) => origin.resolve(
-    '/stream/mal/$malId/$number/${variant.name}',
-  );
+  Uri _embedMal(int malId, int number) =>
+      origin.resolve('/stream/mal/$malId/$number/${variant.name}');
 
   int? _mal(AnimeIdentity identity) {
     final ids = identity.externalIds
@@ -130,10 +130,7 @@ final class MegaPlayPlaybackProvider extends EpisodeSourceAdapter {
   ) async {
     PublicPlaybackFailure? missed;
     try {
-      final String? direct = await _loadFileId(
-        _embed(episode),
-        cancellation,
-      );
+      final String? direct = await _loadFileId(_embed(episode), cancellation);
       if (direct != null) return direct;
     } on PublicPlaybackFailure catch (error) {
       if (error.kind != PlaybackProviderFailureKind.notFound &&
@@ -158,8 +155,8 @@ final class MegaPlayPlaybackProvider extends EpisodeSourceAdapter {
   Future<PlaybackProviderResult<List<SourceAnimeMatch>>> searchAnime(
     AnimeIdentity identity, {
     required PlaybackCancellationToken cancellation,
-  }) => _read(() async {
-    _check(cancellation);
+  }) => EpisodeSourceSupport.read(() async {
+    EpisodeSourceSupport.check(cancellation);
     final String? value = _anilistId(identity);
     if (value == null) {
       throw const PublicPlaybackFailure(PlaybackProviderFailureKind.missingId);
@@ -185,21 +182,19 @@ final class MegaPlayPlaybackProvider extends EpisodeSourceAdapter {
     SourceAnimeMatch match, {
     required int episodeNumber,
     required PlaybackCancellationToken cancellation,
-  }) => _read(() async {
-    _check(cancellation);
+  }) => EpisodeSourceSupport.read(() async {
+    EpisodeSourceSupport.check(cancellation);
     if (!_validMatch(match) || episodeNumber < 1) return null;
     final EpisodeRef episode = _episode(match, episodeNumber);
-    return await _loadFileIdFor(episode, cancellation) == null
-        ? null
-        : episode;
+    return await _loadFileIdFor(episode, cancellation) == null ? null : episode;
   });
 
   @override
   Future<PlaybackProviderResult<List<PlaybackSource>>> findSources(
     PlaybackEpisode requested, {
     required PlaybackCancellationToken cancellation,
-  }) => _read(() async {
-    _check(cancellation);
+  }) => EpisodeSourceSupport.read(() async {
+    EpisodeSourceSupport.check(cancellation);
     final String? value = _anilistId(requested.identity);
     if (value == null) {
       throw const PublicPlaybackFailure(PlaybackProviderFailureKind.missingId);
@@ -214,8 +209,8 @@ final class MegaPlayPlaybackProvider extends EpisodeSourceAdapter {
   Future<PlaybackProviderResult<List<PlaybackSource>>> findEpisodeSources(
     EpisodeRef episode, {
     required PlaybackCancellationToken cancellation,
-  }) => _read(() async {
-    _check(cancellation);
+  }) => EpisodeSourceSupport.read(() async {
+    EpisodeSourceSupport.check(cancellation);
     if (!_validMatch(episode.anime) ||
         episode.episodeId !=
             _episode(episode.anime, episode.episodeNumber).episodeId) {
@@ -413,7 +408,7 @@ final class MegaPlayPlaybackProvider extends EpisodeSourceAdapter {
       'User-Agent': _http.userAgent,
     });
     for (final route in routes) {
-      _check(cancellation);
+      EpisodeSourceSupport.check(cancellation);
       String body;
       try {
         body = await _http.read(
@@ -434,7 +429,7 @@ final class MegaPlayPlaybackProvider extends EpisodeSourceAdapter {
         throw const FormatException('Invalid source answer');
       }
       final String? file = await _sourceFile(decoded);
-      _check(cancellation);
+      EpisodeSourceSupport.check(cancellation);
       if (file == null || file.isEmpty) continue;
       final Uri? uri = Uri.tryParse(file);
       if (file.length > 8192 ||
@@ -479,28 +474,5 @@ final class MegaPlayPlaybackProvider extends EpisodeSourceAdapter {
       ];
     }
     throw const PublicPlaybackFailure(PlaybackProviderFailureKind.noSources);
-  }
-
-  static void _check(PlaybackCancellationToken cancellation) {
-    if (cancellation.isCancelled) {
-      throw const PublicPlaybackFailure(PlaybackProviderFailureKind.cancelled);
-    }
-  }
-
-  Future<PlaybackProviderResult<T>> _read<T>(Future<T?> Function() load) async {
-    try {
-      final T? value = await load();
-      return value == null
-          ? PlaybackProviderEmpty<T>()
-          : PlaybackProviderSuccess<T>(value);
-    } on PublicPlaybackFailure catch (error) {
-      return error.result<T>();
-    } on FormatException {
-      return PlaybackProviderFailed<T>(
-        const PlaybackProviderFailure(
-          PlaybackProviderFailureKind.invalidResponse,
-        ),
-      );
-    }
   }
 }

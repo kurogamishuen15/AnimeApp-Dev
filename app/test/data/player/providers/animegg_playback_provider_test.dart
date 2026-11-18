@@ -74,58 +74,64 @@ const String _hlsEmbedPage = '''
 ''';
 
 void main() {
-  test('sub mirror resolves progressive MP4 candidates through the manager',
-      () async {
-    final pages = _Pages(
-      searchBody: _searchPage,
-      seriesBody: _seriesPage,
-      watchBody: _watchPage,
-      embedBody: _embedPage,
-    );
-    final Dio client = Dio()..httpClientAdapter = pages;
-    addTearDown(() => client.close(force: true));
-    final provider = AnimeGgPlaybackProvider(client);
-    final manager = PlaybackProviderManager(
-      providers: [PlaybackProviderRegistration(provider: provider)],
-      videoHostResolvers: [
-        PlaybackVideoHostResolverRegistration(
-          resolver: DirectMediaHostResolver(),
+  test(
+    'sub mirror resolves progressive MP4 candidates through the manager',
+    () async {
+      final pages = _Pages(
+        searchBody: _searchPage,
+        seriesBody: _seriesPage,
+        watchBody: _watchPage,
+        embedBody: _embedPage,
+      );
+      final Dio client = Dio()..httpClientAdapter = pages;
+      addTearDown(() => client.close(force: true));
+      final provider = AnimeGgPlaybackProvider(client);
+      final manager = PlaybackProviderManager(
+        providers: [PlaybackProviderRegistration(provider: provider)],
+        videoHostResolvers: [
+          PlaybackVideoHostResolverRegistration(
+            resolver: DirectMediaHostResolver(),
+          ),
+        ],
+        clock: DateTime.now,
+      );
+      final result = await manager.resolveCandidates(
+        _episode(),
+        cancellation: PlaybackCancellationToken(),
+      );
+      final streams =
+          (result as PlaybackProviderSuccess<List<ResolvedPlaybackStream>>)
+              .value;
+      expect(
+        streams.map((ResolvedPlaybackStream stream) => stream.uri.toString()),
+        unorderedEquals(<String>[
+          'https://www.animegg.org/play/227251/video.mp4?for=101794971615946',
+          'https://www.animegg.org/play/227255/video.mp4?for=101794971615946',
+        ]),
+      );
+      expect(
+        streams.every(
+          (ResolvedPlaybackStream stream) =>
+              stream.format == PlaybackMediaFormat.mp4,
         ),
-      ],
-      clock: DateTime.now,
-    );
-    final result = await manager.resolveCandidates(
-      _episode(),
-      cancellation: PlaybackCancellationToken(),
-    );
-    final streams =
-        (result as PlaybackProviderSuccess<List<ResolvedPlaybackStream>>).value;
-    expect(
-      streams.map((ResolvedPlaybackStream stream) => stream.uri.toString()),
-      unorderedEquals(<String>[
-        'https://www.animegg.org/play/227251/video.mp4?for=101794971615946',
-        'https://www.animegg.org/play/227255/video.mp4?for=101794971615946',
-      ]),
-    );
-    expect(
-      streams.every(
-        (ResolvedPlaybackStream stream) => stream.format == PlaybackMediaFormat.mp4,
-      ),
-      isTrue,
-    );
-    expect(
-      pages.requests.map((RequestOptions request) => request.uri.path),
-      ['/search/', '/series/tokyo-ghoulre', '/tokyo-ghoulre-episode-9', '/embed/91335'],
-    );
-    expect(
-      pages.requests.last.headers['Referer'],
-      'https://www.animegg.org/',
-    );
-    expect(
-      streams.first.httpHeaders.values['User-Agent'],
-      contains('Chrome/124'),
-    );
-  });
+        isTrue,
+      );
+      expect(pages.requests.map((RequestOptions request) => request.uri.path), [
+        '/search/',
+        '/series/tokyo-ghoulre',
+        '/tokyo-ghoulre-episode-9',
+        '/embed/91335',
+      ]);
+      expect(
+        pages.requests.last.headers['Referer'],
+        'https://www.animegg.org/',
+      );
+      expect(
+        streams.first.httpHeaders.values['User-Agent'],
+        contains('Chrome/124'),
+      );
+    },
+  );
 
   test('dub variant uses the dubbed tab id', () async {
     final pages = _Pages(
@@ -167,7 +173,10 @@ void main() {
     );
     final source =
         (result as PlaybackProviderSuccess<List<PlaybackSource>>).value.single;
-    expect(source.servers.single.mediaFormat == PlaybackMediaFormat.hls, isTrue);
+    expect(
+      source.servers.single.mediaFormat == PlaybackMediaFormat.hls,
+      isTrue,
+    );
     expect(
       source.servers.single.endpoint.toString(),
       'https://cdn.animegg.org/series/master.m3u8?token=fixture',
@@ -189,7 +198,10 @@ void main() {
         animeId: AnimeId('test'),
         episodeNumber: 99,
         externalAnimeIds: [
-          ExternalAnimeId(providerId: MetadataProviderId('anilist'), value: '100240'),
+          ExternalAnimeId(
+            providerId: MetadataProviderId('anilist'),
+            value: '100240',
+          ),
         ],
         animeTitles: const ['Tokyo Ghoul:re'],
       ),
@@ -318,7 +330,9 @@ final class _Pages implements HttpClientAdapter {
     return ResponseBody.fromString(
       body,
       status,
-      headers: {'content-type': ['text/html']},
+      headers: {
+        'content-type': ['text/html'],
+      },
     );
   }
 

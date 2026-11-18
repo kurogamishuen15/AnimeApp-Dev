@@ -4,6 +4,7 @@ import '../../../../domain/player/providers/anime_identity.dart';
 import '../../../../domain/player/providers/episode_source.dart';
 import '../../../../domain/player/providers/playback_provider_contract.dart';
 import '../../../../domain/player/providers/playback_source.dart';
+import '../episode_source_support.dart';
 import '../hosts/direct_media_host_resolver.dart';
 import '../html_playback_parsers.dart';
 import '../public_playback_http.dart';
@@ -15,8 +16,11 @@ import '../public_playback_http.dart';
 /// No cookies, sessions, or JavaScript execution; the page's own published
 /// player JSON is read as text.
 final class AniZonePlaybackProvider extends EpisodeSourceAdapter {
-  AniZonePlaybackProvider(Dio client, {Uri? origin, PublicPlaybackHttp? transport})
-    : origin = origin ?? Uri.https('anizone.to') {
+  AniZonePlaybackProvider(
+    Dio client, {
+    Uri? origin,
+    PublicPlaybackHttp? transport,
+  }) : origin = origin ?? Uri.https('anizone.to') {
     if (!DirectMediaHostResolver.isSyntacticallyPublicHttps(this.origin) ||
         !const {'', '/'}.contains(this.origin.path) ||
         this.origin.hasQuery) {
@@ -74,43 +78,36 @@ final class AniZonePlaybackProvider extends EpisodeSourceAdapter {
         'AniZone slug from exact-title search and explicit episode path',
   );
 
-  static String _contractTitle(String value) =>
-      value.toLowerCase().trim().replaceAll(RegExp(r'\s+'), ' ');
-
   @override
   Future<PlaybackProviderResult<List<SourceAnimeMatch>>> searchAnime(
     AnimeIdentity identity, {
     required PlaybackCancellationToken cancellation,
-  }) => _read(() async {
-    _check(cancellation);
+  }) => EpisodeSourceSupport.read(() async {
+    EpisodeSourceSupport.check(cancellation);
     if (identity.titles.isEmpty) return null;
     final List<String> requested = identity.titles
-        .map(_contractTitle)
+        .map(EpisodeSourceSupport.contractTitle)
         .where((String title) => title.isNotEmpty)
         .toList();
     final seen = <String>{};
     for (final String title in identity.titles.take(3)) {
-      _check(cancellation);
+      EpisodeSourceSupport.check(cancellation);
       final String text = await _http.read(
-        origin
-            .resolve('/anime')
-            .replace(queryParameters: {'search': title}),
+        origin.resolve('/anime').replace(queryParameters: {'search': title}),
         cancellation,
         stage: PlaybackHttpStage.catalog,
       );
       final String decoded = HtmlPlaybackParsers.decodeJsonEscapes(text);
       for (final RegExpMatch entry in _entry.allMatches(decoded).take(40)) {
         final String slug = entry.group(1)!;
-        final String name = HtmlPlaybackParsers.decodeEntities(
-          entry.group(2)!,
-        );
+        final String name = HtmlPlaybackParsers.decodeEntities(entry.group(2)!);
         if (!_slug.hasMatch(slug) ||
             !seen.add(slug) ||
             name.trim().isEmpty ||
             name.length > 256) {
           continue;
         }
-        if (requested.contains(_contractTitle(name))) {
+        if (requested.contains(EpisodeSourceSupport.contractTitle(name))) {
           return [
             SourceAnimeMatch(
               providerId: id,
@@ -144,8 +141,8 @@ final class AniZonePlaybackProvider extends EpisodeSourceAdapter {
     SourceAnimeMatch match, {
     required int episodeNumber,
     required PlaybackCancellationToken cancellation,
-  }) => _read(() async {
-    _check(cancellation);
+  }) => EpisodeSourceSupport.read(() async {
+    EpisodeSourceSupport.check(cancellation);
     if (!_validMatch(match) || episodeNumber < 1) return null;
     return _episode(match, episodeNumber);
   });
@@ -154,8 +151,8 @@ final class AniZonePlaybackProvider extends EpisodeSourceAdapter {
   Future<PlaybackProviderResult<List<PlaybackSource>>> findEpisodeSources(
     EpisodeRef episode, {
     required PlaybackCancellationToken cancellation,
-  }) => _read(() async {
-    _check(cancellation);
+  }) => EpisodeSourceSupport.read(() async {
+    EpisodeSourceSupport.check(cancellation);
     if (!_validMatch(episode.anime) ||
         episode.episodeId !=
             _episode(episode.anime, episode.episodeNumber).episodeId) {
@@ -169,14 +166,13 @@ final class AniZonePlaybackProvider extends EpisodeSourceAdapter {
       cancellation,
       stage: PlaybackHttpStage.episode,
       headers: PlaybackRequestHeaders({
-        'Referer': origin
-            .resolve('/anime/${episode.sourceAnimeId}')
-            .toString(),
+        'Referer': origin.resolve('/anime/${episode.sourceAnimeId}').toString(),
       }),
     );
     final String decoded = HtmlPlaybackParsers.decodeJsonEscapes(text);
     final RegExpMatch? tagMatch = _mediaPlayerTag.firstMatch(decoded);
-    final String? raw = _playerSrc.firstMatch(decoded)?.group(1) ??
+    final String? raw =
+        _playerSrc.firstMatch(decoded)?.group(1) ??
         (tagMatch == null
             ? null
             : HtmlPlaybackParsers.decodeEntities(tagMatch.group(1)!)) ??
@@ -239,9 +235,8 @@ final class AniZonePlaybackProvider extends EpisodeSourceAdapter {
             uri: uri,
             label: label.isEmpty || label.length > 128 ? 'Subtitle' : label,
             language:
-                RegExp(r'^([a-z]{2,3}(?:-[A-Za-z0-9]{2,8})*)$').hasMatch(
-                  language,
-                )
+                RegExp(r'^([a-z]{2,3}(?:-[A-Za-z0-9]{2,8})*)$')
+                    .hasMatch(language)
                 ? language
                 : 'unknown',
           ),
@@ -255,7 +250,11 @@ final class AniZonePlaybackProvider extends EpisodeSourceAdapter {
     for (final RegExpMatch match in _vttSubtitle.allMatches(decoded).take(16)) {
       final Uri? uri = Uri.tryParse(match.group(3)!);
       if (uri != null) {
-        add(uri, HtmlPlaybackParsers.decodeEntities(match.group(1)!), match.group(2)!);
+        add(
+          uri,
+          HtmlPlaybackParsers.decodeEntities(match.group(1)!),
+          match.group(2)!,
+        );
       }
     }
     if (result.isEmpty) {
@@ -263,39 +262,14 @@ final class AniZonePlaybackProvider extends EpisodeSourceAdapter {
           in _vttSubtitleNoLanguage.allMatches(decoded).take(16)) {
         final Uri? uri = Uri.tryParse(match.group(2)!);
         if (uri != null) {
-          add(uri, HtmlPlaybackParsers.decodeEntities(match.group(1)!), 'unknown');
+          add(
+            uri,
+            HtmlPlaybackParsers.decodeEntities(match.group(1)!),
+            'unknown',
+          );
         }
       }
     }
     return result;
-  }
-
-  static void _check(PlaybackCancellationToken cancellation) {
-    if (cancellation.isCancelled) {
-      throw const PublicPlaybackFailure(PlaybackProviderFailureKind.cancelled);
-    }
-  }
-
-  Future<PlaybackProviderResult<T>> _read<T>(Future<T?> Function() load) async {
-    try {
-      final T? value = await load();
-      return value == null
-          ? PlaybackProviderEmpty<T>()
-          : PlaybackProviderSuccess<T>(value);
-    } on PublicPlaybackFailure catch (error) {
-      return error.result<T>();
-    } on FormatException {
-      return PlaybackProviderFailed<T>(
-        const PlaybackProviderFailure(
-          PlaybackProviderFailureKind.invalidResponse,
-        ),
-      );
-    } on ArgumentError {
-      return PlaybackProviderFailed<T>(
-        const PlaybackProviderFailure(
-          PlaybackProviderFailureKind.invalidResponse,
-        ),
-      );
-    }
   }
 }

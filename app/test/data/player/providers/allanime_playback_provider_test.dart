@@ -39,9 +39,7 @@ const AllAnimeBootMaterials _testMaterials = AllAnimeBootMaterials(
 
 /// partB that XORs with the mask into the key a1a1..a1 (32 bytes).
 final String _testPartB = base64.encode(
-  Uint8List.fromList(
-    List<int>.generate(32, (int i) => 0x0f ^ 0xa1),
-  ),
+  Uint8List.fromList(List<int>.generate(32, (int i) => 0x0f ^ 0xa1)),
 );
 
 final Uint8List _testKey = Uint8List.fromList(
@@ -108,7 +106,9 @@ void main() {
           'partB': _testPartB,
           'k': 'k7',
         },
-        sourcesBody: jsonEncode({'data': {'tobeparsed': tobeparsed}}),
+        sourcesBody: jsonEncode({
+          'data': {'tobeparsed': tobeparsed},
+        }),
       );
       final Dio client = Dio()..httpClientAdapter = api;
       addTearDown(() => client.close(force: true));
@@ -130,24 +130,26 @@ void main() {
         cancellation: PlaybackCancellationToken(),
       );
       final streams =
-          (result as PlaybackProviderSuccess<List<ResolvedPlaybackStream>>).value;
+          (result as PlaybackProviderSuccess<List<ResolvedPlaybackStream>>)
+              .value;
       expect(streams, hasLength(1));
       expect(
         streams.single.uri.toString(),
         'https://tools.fast4speed.rsvp/media/sub/9',
       );
       expect(streams.single.format, PlaybackMediaFormat.mp4);
-      expect(streams.single.httpHeaders.values['Referer'], 'https://mkissa.to/');
+      expect(
+        streams.single.httpHeaders.values['Referer'],
+        'https://mkissa.to/',
+      );
       // Bootstrap carries the signed boot token and build id.
       final RequestOptions bootstrap = api.requests.firstWhere(
-        (RequestOptions r) =>
-            r.uri.path == '/client-crypto/v1/bootstrap',
+        (RequestOptions r) => r.uri.path == '/client-crypto/v1/bootstrap',
       );
       expect(bootstrap.headers['x-build-id'], '190');
       expect(
-        RegExp(r'^[0-9a-f]{64}$').hasMatch(
-          bootstrap.headers['x-aa-boot'] as String,
-        ),
+        RegExp(r'^[0-9a-f]{64}$')
+            .hasMatch(bootstrap.headers['x-aa-boot'] as String),
         isTrue,
       );
       // The sources query carries the lane and the aaReq token.
@@ -155,10 +157,9 @@ void main() {
         (RequestOptions r) => r.uri.path == '/api' && r.method == 'GET',
       );
       expect(sources.headers['x-build-id'], '190');
-      final Map<String, Object?> extensions =
-          (jsonDecode(sources.uri.queryParameters['extensions']!)
-                  as Map<dynamic, dynamic>)
-              .cast<String, Object?>();
+      final Map<String, Object?> extensions = (jsonDecode(
+        sources.uri.queryParameters['extensions']!,
+      ) as Map<dynamic, dynamic>).cast<String, Object?>();
       expect(extensions['k'], 'k7');
       expect(
         RegExp(r'^[A-Za-z0-9+/=]+$').hasMatch(extensions['aaReq'] as String),
@@ -189,12 +190,10 @@ void main() {
           },
         },
       },
-      bootstrapBody: {
-        'epoch': 2967,
-        'partB': _testPartB,
-        'k': 'k7',
-      },
-      sourcesBody: jsonEncode({'data': {'tobeparsed': tobeparsed}}),
+      bootstrapBody: {'epoch': 2967, 'partB': _testPartB, 'k': 'k7'},
+      sourcesBody: jsonEncode({
+        'data': {'tobeparsed': tobeparsed},
+      }),
     );
     final Dio client = Dio()..httpClientAdapter = api;
     addTearDown(() => client.close(force: true));
@@ -214,9 +213,13 @@ void main() {
     expect(source.displayName, 'AllAnime · Doblaje (dub)');
     expect(
       api.requests
-          .where((RequestOptions r) => r.uri.path == '/api' && r.method == 'GET')
+          .where(
+            (RequestOptions r) => r.uri.path == '/api' && r.method == 'GET',
+          )
           .map((RequestOptions r) => r.uri.queryParameters['variables'])
-          .any((String? v) => v != null && v.contains('"translationType":"dub"')),
+          .any(
+            (String? v) => v != null && v.contains('"translationType":"dub"'),
+          ),
       isTrue,
     );
   });
@@ -244,7 +247,9 @@ void main() {
         },
       },
       bootstrapBody: {'epoch': 2967, 'partB': _testPartB, 'k': 'k7'},
-      sourcesBody: jsonEncode({'data': {'tobeparsed': tobeparsed}}),
+      sourcesBody: jsonEncode({
+        'data': {'tobeparsed': tobeparsed},
+      }),
     );
     final Dio client = Dio()..httpClientAdapter = api;
     addTearDown(() => client.close(force: true));
@@ -290,8 +295,7 @@ void main() {
     expect(api.requests, hasLength(1)); // search only
   });
 
-  test('invalid boot token surfaces unavailable (build rotation)',
-      () async {
+  test('invalid boot token surfaces unavailable (build rotation)', () async {
     final api = _Api(
       searchBody: {
         'data': {
@@ -321,8 +325,7 @@ void main() {
     );
   });
 
-  test('aaReq rejection shape degrades to noSources for fallback',
-      () async {
+  test('aaReq rejection shape degrades to noSources for fallback', () async {
     final api = _Api(
       searchBody: {
         'data': {
@@ -423,7 +426,9 @@ void main() {
         },
       },
       bootstrapBody: {'epoch': 2967, 'partB': _testPartB, 'k': 'k7'},
-      sourcesBody: jsonEncode({'data': {'tobeparsed': tobeparsed}}),
+      sourcesBody: jsonEncode({
+        'data': {'tobeparsed': tobeparsed},
+      }),
     );
     final Dio client = Dio()..httpClientAdapter = api;
     addTearDown(() => client.close(force: true));
@@ -507,7 +512,8 @@ void main() {
     expect(
       PlaybackRequestHeaders({
         'x-build-id': '190',
-        'x-aa-boot': 'c53c5a10c827b603983e8e5c6a156b11dd4050741ab18b5fdc8b56d14298cac0',
+        'x-aa-boot':
+            'c53c5a10c827b603983e8e5c6a156b11dd4050741ab18b5fdc8b56d14298cac0',
       }).values['x-build-id'],
       '190',
     );
@@ -540,21 +546,27 @@ final class _Api implements HttpClientAdapter {
       return ResponseBody.fromString(
         searchBody is String ? searchBody as String : jsonEncode(searchBody),
         200,
-        headers: {'content-type': ['application/json']},
+        headers: {
+          'content-type': ['application/json'],
+        },
       );
     }
     if (path == '/client-crypto/v1/bootstrap') {
       return ResponseBody.fromString(
         jsonEncode(bootstrapBody),
         200,
-        headers: {'content-type': ['application/json']},
+        headers: {
+          'content-type': ['application/json'],
+        },
       );
     }
     if (options.method == 'GET' && path == '/api') {
       return ResponseBody.fromString(
         sourcesBody,
         sourcesStatus,
-        headers: {'content-type': ['application/json']},
+        headers: {
+          'content-type': ['application/json'],
+        },
       );
     }
     return ResponseBody.fromString('{}', 404);

@@ -7,6 +7,7 @@ import '../../../../domain/player/providers/anime_identity.dart';
 import '../../../../domain/player/providers/episode_source.dart';
 import '../../../../domain/player/providers/playback_provider_contract.dart';
 import '../../../../domain/player/providers/playback_source.dart';
+import '../episode_source_support.dart';
 import '../hosts/direct_media_host_resolver.dart';
 import '../public_playback_http.dart';
 
@@ -70,7 +71,7 @@ final class AnimeAv1PlaybackProvider extends EpisodeSourceAdapter {
     String? search,
     PlaybackHttpStage stage = PlaybackHttpStage.catalog,
   }) async {
-    _check(cancellation);
+    EpisodeSourceSupport.check(cancellation);
     final uri = origin
         .resolve('/$path/__data.json')
         .replace(queryParameters: search == null ? null : {'search': search});
@@ -82,7 +83,7 @@ final class AnimeAv1PlaybackProvider extends EpisodeSourceAdapter {
         'Referer': origin.resolve('/').toString(),
       }),
     );
-    _check(cancellation);
+    EpisodeSourceSupport.check(cancellation);
     return AnimeAv1PageData.decode(text);
   }
 
@@ -120,8 +121,8 @@ final class AnimeAv1PlaybackProvider extends EpisodeSourceAdapter {
   Future<PlaybackProviderResult<List<SourceAnimeMatch>>> searchAnime(
     AnimeIdentity identity, {
     required PlaybackCancellationToken cancellation,
-  }) => _read(() async {
-    _check(cancellation);
+  }) => EpisodeSourceSupport.read(() async {
+    EpisodeSourceSupport.check(cancellation);
     final mal = _mal(identity);
     if (mal == null) {
       throw const PublicPlaybackFailure(PlaybackProviderFailureKind.missingId);
@@ -188,8 +189,8 @@ final class AnimeAv1PlaybackProvider extends EpisodeSourceAdapter {
   Future<PlaybackProviderResult<List<EpisodeRef>>> listEpisodes(
     SourceAnimeMatch match, {
     required PlaybackCancellationToken cancellation,
-  }) => _read(() async {
-    _check(cancellation);
+  }) => EpisodeSourceSupport.read(() async {
+    EpisodeSourceSupport.check(cancellation);
     if (!_validMatch(match)) {
       throw const FormatException('Invalid source identity');
     }
@@ -208,8 +209,8 @@ final class AnimeAv1PlaybackProvider extends EpisodeSourceAdapter {
   Future<PlaybackProviderResult<List<PlaybackSource>>> findEpisodeSources(
     EpisodeRef episode, {
     required PlaybackCancellationToken cancellation,
-  }) => _read(() async {
-    _check(cancellation);
+  }) => EpisodeSourceSupport.read(() async {
+    EpisodeSourceSupport.check(cancellation);
     if (!_validMatch(episode.anime) ||
         episode.episodeId !=
             _episode(episode.anime, episode.episodeNumber).episodeId) {
@@ -297,31 +298,6 @@ final class AnimeAv1PlaybackProvider extends EpisodeSourceAdapter {
     }
     return result.isEmpty ? null : result;
   });
-
-  static void _check(PlaybackCancellationToken cancellation) {
-    if (cancellation.isCancelled) {
-      throw const PublicPlaybackFailure(PlaybackProviderFailureKind.cancelled);
-    }
-  }
-
-  Future<PlaybackProviderResult<T>> _read<T>(Future<T?> Function() load) async {
-    try {
-      final value = await load();
-      return value == null
-          ? PlaybackProviderEmpty<T>()
-          : PlaybackProviderSuccess(value);
-    } on PublicPlaybackFailure catch (error) {
-      return error.result<T>();
-    } on FormatException {
-      return const PlaybackProviderFailed(
-        PlaybackProviderFailure(PlaybackProviderFailureKind.invalidResponse),
-      );
-    } on ArgumentError {
-      return const PlaybackProviderFailed(
-        PlaybackProviderFailure(PlaybackProviderFailureKind.invalidResponse),
-      );
-    }
-  }
 }
 
 /// Bounded adaptation of Anilili's SvelteKit/devalue pageData/hydrate parser.

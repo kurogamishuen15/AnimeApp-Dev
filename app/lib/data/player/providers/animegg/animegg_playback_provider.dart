@@ -4,6 +4,7 @@ import '../../../../domain/player/providers/anime_identity.dart';
 import '../../../../domain/player/providers/episode_source.dart';
 import '../../../../domain/player/providers/playback_provider_contract.dart';
 import '../../../../domain/player/providers/playback_source.dart';
+import '../episode_source_support.dart';
 import '../hosts/direct_media_host_resolver.dart';
 import '../html_playback_parsers.dart';
 import '../public_playback_http.dart';
@@ -76,15 +77,15 @@ final class AnimeGgPlaybackProvider extends EpisodeSourceAdapter {
     PlaybackProviderCapability.sourceAlternatives,
   };
 
-  PlaybackRequestHeaders get _referer => PlaybackRequestHeaders({
-    'Referer': origin.resolve('/').toString(),
-  });
+  PlaybackRequestHeaders get _referer =>
+      PlaybackRequestHeaders({'Referer': origin.resolve('/').toString()});
 
   /// Media candidates carry a browser User-Agent: the vidcache CDN serves
   /// library clients at unusable rates (verified live, ~28 KB/s vs ~176 KB/s).
   PlaybackRequestHeaders get _mediaHeaders => PlaybackRequestHeaders({
     'Referer': origin.resolve('/').toString(),
-    'User-Agent': 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 '
+    'User-Agent':
+        'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 '
         '(KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
   });
 
@@ -105,37 +106,28 @@ final class AnimeGgPlaybackProvider extends EpisodeSourceAdapter {
         'whose row number matches the request',
   );
 
-  static String _contractTitle(String value) =>
-      value.toLowerCase().trim().replaceAll(RegExp(r'\s+'), ' ');
-
   @override
   Future<PlaybackProviderResult<List<SourceAnimeMatch>>> searchAnime(
     AnimeIdentity identity, {
     required PlaybackCancellationToken cancellation,
-  }) => _read(() async {
-    _check(cancellation);
+  }) => EpisodeSourceSupport.read(() async {
+    EpisodeSourceSupport.check(cancellation);
     if (identity.titles.isEmpty) return null;
     final List<String> requested = identity.titles
-        .map(_contractTitle)
+        .map(EpisodeSourceSupport.contractTitle)
         .where((String title) => title.isNotEmpty)
         .toList();
     final seen = <String>{};
     for (final String title in identity.titles.take(3)) {
-      _check(cancellation);
+      EpisodeSourceSupport.check(cancellation);
       final String text = await _http.read(
-        origin
-            .resolve('/search/')
-            .replace(queryParameters: {'q': title}),
+        origin.resolve('/search/').replace(queryParameters: {'q': title}),
         cancellation,
         stage: PlaybackHttpStage.catalog,
       );
-      for (final RegExpMatch anchor in _searchAnchor.allMatches(text).take(
-        40,
-      )) {
-        final String href = HtmlPlaybackParsers.attr(
-          anchor.group(1)!,
-          'href',
-        );
+      for (final RegExpMatch anchor
+          in _searchAnchor.allMatches(text).take(40)) {
+        final String href = HtmlPlaybackParsers.attr(anchor.group(1)!, 'href');
         final RegExpMatch? slugMatch = RegExp(
           r'^/series/([a-z0-9][a-z0-9-]{0,180})',
         ).firstMatch(href);
@@ -148,7 +140,7 @@ final class AnimeGgPlaybackProvider extends EpisodeSourceAdapter {
             ? slug.replaceAll('-', ' ')
             : HtmlPlaybackParsers.stripTags(h2.group(1)!);
         if (name.trim().isEmpty || name.length > 256) continue;
-        if (requested.contains(_contractTitle(name))) {
+        if (requested.contains(EpisodeSourceSupport.contractTitle(name))) {
           return [
             SourceAnimeMatch(
               providerId: id,
@@ -182,8 +174,8 @@ final class AnimeGgPlaybackProvider extends EpisodeSourceAdapter {
     SourceAnimeMatch match, {
     required int episodeNumber,
     required PlaybackCancellationToken cancellation,
-  }) => _read(() async {
-    _check(cancellation);
+  }) => EpisodeSourceSupport.read(() async {
+    EpisodeSourceSupport.check(cancellation);
     if (!_validMatch(match) || episodeNumber < 1) return null;
     return _episode(match, episodeNumber);
   });
@@ -192,17 +184,14 @@ final class AnimeGgPlaybackProvider extends EpisodeSourceAdapter {
   Future<PlaybackProviderResult<List<PlaybackSource>>> findEpisodeSources(
     EpisodeRef episode, {
     required PlaybackCancellationToken cancellation,
-  }) => _read(() async {
-    _check(cancellation);
+  }) => EpisodeSourceSupport.read(() async {
+    EpisodeSourceSupport.check(cancellation);
     if (!_validMatch(episode.anime) ||
         episode.episodeId !=
             _episode(episode.anime, episode.episodeNumber).episodeId) {
       throw const FormatException('Invalid episode identity');
     }
-    final String? watchPath = await _episodePath(
-      episode,
-      cancellation,
-    );
+    final String? watchPath = await _episodePath(episode, cancellation);
     if (watchPath == null) {
       throw const PublicPlaybackFailure(PlaybackProviderFailureKind.noEpisodes);
     }
@@ -219,7 +208,7 @@ final class AnimeGgPlaybackProvider extends EpisodeSourceAdapter {
     final servers = <SourceCandidate>[];
     final seen = <String>{};
     for (final (:String id, :String mirror) in tabs.take(4)) {
-      _check(cancellation);
+      EpisodeSourceSupport.check(cancellation);
       final String embed = await _http.read(
         origin.resolve('/embed/$id'),
         cancellation,
@@ -289,10 +278,9 @@ final class AnimeGgPlaybackProvider extends EpisodeSourceAdapter {
       final RegExpMatch? strong = _strong.firstMatch(block);
       if (strong == null) continue;
       final String text = HtmlPlaybackParsers.stripTags(strong.group(1)!);
-      final RegExpMatch? number = RegExp(
-        r'(\d+)\s*$',
-      ).firstMatch(text);
-      if (number == null || int.tryParse(number.group(1)!) != episode.episodeNumber) {
+      final RegExpMatch? number = RegExp(r'(\d+)\s*$').firstMatch(text);
+      if (number == null ||
+          int.tryParse(number.group(1)!) != episode.episodeNumber) {
         continue;
       }
       final RegExpMatch? anchor = _popAnchor.firstMatch(block);
@@ -334,7 +322,10 @@ final class AnimeGgPlaybackProvider extends EpisodeSourceAdapter {
     String mirror,
     EpisodeRef episode,
   ) {
-    if (servers.length >= 8 || raw.isEmpty || raw.length > 8192 || !seen.add(raw)) {
+    if (servers.length >= 8 ||
+        raw.isEmpty ||
+        raw.length > 8192 ||
+        !seen.add(raw)) {
       return;
     }
     final Uri? uri = Uri.tryParse(raw);
@@ -356,34 +347,5 @@ final class AnimeGgPlaybackProvider extends EpisodeSourceAdapter {
         provenance: 'AnimeGG embed media (Anilili MIT-0, forma live)',
       ),
     );
-  }
-
-  static void _check(PlaybackCancellationToken cancellation) {
-    if (cancellation.isCancelled) {
-      throw const PublicPlaybackFailure(PlaybackProviderFailureKind.cancelled);
-    }
-  }
-
-  Future<PlaybackProviderResult<T>> _read<T>(Future<T?> Function() load) async {
-    try {
-      final T? value = await load();
-      return value == null
-          ? PlaybackProviderEmpty<T>()
-          : PlaybackProviderSuccess<T>(value);
-    } on PublicPlaybackFailure catch (error) {
-      return error.result<T>();
-    } on FormatException {
-      return PlaybackProviderFailed<T>(
-        const PlaybackProviderFailure(
-          PlaybackProviderFailureKind.invalidResponse,
-        ),
-      );
-    } on ArgumentError {
-      return PlaybackProviderFailed<T>(
-        const PlaybackProviderFailure(
-          PlaybackProviderFailureKind.invalidResponse,
-        ),
-      );
-    }
   }
 }

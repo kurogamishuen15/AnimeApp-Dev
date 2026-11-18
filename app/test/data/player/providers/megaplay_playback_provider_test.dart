@@ -307,8 +307,7 @@ void main() {
     );
   });
 
-  test('MyAnimeList fallback serves when the AniList route misses',
-      () async {
+  test('MyAnimeList fallback serves when the AniList route misses', () async {
     // Verified live 2026-11-17: 2Dhive embeds MegaPlay by MyAnimeList id, and
     // that route answers with its own data-id when the AniList route misses.
     final pages = _Pages(
@@ -347,15 +346,18 @@ void main() {
     final streams =
         (result as PlaybackProviderSuccess<List<ResolvedPlaybackStream>>).value;
     expect(streams.single.uri.toString(), 'https://cdn.anime.org/master.m3u8');
-    final List<String> paths =
-        pages.requests.map((RequestOptions request) => request.uri.path).toList();
+    final List<String> paths = pages.requests
+        .map((RequestOptions request) => request.uri.path)
+        .toList();
     expect(paths.first, '/stream/ani/100240/9/sub');
     expect(paths, contains('/stream/mal/36511/9/sub'));
     expect(paths.last, '/stream/getSourcesNew');
     expect(
       pages.requests
-          .where((RequestOptions request) =>
-              request.uri.path == '/stream/mal/36511/9/sub')
+          .where(
+            (RequestOptions request) =>
+                request.uri.path == '/stream/mal/36511/9/sub',
+          )
           .first
           .headers['Referer'],
       'https://hianimes.re/',

@@ -16,7 +16,9 @@ PlaybackEpisode _episode({bool withTitle = true}) => PlaybackEpisode(
   externalAnimeIds: [
     ExternalAnimeId(providerId: MetadataProviderId('anilist'), value: '100240'),
   ],
-  animeTitles: withTitle ? const ['Tokyo Ghoul:re'] : const ['Nonexistent Show'],
+  animeTitles: withTitle
+      ? const ['Tokyo Ghoul:re']
+      : const ['Nonexistent Show'],
 );
 
 // Escapes observed in the live AniZone markup (2026-11-17). The search page
@@ -52,7 +54,8 @@ String _searchEntry(String slug, String title) =>
     '5$_q1:$_q1'
     '$title$_q1}}';
 
-String get _searchPage => '''
+String get _searchPage =>
+    '''
 <div x-data="items: JSON.parse('[${_searchEntry('pokofpdc', 'Tokyo Ghoul')},${_searchEntry('djivt6wx', 'Tokyo Ghoul:re')},${_searchEntry('hzckwj7v', 'Tokyo Ghoul Root A')}]')"></div>
 ''';
 
@@ -103,7 +106,9 @@ String _subtitle(
 /// Live shape: AniZone publishes ASS captions; the VTT-only contract must
 /// skip them without discarding the playable manifest.
 final String _assEpisodePage = _playerJson(
-  subtitles: [_subtitle('English [UDF]', 'ass', 'en', '0_en.ass', isDefault: true)],
+  subtitles: [
+    _subtitle('English [UDF]', 'ass', 'en', '0_en.ass', isDefault: true),
+  ],
 );
 
 final String _vttEpisodePage = _playerJson(
@@ -141,10 +146,10 @@ void main() {
     );
     expect(streams.single.format, PlaybackMediaFormat.hls);
     expect(streams.single.subtitles, isEmpty); // ASS tracks are skipped.
-    expect(
-      pages.requests.map((RequestOptions request) => request.uri.path),
-      ['/anime', '/anime/djivt6wx/9'],
-    );
+    expect(pages.requests.map((RequestOptions request) => request.uri.path), [
+      '/anime',
+      '/anime/djivt6wx/9',
+    ]);
     expect(
       pages.requests.last.headers['Referer'],
       'https://anizone.to/anime/djivt6wx',
@@ -161,37 +166,33 @@ void main() {
       cancellation: PlaybackCancellationToken(),
     );
     expect(result, isA<PlaybackProviderEmpty<List<PlaybackSource>>>());
-    expect(
-      pages.requests.map((RequestOptions r) => r.uri.path),
-      ['/anime'],
-    );
+    expect(pages.requests.map((RequestOptions r) => r.uri.path), ['/anime']);
   });
 
-  test('episode page without a manifest is noSources without retries',
-      () async {
-    final pages = _Pages(
-      searchBody: _searchPage,
-      episodeBody: '<html><body>No player here</body></html>',
-    );
-    final Dio client = Dio()..httpClientAdapter = pages;
-    addTearDown(() => client.close(force: true));
-    final provider = AniZonePlaybackProvider(client);
-    final result = await provider.findSources(
-      _episode(),
-      cancellation: PlaybackCancellationToken(),
-    );
-    expect(
-      (result as PlaybackProviderFailed).failure.kind,
-      PlaybackProviderFailureKind.noSources,
-    );
-    expect(pages.requests, hasLength(2));
-  });
+  test(
+    'episode page without a manifest is noSources without retries',
+    () async {
+      final pages = _Pages(
+        searchBody: _searchPage,
+        episodeBody: '<html><body>No player here</body></html>',
+      );
+      final Dio client = Dio()..httpClientAdapter = pages;
+      addTearDown(() => client.close(force: true));
+      final provider = AniZonePlaybackProvider(client);
+      final result = await provider.findSources(
+        _episode(),
+        cancellation: PlaybackCancellationToken(),
+      );
+      expect(
+        (result as PlaybackProviderFailed).failure.kind,
+        PlaybackProviderFailureKind.noSources,
+      );
+      expect(pages.requests, hasLength(2));
+    },
+  );
 
   test('VTT captions published by the player are preserved', () async {
-    final pages = _Pages(
-      searchBody: _searchPage,
-      episodeBody: _vttEpisodePage,
-    );
+    final pages = _Pages(searchBody: _searchPage, episodeBody: _vttEpisodePage);
     final Dio client = Dio()..httpClientAdapter = pages;
     addTearDown(() => client.close(force: true));
     final provider = AniZonePlaybackProvider(client);
@@ -265,13 +266,17 @@ final class _Pages implements HttpClientAdapter {
       return ResponseBody.fromString(
         searchBody,
         200,
-        headers: {'content-type': ['text/html']},
+        headers: {
+          'content-type': ['text/html'],
+        },
       );
     }
     return ResponseBody.fromString(
       episodeBody,
       episodeStatus,
-      headers: {'content-type': ['text/html']},
+      headers: {
+        'content-type': ['text/html'],
+      },
     );
   }
 

@@ -10,6 +10,7 @@ import '../../../../domain/player/providers/anime_identity.dart';
 import '../../../../domain/player/providers/episode_source.dart';
 import '../../../../domain/player/providers/playback_provider_contract.dart';
 import '../../../../domain/player/providers/playback_source.dart';
+import '../episode_source_support.dart';
 import '../hosts/direct_media_host_resolver.dart';
 import '../public_playback_http.dart';
 
@@ -52,7 +53,8 @@ final class AllAnimeBootMaterials {
     maskHex: '65c85a8520d83eafafdff966cc3f5187ab774d238f60338ff4fc0ae7d941ca35',
     bootPrefix: 'rEVwtVi:190',
     joinPrefix: 'mkissa.to~k7~190~mkissa~',
-    queryHash: '670bbf38d0868f446e2346c1e956ca2c40c416e733ca248fd54e04f1c8b99145',
+    queryHash:
+        '670bbf38d0868f446e2346c1e956ca2c40c416e733ca248fd54e04f1c8b99145',
   );
 
   final String buildId;
@@ -85,7 +87,8 @@ final class AllAnimePlaybackProvider extends EpisodeSourceAdapter {
       throw ArgumentError.value(materials.maskHex, 'materials.maskHex');
     }
     _mask = mask;
-    _http = transport ??
+    _http =
+        transport ??
         PublicPlaybackHttp(client, {this.apiOrigin.host, 'allanime.day'});
   }
 
@@ -125,7 +128,8 @@ final class AllAnimePlaybackProvider extends EpisodeSourceAdapter {
   /// throttles library clients (verified live, same family as vidcache).
   PlaybackRequestHeaders get _mediaHeaders => PlaybackRequestHeaders({
     'Referer': 'https://mkissa.to/',
-    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 '
+    'User-Agent':
+        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 '
         '(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
   });
 
@@ -156,25 +160,23 @@ final class AllAnimePlaybackProvider extends EpisodeSourceAdapter {
         'verified when the episode is resolved',
   );
 
-  static String _contractTitle(String value) =>
-      value.toLowerCase().trim().replaceAll(RegExp(r'\s+'), ' ');
-
   @override
   Future<PlaybackProviderResult<List<SourceAnimeMatch>>> searchAnime(
     AnimeIdentity identity, {
     required PlaybackCancellationToken cancellation,
-  }) => _read(() async {
-    _check(cancellation);
+  }) => EpisodeSourceSupport.read(() async {
+    EpisodeSourceSupport.check(cancellation);
     if (identity.titles.isEmpty) return null;
     final int? mal = _mal(identity);
     final List<String> requested = identity.titles
-        .map(_contractTitle)
+        .map(EpisodeSourceSupport.contractTitle)
         .where((String title) => title.isNotEmpty)
         .toList();
     final seen = <String>{};
-    final candidates = <({String id, String name, String? english, int? mal})>[];
+    final candidates =
+        <({String id, String name, String? english, int? mal})>[];
     for (final String title in identity.titles.take(3)) {
-      _check(cancellation);
+      EpisodeSourceSupport.check(cancellation);
       for (final candidate in await _search(title, cancellation)) {
         if (!seen.add(candidate.id)) continue;
         candidates.add(candidate);
@@ -202,7 +204,7 @@ final class AllAnimePlaybackProvider extends EpisodeSourceAdapter {
       final List<String> names = [
         candidate.name,
         if (candidate.english != null) candidate.english!,
-      ].map(_contractTitle).toList();
+      ].map(EpisodeSourceSupport.contractTitle).toList();
       if (requested.any(names.contains)) {
         return [
           SourceAnimeMatch(
@@ -219,10 +221,10 @@ final class AllAnimePlaybackProvider extends EpisodeSourceAdapter {
     return null;
   });
 
-  Future<
-    List<({String id, String name, String? english, int? mal})>
-  >
-  _search(String query, PlaybackCancellationToken cancellation) async {
+  Future<List<({String id, String name, String? english, int? mal})>> _search(
+    String query,
+    PlaybackCancellationToken cancellation,
+  ) async {
     final String body = jsonEncode({
       'query': _searchQuery,
       'variables': {
@@ -304,8 +306,8 @@ final class AllAnimePlaybackProvider extends EpisodeSourceAdapter {
     SourceAnimeMatch match, {
     required int episodeNumber,
     required PlaybackCancellationToken cancellation,
-  }) => _read(() async {
-    _check(cancellation);
+  }) => EpisodeSourceSupport.read(() async {
+    EpisodeSourceSupport.check(cancellation);
     if (!_validMatch(match) || episodeNumber < 1) return null;
     return _episode(match, episodeNumber);
   });
@@ -314,8 +316,8 @@ final class AllAnimePlaybackProvider extends EpisodeSourceAdapter {
   Future<PlaybackProviderResult<List<PlaybackSource>>> findEpisodeSources(
     EpisodeRef episode, {
     required PlaybackCancellationToken cancellation,
-  }) => _read(() async {
-    _check(cancellation);
+  }) => EpisodeSourceSupport.read(() async {
+    EpisodeSourceSupport.check(cancellation);
     if (!_validMatch(episode.anime) ||
         episode.episodeId !=
             _episode(episode.anime, episode.episodeNumber).episodeId) {
@@ -342,13 +344,15 @@ final class AllAnimePlaybackProvider extends EpisodeSourceAdapter {
       // evaded here); a stale or rejected token degrades to noSources so the
       // manager can fall back to other providers.
       final Object? errors = decoded['errors'];
-      final bool captcha = errors is List &&
+      final bool captcha =
+          errors is List &&
           errors.any(
             (Object? error) =>
                 error is Map &&
                 (error['message'] == 'NEED_CAPTCHA' ||
                     (error['extensions'] is Map &&
-                        (error['extensions'] as Map)['code'] == 'NEED_CAPTCHA')),
+                        (error['extensions'] as Map)['code'] ==
+                            'NEED_CAPTCHA')),
           );
       throw PublicPlaybackFailure(
         captcha
@@ -390,16 +394,18 @@ final class AllAnimePlaybackProvider extends EpisodeSourceAdapter {
     Map<String, dynamic>? answer;
     PublicPlaybackFailure? lastFailure;
     for (final int candidate in {epoch, max(epoch - 1, 0)}) {
-      _check(cancellation);
+      EpisodeSourceSupport.check(cancellation);
       final String token = await _bootToken(candidate);
       try {
         final String text = await _http.read(
           apiOrigin
               .resolve('/client-crypto/v1/bootstrap')
-              .replace(queryParameters: {
-                'buildId': _materials.buildId,
-                'k': _materials.lane,
-              }),
+              .replace(
+                queryParameters: {
+                  'buildId': _materials.buildId,
+                  'k': _materials.lane,
+                },
+              ),
           cancellation,
           stage: PlaybackHttpStage.catalog,
           headers: PlaybackRequestHeaders({
@@ -428,7 +434,9 @@ final class AllAnimePlaybackProvider extends EpisodeSourceAdapter {
     }
     if (answer['error'] == 'invalid_boot_token') {
       // Build materials rotated server-side; a release refresh is required.
-      throw const PublicPlaybackFailure(PlaybackProviderFailureKind.unavailable);
+      throw const PublicPlaybackFailure(
+        PlaybackProviderFailureKind.unavailable,
+      );
     }
     final Object? epochValue = answer['epoch'];
     final Object? partBValue = answer['partB'];
@@ -482,9 +490,11 @@ final class AllAnimePlaybackProvider extends EpisodeSourceAdapter {
       'k': _materials.lane,
       'aaReq': aaReq,
     });
-    final Uri uri = apiOrigin.resolve('/api').replace(
-      queryParameters: {'variables': variables, 'extensions': extensions},
-    );
+    final Uri uri = apiOrigin
+        .resolve('/api')
+        .replace(
+          queryParameters: {'variables': variables, 'extensions': extensions},
+        );
     return _http.read(
       uri,
       cancellation,
@@ -532,11 +542,7 @@ final class AllAnimePlaybackProvider extends EpisodeSourceAdapter {
     wire[0] = 1;
     wire.setRange(1, 13, iv);
     wire.setRange(13, 13 + box.cipherText.length, box.cipherText);
-    wire.setRange(
-      13 + box.cipherText.length,
-      wire.length,
-      box.mac.bytes,
-    );
+    wire.setRange(13 + box.cipherText.length, wire.length, box.mac.bytes);
     return base64.encode(wire);
   }
 
@@ -580,7 +586,7 @@ final class AllAnimePlaybackProvider extends EpisodeSourceAdapter {
       // Iframe routes need a browser; never returned as playable.
       final bool direct =
           (type is String && type.toLowerCase() == 'player') ||
-              _mediaUrl.hasMatch(url);
+          _mediaUrl.hasMatch(url);
       if (!direct) continue;
       _addCandidate(servers, seen, url, Map<String, dynamic>.from(entry));
     }
@@ -634,34 +640,5 @@ final class AllAnimePlaybackProvider extends EpisodeSourceAdapter {
       out[i] = int.parse(hex.substring(i * 2, i * 2 + 2), radix: 16);
     }
     return out;
-  }
-
-  static void _check(PlaybackCancellationToken cancellation) {
-    if (cancellation.isCancelled) {
-      throw const PublicPlaybackFailure(PlaybackProviderFailureKind.cancelled);
-    }
-  }
-
-  Future<PlaybackProviderResult<T>> _read<T>(Future<T?> Function() load) async {
-    try {
-      final T? value = await load();
-      return value == null
-          ? PlaybackProviderEmpty<T>()
-          : PlaybackProviderSuccess<T>(value);
-    } on PublicPlaybackFailure catch (error) {
-      return error.result<T>();
-    } on FormatException {
-      return PlaybackProviderFailed<T>(
-        const PlaybackProviderFailure(
-          PlaybackProviderFailureKind.invalidResponse,
-        ),
-      );
-    } on ArgumentError {
-      return PlaybackProviderFailed<T>(
-        const PlaybackProviderFailure(
-          PlaybackProviderFailureKind.invalidResponse,
-        ),
-      );
-    }
   }
 }
