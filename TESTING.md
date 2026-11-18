@@ -17,61 +17,83 @@ Los controles integrados se describen en [scripts/README.md](scripts/README.md);
 
 ## Aplicación Flutter
 
-### Estado actual de providers S0-S (2026-11-16)
+### Alternativa ante HTTP 403 · OC-04 (2026-11-17)
 
-El root registra `AnimesDigitalPlaybackProvider` v1.0.0 como candidato y un
-`DirectMediaHostResolver` genérico. El provider obtiene el episodio público de
-One Piece 1180, un HLS y su primer segmento (HTTP 200); al entregarlo a la
-ventana real media_kit/libmpv, se mostró error de decodificación y pantalla
-negra. No se acredita reproducción visible ni se cierra S0-S. `EpisodeSourceAdapter`
-separa matching, episodios y fuentes y no acepta fuzzy matching automático.
-Desde `app/`:
+La ficha puede mostrar y copiar páginas externas que AniList publique en
+`streamingEpisodes`; solo acepta HTTPS sin credenciales. Esos enlaces llevan a
+la página del servicio y **no** son URLs de medios para libmpv. El manager
+continúa a otro provider únicamente si ese provider ya está registrado y
+habilitado. La implementación no reintenta ni intenta eludir un 403.
+
+El DoH revisado en Anilili cubre fallos de DNS local (sin respuesta/sinkhole), no
+un HTTP 403 recibido desde Cloudflare. Su adaptador de catálogo se detiene ante
+4xx; su manejo de challenge/clearance está fuera de los límites autorizados y no
+se portó. Ver el [anexo de investigación OC-04](docs/ai-system/audits/OC04-HTTP403-FALLBACK-audit-2026-11-17.md).
+
+Con Flutter 3.50.0-0.4.pre / Dart 3.14.0, se ejecutaron estos tests focalizados
+(**47/47**):
 
 ```bash
 ../.ai-local/toolchains/flutter/bin/flutter test --no-pub --concurrency=1 \
-  test/domain/episode_source_adapter_test.dart \
-  test/domain/playback_provider_contract_test.dart \
+  test/data/anilist/anilist_client_test.dart \
+  test/data/anilist/anilist_metadata_provider_test.dart \
   test/application/playback_provider_manager_test.dart \
-  test/application/playback_source_cache_test.dart \
-  test/data/player/providers/animesdigital \
-  test/data/player/providers/hosts/direct_media_host_resolver_test.dart \
-  test/data/player/providers/playback_providers_module_test.dart
+  test/catalog/playback_resolution_message_test.dart \
+  test/catalog/anime_detail_external_streaming_links_test.dart
 ```
 
-La prueba focalizada del provider AnimesDigital pasó 7/7, incluida la regresión
-de presupuesto total compartido entre búsquedas lentas. La última suite Flutter
-completa terminó con **300 aprobadas y 7 omitidas de forma optativa** mediante
-`../.ai-local/toolchains/flutter/bin/flutter test --no-pub --concurrency=1`.
-Dart analyze de `lib test tool` y
-`flutter analyze --no-pub` no reportaron problemas. El log completo ignorado
-por Git en `.ai-local/review/s0s-final-flutter-suite-2026-11-16.log` corresponde
-a la ejecución anterior de 297/7; la última salida de 300/7 quedó en la consola,
-no se guardó como log.
-El harness HTTP live está descrito en [`app/tool/README.md`](app/tool/README.md).
-Para ejecutar el smoke HLS técnico
-previo de libmpv:
+También pasaron `flutter analyze --no-pub` y `flutter build linux --debug
+--no-pub`. La suite completa tuvo 336 aprobadas, 10 optativas omitidas y dos
+timeouts en pruebas nativas del player; ambos tests pasaron al ejecutarse de
+forma aislada. No se cambió el player. No se realizó solicitud live a AniList ni
+reproducción externa. Ver las [limitaciones y el detalle de la ejecución](docs/ai-system/audits/OC04-HTTP403-FALLBACK-audit-2026-11-17.md).
+
+### Proveedores actuales · OC-03 (2026-11-17)
+
+`PlaybackProvidersModule` registra Miruro catalog, el resolver compartido de
+medios directos, Wikimedia opt-in y `user_sources` opcional. Los adaptadores
+AnimesDigital/AnimeAV1/TioAnime/AnimeGG/AnimeHeaven y perfiles de MP4Upload /
+YourUpload ya no están conectados al runtime. Estado actual y contratos:
+[`app/lib/data/player/providers/README.md`](app/lib/data/player/providers/README.md)
+y [`miruro/README.md`](app/lib/data/player/providers/miruro/README.md).
+
+Pruebas ejecutadas con el SDK aislado `.ai-local/toolchains/flutter` (Flutter
+3.50.0-0.4.pre / Dart 3.14.0):
 
 ```bash
-KONGROO_TEST_PUBLIC_HLS=1 ../.ai-local/toolchains/flutter/bin/flutter test \
-  --no-pub --concurrency=1 test/player/public_hls_host_integration_test.dart
+../.ai-local/toolchains/flutter/bin/flutter test --no-pub --concurrency=1 \
+  test/data/player/providers/miruro_catalog_provider_test.dart \
+  test/data/player/providers/playback_providers_module_test.dart \
+  test/data/player/providers/public_playback_http_test.dart \
+  test/data/player/providers/public_playback_providers_test.dart \
+  test/data/player/providers/user_defined_playback_provider_test.dart \
+  test/data/player/providers/hosts/direct_media_host_resolver_test.dart \
+  test/domain/playback_provider_contract_test.dart \
+  test/domain/episode_source_adapter_test.dart \
+  test/application/playback_provider_manager_test.dart
 ```
 
-La fuente de prueba anterior devolvió HTTP 200 y libmpv avanzó 2038 ms, pero no
-hubo frame/ventana/audio observados ni es un episodio. El live harness actual
-comprobó en AnimesDigital el HLS 200/4998 bytes, 142 segmentos y un segmento TS
-200/67258 bytes para el episodio 1180. Las ventanas de los episodios 1180 y 1
-mostraron negro/error de decodificación. No se midió CPU/RAM del stream. La
-baseline del player previa a S0-S es
-[`S0-S-BASELINE-AND-IMPLEMENTATION.md`](docs/ai-system/missions/S0-S-BASELINE-AND-IMPLEMENTATION.md).
+Resultado focalizado: **62/62**. Suite Flutter completa, en serie:
+**334 aprobadas y 10 optativas omitidas**. `flutter analyze --no-pub` y el build
+Linux debug (`flutter build linux --debug --no-pub`) pasaron. La Home se abrió
+en Fedora y se capturó un primer frame en el archivo local ignorado
+`.ai-local/review/oc03-home.png`; el backend Wayland no tenía teclado/ratón
+disponibles, de modo que la interacción manual no se validó.
 
-La opción `KONGROO_LIVE_FFPROBE=1` añadió diagnóstico redacted: una corrida del
-episodio 1 observó que libavformat rechazó una referencia HLS `.webp` por
-`allowed_segment_extensions`; no demuestra que esa sea la causa del fallo de
-libmpv. Una solicitud posterior del provider terminó en `timeout`. No se amplió
-la lista permitida ni se almacenaron URLs firmadas. La herramienta analiza
-transporte y metadatos; no sustituye una ventana con cuadro visible.
-Las pruebas del resumen/redacción pasan 3/3 con el SDK aislado del proyecto;
-`dart analyze` del harness y su test no reporta issues.
+En la suite del engine, 20 aperturas de medios locales reportaron RSS de
+251,928,576 B antes, 396,959,744 B pico tras Stop y 377,868,288 B después de
+dispose. Esto es una medición del proceso de test con fixture local en el host
+actual; no es un perfil de reproducción externa, una prueba en 4 GB ni un soak
+para concluir si existe fuga. El transporte limita la lectura por defecto a
+2 MiB y los catálogos admiten un máximo configurado de 8 MiB; existe test
+loopback de respuesta de 3 MiB. El consumo real bajo carga Miruro y en el equipo
+objetivo sigue pendiente.
+
+La evidencia live ya registrada para AniList 100240 devolvió HTTP 403 en dos
+orígenes antes del episodio y media. No se repitió ni se evadió. Ningún servidor
+externo de anime está confirmado como reproducible. El smoke público HLS
+histórico y AnimesDigital de las secciones de historial no prueban el provider
+actual ni equivalen a reproducción funcional.
 
 ### Estado histórico de providers tras limpieza S0 (2026-11-15)
 

@@ -5,10 +5,46 @@ import 'package:anime_app/app/player/playback_route_session.dart';
 import 'package:anime_app/app/player/spike_player_module.dart';
 import 'package:anime_app/data/player/engine/active_player_lease.dart';
 import 'package:anime_app/data/player/engine/media_kit_spike_engine.dart';
+import 'package:anime_app/domain/player/providers/playback_source.dart';
 import 'package:anime_app/domain/player/subtitles/external_subtitle_catalog.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('conflicting captions for the same media are rejected before engine allocation', () async {
+    final media = Uri.parse('https://media.anime.org/master.m3u8');
+    PlayableSource stream(String name, String language) => PlayableSource(
+      providerId: PlaybackProviderId('test'),
+      sourceId: name,
+      serverId: name,
+      uri: media,
+      subtitles: [
+        ProviderSubtitle(
+          id: 'caption',
+          uri: Uri.parse('https://captions.anime.org/$language.vtt'),
+          label: language,
+          language: language,
+        ),
+      ],
+    );
+    bool allocated = false;
+    await expectLater(
+      SpikePlayerModule.open(
+        File('fixture.mkv'),
+        authorizedAlternatives: [
+          stream('initial', 'en'),
+          stream('other', 'es'),
+        ],
+        engineFactory: () {
+          allocated = true;
+          throw StateError('must not allocate');
+        },
+      ),
+      throwsArgumentError,
+    );
+    expect(allocated, isFalse);
+    expect(MediaKitSpikeEngine.hasActivePlayerLease, isFalse);
+  });
+
   test('cancelled startup exits before acquiring native resources', () async {
     final PlaybackRouteOpenCancellation cancellation =
         PlaybackRouteOpenCancellation()..request();

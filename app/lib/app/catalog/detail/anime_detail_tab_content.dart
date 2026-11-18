@@ -1,6 +1,5 @@
-import 'dart:math' as math;
-
 import 'package:anime_app/domain/catalog/anime_detail_metadata.dart';
+import 'package:anime_app/domain/catalog/episode_index_provider.dart';
 import 'package:anime_app/domain/catalog/provider_anime_metadata.dart';
 import 'package:anime_app/domain/progress/playback_progress.dart';
 import 'package:material_ui/material_ui.dart';
@@ -17,7 +16,12 @@ final class AnimeDetailTabContent extends StatelessWidget {
     required this.saving,
     required this.error,
     required this.onSaveProgress,
+    this.onCopyExternalEpisodeLink,
     this.onPlayEpisode,
+    this.episodeIndex,
+    this.episodeIndexLoading = false,
+    this.episodeIndexError,
+    this.onLoadMoreEpisodes,
     super.key,
   });
 
@@ -29,7 +33,12 @@ final class AnimeDetailTabContent extends StatelessWidget {
   final bool saving;
   final String? error;
   final VoidCallback onSaveProgress;
+  final ValueChanged<Uri>? onCopyExternalEpisodeLink;
   final ValueChanged<int>? onPlayEpisode;
+  final EpisodeIndexPage? episodeIndex;
+  final bool episodeIndexLoading;
+  final String? episodeIndexError;
+  final VoidCallback? onLoadMoreEpisodes;
 
   @override
   Widget build(BuildContext context) => switch (tab) {
@@ -41,7 +50,12 @@ final class AnimeDetailTabContent extends StatelessWidget {
       saving: saving,
       error: error,
       onSave: onSaveProgress,
+      onCopyExternalEpisodeLink: onCopyExternalEpisodeLink,
       onPlayEpisode: onPlayEpisode,
+      episodeIndex: episodeIndex,
+      episodeIndexLoading: episodeIndexLoading,
+      episodeIndexError: episodeIndexError,
+      onLoadMoreEpisodes: onLoadMoreEpisodes,
     ),
     AnimeDetailTab.information => _InformationTab(metadata: metadata),
     AnimeDetailTab.cast => _DetailTextList(
@@ -109,6 +123,11 @@ final class _EpisodesTab extends StatelessWidget {
     required this.saving,
     required this.error,
     required this.onSave,
+    required this.onCopyExternalEpisodeLink,
+    required this.episodeIndex,
+    required this.episodeIndexLoading,
+    required this.episodeIndexError,
+    required this.onLoadMoreEpisodes,
     this.onPlayEpisode,
   });
   final ProviderAnimeMetadata? metadata;
@@ -118,23 +137,31 @@ final class _EpisodesTab extends StatelessWidget {
   final bool saving;
   final String? error;
   final VoidCallback onSave;
+  final ValueChanged<Uri>? onCopyExternalEpisodeLink;
   final ValueChanged<int>? onPlayEpisode;
+  final EpisodeIndexPage? episodeIndex;
+  final bool episodeIndexLoading;
+  final String? episodeIndexError;
+  final VoidCallback? onLoadMoreEpisodes;
 
   @override
   Widget build(BuildContext context) {
-    final List<AnimeEpisodeMetadata> supplied =
-        metadata?.detail?.episodes ?? const [];
-    final Map<int, AnimeEpisodeMetadata> byNumber = {
-      for (final episode in supplied) episode.number: episode,
-    };
-    final int highestSupplied = supplied.fold(
-      0,
-      (highest, episode) => math.max(highest, episode.number),
-    );
-    final int episodeCount = math.max(
-      metadata?.episodeCount ?? metadata?.detail?.episodeCount ?? 0,
-      highestSupplied,
-    );
+    final List<ProviderEpisodeMetadata> indexed =
+        episodeIndex?.episodes ?? const [];
+    final int? announced =
+        metadata?.episodeCount ?? metadata?.detail?.episodeCount;
+    final bool hasIndex = indexed.isNotEmpty;
+    final List<AnimeEpisodeMetadata> externalEpisodes = [
+      for (final AnimeEpisodeMetadata episode
+          in metadata?.detail?.episodes ?? const <AnimeEpisodeMetadata>[])
+        if (episode.externalWatchUri != null) episode,
+    ];
+    final String? caption = hasIndex
+        ? '${indexed.length} de ${episodeIndex?.totalCount ?? indexed.length}'
+              ' indexados · fuentes sin verificar'
+        : announced != null && announced > 0
+        ? '$announced anunciados (AniList) · sin índice'
+        : null;
 
     return CustomScrollView(
       key: const PageStorageKey<String>('detail-episodes-scroll'),
@@ -148,13 +175,18 @@ final class _EpisodesTab extends StatelessWidget {
                 child: Row(
                   children: [
                     Text('Episodios', style: _sectionTitle(context)),
-                    if (episodeCount > 0) ...[
+                    if (caption != null) ...[
                       const Spacer(),
-                      Text(
-                        '$episodeCount episodios',
-                        style: const TextStyle(
-                          color: Color(0xffaaa6af),
-                          fontSize: 13,
+                      Flexible(
+                        child: Text(
+                          caption,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.end,
+                          style: const TextStyle(
+                            color: Color(0xffaaa6af),
+                            fontSize: 13,
+                          ),
                         ),
                       ),
                     ],
@@ -164,11 +196,54 @@ final class _EpisodesTab extends StatelessWidget {
             ),
           ),
         ),
-        if (episodeCount == 0)
-          const SliverFillRemaining(
+        if (externalEpisodes.isNotEmpty) ...[
+          const SliverPadding(
+            padding: EdgeInsets.fromLTRB(24, 20, 24, 8),
+            sliver: SliverToBoxAdapter(
+              child: Text(
+                'Ver en servicio externo',
+                style: TextStyle(
+                  color: Color(0xfff4f1f8),
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+          const SliverPadding(
+            padding: EdgeInsets.symmetric(horizontal: 24),
+            sliver: SliverToBoxAdapter(
+              child: Text(
+                'Enlaces legales publicados por AniList. Se abren fuera del reproductor de Kongroo.',
+                style: TextStyle(color: Color(0xffaaa6af), fontSize: 13),
+              ),
+            ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
+            sliver: SliverList.builder(
+              itemCount: externalEpisodes.length,
+              itemBuilder: (BuildContext context, int index) {
+                final AnimeEpisodeMetadata episode = externalEpisodes[index];
+                final Uri? uri = episode.externalWatchUri;
+                if (uri == null) return const SizedBox.shrink();
+                return _ExternalEpisodeLink(
+                  episode: episode,
+                  uri: uri,
+                  index: index,
+                  onCopy: onCopyExternalEpisodeLink,
+                );
+              },
+            ),
+          ),
+        ],
+        if (!hasIndex && episodeIndex?.hasMore != true)
+          SliverFillRemaining(
             hasScrollBody: false,
-            child: _UnavailableTab(
-              message: 'No hay episodios publicados para esta ficha.',
+            child: _EpisodeIndexStatus(
+              loading: episodeIndexLoading,
+              failed: episodeIndexError != null,
+              announced: announced,
             ),
           )
         else ...[
@@ -185,17 +260,35 @@ final class _EpisodesTab extends StatelessWidget {
                 BuildContext context,
                 int index,
               ) {
-                final int number = index + 1;
+                final ProviderEpisodeMetadata episode = indexed[index];
+                final int number = episode.episodeNumber;
                 return _EpisodeCard(
                   number: number,
-                  episode: byNumber[number],
+                  title: episode.title,
+                  thumbnailUrl: episode.thumbnailUrl,
                   onPlay: onPlayEpisode == null
                       ? null
                       : () => onPlayEpisode!(number),
                 );
-              }, childCount: episodeCount),
+              }, childCount: indexed.length),
             ),
           ),
+          if (episodeIndex?.hasMore == true && onLoadMoreEpisodes != null)
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+              sliver: SliverToBoxAdapter(
+                child: Center(
+                  child: OutlinedButton(
+                    onPressed: episodeIndexLoading ? null : onLoadMoreEpisodes,
+                    child: Text(
+                      episodeIndexLoading
+                          ? 'Cargando…'
+                          : 'Cargar más episodios',
+                    ),
+                  ),
+                ),
+              ),
+            ),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(24, 24, 24, 30),
             sliver: SliverToBoxAdapter(
@@ -220,21 +313,82 @@ final class _EpisodesTab extends StatelessWidget {
   }
 }
 
+final class _ExternalEpisodeLink extends StatelessWidget {
+  const _ExternalEpisodeLink({
+    required this.episode,
+    required this.uri,
+    required this.index,
+    required this.onCopy,
+  });
+
+  final AnimeEpisodeMetadata episode;
+  final Uri uri;
+  final int index;
+  final ValueChanged<Uri>? onCopy;
+
+  @override
+  Widget build(BuildContext context) => ListTile(
+    key: ValueKey<String>('external-streaming-link-$index'),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+    title: Text(episode.title, maxLines: 2, overflow: TextOverflow.ellipsis),
+    subtitle: Text(episode.site ?? uri.host),
+    trailing: TextButton.icon(
+      key: ValueKey<String>('copy-external-streaming-link-$index'),
+      onPressed: onCopy == null ? null : () => onCopy!(uri),
+      icon: const Icon(Icons.copy),
+      label: const Text('Copiar enlace'),
+    ),
+  );
+}
+
+final class _EpisodeIndexStatus extends StatelessWidget {
+  const _EpisodeIndexStatus({
+    required this.loading,
+    required this.failed,
+    required this.announced,
+  });
+
+  final bool loading;
+  final bool failed;
+  final int? announced;
+
+  @override
+  Widget build(BuildContext context) {
+    if (loading) {
+      return const Center(
+        child: CircularProgressIndicator(semanticsLabel: 'Cargando episodios'),
+      );
+    }
+    if (failed) {
+      return const _UnavailableTab(
+        message: 'No se pudo cargar el índice de episodios. Vuelve a intentarlo más tarde.',
+      );
+    }
+    return _UnavailableTab(
+      message: announced != null && announced! > 0
+          ? 'AniList anuncia $announced episodios, pero no hay índice verificado.'
+          : 'No hay episodios publicados para esta ficha.',
+    );
+  }
+}
+
 final class _EpisodeCard extends StatelessWidget {
   const _EpisodeCard({
     required this.number,
-    required this.episode,
+    required this.title,
+    required this.thumbnailUrl,
     this.onPlay,
   });
 
   final int number;
-  final AnimeEpisodeMetadata? episode;
+  final String? title;
+  final String? thumbnailUrl;
   final VoidCallback? onPlay;
 
   @override
   Widget build(BuildContext context) {
-    final String? thumbnail = episode?.thumbnailUrl;
-    final String? subtitle = _episodeSubtitle(episode?.title, number);
+    final String? thumbnail = thumbnailUrl;
+    final String? subtitle = _episodeSubtitle(title, number);
     return Semantics(
       key: ValueKey<String>('episode-card-$number'),
       label: subtitle == null
@@ -305,7 +459,7 @@ final class _EpisodeCard extends StatelessWidget {
                         ),
                         if (onPlay != null)
                           IconButton(
-                            tooltip: 'Buscar servidores y reproducir',
+                            tooltip: 'Buscar fuentes del episodio',
                             visualDensity: VisualDensity.compact,
                             onPressed: onPlay,
                             icon: const Icon(Icons.play_arrow_rounded),

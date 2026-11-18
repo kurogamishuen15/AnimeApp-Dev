@@ -20,6 +20,7 @@ import 'package:material_ui/material_ui.dart';
 Widget _host(
   HomeLoader load, {
   ValueChanged<HomeTitle>? onDetails,
+  ValueChanged<HomeEpisode>? onResume,
   TextScaler scaler = TextScaler.noScaling,
   Future<void> Function(HomeTitle, HomeCardLibraryCommand)? onLibraryAction,
   NavigationMode navigationMode = NavigationMode.traditional,
@@ -43,6 +44,7 @@ Widget _host(
       child: HomeScreen(
         load: load,
         onDetails: onDetails ?? (_) {},
+        onResume: onResume,
         onLibraryAction: onLibraryAction ?? (_, _) async {},
       ),
     ),
@@ -104,11 +106,11 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('timeout becomes a recoverable error', (tester) async {
+  testWidgets('backstop ceiling becomes a recoverable error', (tester) async {
     await tester.pumpWidget(
       _host(() => Completer<Result<HomeContent>>().future),
     );
-    await tester.pump(const Duration(seconds: 13));
+    await tester.pump(const Duration(seconds: 31));
     await tester.pumpAndSettle();
     expect(find.text('No se pudo cargar Inicio'), findsOneWidget);
   });
@@ -120,6 +122,7 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
     const title = HomeTitle(title: 'Faroles', airing: true);
     HomeTitle? selected;
+    HomeEpisode? resumed;
     await tester.pumpWidget(
       _host(
         () async => const Success(
@@ -131,6 +134,7 @@ void main() {
           ),
         ),
         onDetails: (title) => selected = title,
+        onResume: (episode) => resumed = episode,
       ),
     );
     await tester.pumpAndSettle();
@@ -143,7 +147,10 @@ void main() {
     expect(selected, same(title));
     await tester.tap(find.text('Episodio 2\n5:00 restantes'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('Episodio 2 · 45:00'), findsOneWidget);
+    expect(resumed?.label, 'Episodio 2');
+    expect(resumed?.positionMs, 2700000);
+    expect(resumed?.playback, isNull);
+    expect(find.textContaining('Episodio 2 · 45:00'), findsNothing);
   });
 
   testWidgets('narrow with scaled text, fallback art and a long lazy shelf', (

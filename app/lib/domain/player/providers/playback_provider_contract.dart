@@ -24,6 +24,12 @@ enum PlaybackProviderFailureKind {
   noEpisodes,
   noSources,
   forbidden,
+  challenge,
+  ipBlocked,
+  policyBlocked,
+  iframeDenied,
+  geoRestricted,
+  drm,
   notFound,
   unsupportedEmbed,
   expired,
@@ -38,8 +44,8 @@ extension PlaybackProviderFailureKindPolicy on PlaybackProviderFailureKind {
   bool get countsTowardCircuit => switch (this) {
     PlaybackProviderFailureKind.unavailable ||
     PlaybackProviderFailureKind.network ||
-    PlaybackProviderFailureKind.timeout ||
-    PlaybackProviderFailureKind.rateLimited => true,
+    PlaybackProviderFailureKind.timeout => true,
+    PlaybackProviderFailureKind.rateLimited ||
     PlaybackProviderFailureKind.invalidResponse ||
     PlaybackProviderFailureKind.unauthorized ||
     PlaybackProviderFailureKind.unsupported ||
@@ -49,6 +55,12 @@ extension PlaybackProviderFailureKindPolicy on PlaybackProviderFailureKind {
     PlaybackProviderFailureKind.noEpisodes ||
     PlaybackProviderFailureKind.noSources ||
     PlaybackProviderFailureKind.forbidden ||
+    PlaybackProviderFailureKind.challenge ||
+    PlaybackProviderFailureKind.ipBlocked ||
+    PlaybackProviderFailureKind.policyBlocked ||
+    PlaybackProviderFailureKind.iframeDenied ||
+    PlaybackProviderFailureKind.geoRestricted ||
+    PlaybackProviderFailureKind.drm ||
     PlaybackProviderFailureKind.notFound ||
     PlaybackProviderFailureKind.unsupportedEmbed ||
     PlaybackProviderFailureKind.expired ||
@@ -59,11 +71,31 @@ extension PlaybackProviderFailureKindPolicy on PlaybackProviderFailureKind {
   };
 }
 
+enum PlaybackHttpStage { catalog, anime, episode, embed, media }
+
 final class PlaybackProviderFailure {
-  const PlaybackProviderFailure(this.kind, {this.retryAfter});
+  const PlaybackProviderFailure(
+    this.kind, {
+    this.retryAfter,
+    this.httpStatus,
+    this.host,
+    this.server,
+    this.stage,
+    this.contentType,
+  });
+
+  final int? httpStatus;
+  final String? host;
+  final String? server;
+  final PlaybackHttpStage? stage;
+  final String? contentType;
 
   final PlaybackProviderFailureKind kind;
   final Duration? retryAfter;
+
+  bool get countsTowardCircuit =>
+      kind.countsTowardCircuit ||
+      (kind == PlaybackProviderFailureKind.rateLimited && retryAfter == null);
 }
 
 sealed class PlaybackProviderResult<T> {

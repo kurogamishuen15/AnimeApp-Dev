@@ -48,16 +48,18 @@ Information and alternative titles use available AniList values. The gallery
 shows only the real cover and banner URLs currently present in metadata. Cast
 and relationship tabs display the public characters, voices, and anime
 relations supplied by the catalog, with an empty state when absent. The
-episode tab builds a lazy responsive grid from the public total. Where AniList
-publishes `streamingEpisodes`, the grid also shows the real provider title and
-thumbnail; missing entries remain numbered only. These links are catalogue
-metadata, not Kongroo playback sources, so playback and download actions stay
-disabled unless the application composition supplies the playback manager;
-when supplied, each episode card exposes a play action that resolves provider
-candidates before opening the existing player route. AniList episode URLs are
-never passed to libmpv as playable sources. Existing saved progress remains
-editable only for a local-library item and is not attributed automatically to
-a selected episode.
+episode tab builds a lazy responsive grid from the public episode index. Where
+AniList publishes `streamingEpisodes`, the grid also shows the real provider
+title and thumbnail; a separate lazy list exposes validated HTTPS external
+pages with a copy action. AniList documents these as legal streaming links on
+external sites. They are not direct media sources: Kongroo never passes them
+to libmpv. If an internal provider receives HTTP 403, the UI points the user to
+these links when available. The playback manager also continues to the next
+configured provider after a provider failure; optional Wikimedia and
+user-defined entries remain subject to their enablement/configuration.
+Playback in the existing player is available only when a provider returns a
+supported media source. Existing saved progress remains editable only for a
+local-library item and is not attributed automatically to a selected episode.
 
 Loading keeps the back affordance available. Provider and local persistence
 errors are shown inline. Missing optional fields are omitted. State changes
@@ -74,9 +76,10 @@ domain contracts. No full personalization editor is included.
 
 ## Tests and limits
 
-`app/test/widget_test.dart` verifies the shell remains mounted, numbered
-episode cards are lazy, library state and completion confirmation remain
-functional, and the header/poster geometry fits phone 390×844 and desktop
+`app/test/catalog/anime_detail_external_streaming_links_test.dart` verifies
+external-page display and the copy callback. `app/test/widget_test.dart`
+verifies the shell remains mounted, numbered episode cards are lazy, library
+state and completion confirmation remain functional, and the header/poster geometry fits phone 390×844 and desktop
 1280×960 test sizes without layout exceptions. Loopback tests
 cover titles/thumbnails and persistent cache. The opt-in AniList smoke test
 verifies real episode metadata without OAuth; it is kept separate from the

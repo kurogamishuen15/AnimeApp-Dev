@@ -1,21 +1,17 @@
-# Archivo histórico de módulos de reproducción S0
+# Referencia histórica de providers S0
 
-Estos documentos fueron movidos fuera de los directorios de runtime para que no
-parezcan módulos activos. Describen intentos previos y conservan su contexto;
-las auditorías enlazadas son la fuente de estado vigente. El runtime actual no
-registra providers ni resolutores externos hasta que un flujo nuevo pase las
-pruebas de contrato y playback.
+Los READMEs por proveedor que siguen en esta carpeta son snapshots históricos,
+no instrucciones para reactivar su código. La migración OC-03 retiró los
+adapters y resolutores anteriores del runtime; las pruebas históricas y las
+auditorías conservan los resultados y motivos de retiro.
 
-| Intento | Documento archivado | Evidencia canónica |
-|---|---|---|
-| AnimeHeaven | [README histórico](animeheaven/README.md) | [auditoría S0-R](../../../audits/S0R-ANIMEHEAVEN-audit-2026-11-16.md), [reporte S0](../../../missions/S0-REAL-PLAYBACK-REPORT.md) |
-| AnimeAV1 | [README histórico](animeav1/README.md) | [auditoría de limpieza S0](../../../audits/S0-provider-cleanup-audit-2026-11-15.md) |
-| TioAnime | [README histórico](tioanime/README.md) | [auditoría de hosts](../../../audits/S0-video-host-audit-2026-11-15.md) |
-| AnimeGG | [README histórico](animegg/README.md) | [auditoría de hosts](../../../audits/S0-video-host-audit-2026-11-15.md) |
-| Miruro | [README histórico](miruro/README.md) | [auditoría de limpieza posterior](../../../audits/S0-provider-cleanup-followup-audit-2026-11-15.md) |
-| AnimeOnline Ninja | [README histórico](animeonline_ninja/README.md) | [reporte S0](../../../missions/S0-REAL-PLAYBACK-REPORT.md) |
-| Resolutores compartidos previos | [README histórico](video_hosts/README.md) | [auditoría de hosts](../../../audits/S0-video-host-audit-2026-11-15.md) |
+El estado vigente, módulos activos, contratos, comandos y límites están en el
+[README de providers](../../../../../app/lib/data/player/providers/README.md).
+El resumen de la eliminación/migración está en la
+[auditoría OC-03](../../../audits/OC03-MIRURO-MIGRATION-audit-2026-11-17.md).
+Las auditorías S0 y los informes enlazados allí son la evidencia detallada;
+estas páginas archivadas solo permiten rastrear los nombres y decisiones de
+los intentos antiguos.
 
-Los adaptadores/resolutores retirados no se conservan como código ejecutable.
-Las pruebas genéricas del manager, contratos, selección/fallback y player
-permanecen en sus rutas activas.
+Ninguno de los módulos conservados aquí se registra desde
+`PlaybackProvidersModule`. Mantenerlos no los convierte en código ejecutable.

@@ -6,6 +6,7 @@ import 'package:material_ui/material_ui.dart';
 
 import 'app/catalog/catalog_module.dart';
 import 'data/player/providers/playback_providers_module.dart';
+import 'data/player/providers/user_sources/user_defined_playback_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,7 +16,16 @@ Future<void> main() async {
   final CatalogModule module = await CatalogModule.open(
     databaseFile: await _isolatedDatabaseOverride(),
   );
-  final PlaybackProvidersModule playbackModule = PlaybackProvidersModule.open();
+  final PlaybackProvidersModule playbackModule = PlaybackProvidersModule.open(
+    enableMiruro: Platform.environment['KONGROO_ENABLE_MIRURO'] != '0',
+    enableMegaPlay: Platform.environment['KONGROO_ENABLE_MEGAPLAY'] != '0',
+    enableAnimeAv1: Platform.environment['KONGROO_ENABLE_ANIMEAV1'] != '0',
+    enableAllAnime: Platform.environment['KONGROO_ENABLE_ALLANIME'] != '0',
+    enableAniZone: Platform.environment['KONGROO_ENABLE_ANIZONE'] != '0',
+    enableAnimeGg: Platform.environment['KONGROO_ENABLE_ANIMEGG'] != '0',
+    enableWikimedia: Platform.environment['KONGROO_ENABLE_WIKIMEDIA'] == '1',
+    userSources: await _userSourcesFromEnvironment(),
+  );
   runApp(
     AnimeApp(catalogService: module.service, playbackModule: playbackModule),
   );
@@ -25,6 +35,20 @@ Future<void> main() async {
   final markerPath = Platform.environment['ANIMEAPP_FIRST_FRAME_MARKER'];
   if (markerPath != null && markerPath.isNotEmpty) {
     unawaited(_writeFirstFrameMarker(markerPath));
+  }
+}
+
+/// Optional list of episodes the user registered (`KONGROO_USER_SOURCES` points
+/// to a JSON file). A missing variable means no user sources; an invalid file
+/// is reported and ignored so the rest of the app still starts.
+Future<List<UserDefinedSourceEntry>> _userSourcesFromEnvironment() async {
+  final String? path = Platform.environment['KONGROO_USER_SOURCES'];
+  if (path == null || path.trim().isEmpty) return const [];
+  try {
+    return UserDefinedSourceEntry.parseJson(await File(path).readAsString());
+  } on Object {
+    stderr.writeln('KONGROO_USER_SOURCES ignored: invalid configuration');
+    return const [];
   }
 }
 

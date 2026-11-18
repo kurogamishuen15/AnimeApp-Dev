@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
 import 'home_appearance.dart';
+import 'home_artwork_diagnostics.dart';
 
 final class HomeArtwork extends StatelessWidget {
   const HomeArtwork({
@@ -35,7 +36,10 @@ final class HomeArtwork extends StatelessWidget {
             .clamp(1, 1600),
         filterQuality: FilterQuality.low,
         excludeFromSemantics: true,
-        errorBuilder: (_, _, _) => fallback,
+        errorBuilder: (_, error, _) {
+          HomeArtworkDiagnostics.instance.reportFailure(imageUrl, error);
+          return fallback;
+        },
       );
     }
     if (path == null) return fallback;

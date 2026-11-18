@@ -20,7 +20,9 @@ un `PlaybackEpisode` desde el ID externo y aliases del anime; la UI ofrece el
 selector solo al resolver streams HTTPS candidatos. La ruta de reproducción
 utiliza el `SpikePlayerModule` y `media_kit` existentes, y cancela la resolución
 pendiente al abandonar la ficha. AniList `streamingEpisodes` nunca se usa como
-URL reproducible.
+URL reproducible; las páginas HTTPS publicadas por AniList pueden copiarse
+desde la ficha para abrirlas externamente cuando un provider interno deniega el
+acceso.
 
 ## Flujo visible
 

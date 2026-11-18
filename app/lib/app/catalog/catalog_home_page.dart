@@ -1,12 +1,16 @@
 import 'package:anime_app/application/catalog/catalog_service.dart';
+import 'package:anime_app/application/player/playback_progress_session.dart';
 import 'package:anime_app/application/player/providers/playback_provider_manager.dart';
 import 'package:anime_app/core/result/result.dart';
 import 'package:anime_app/domain/catalog/anime_id.dart';
+import 'package:anime_app/domain/catalog/anime_identity.dart';
 import 'package:anime_app/domain/catalog/external_anime_id.dart';
 import 'package:anime_app/domain/catalog/library_entry.dart';
 import 'package:anime_app/domain/catalog/provider_anime_metadata.dart';
 import 'package:anime_app/domain/player/providers/playback_provider_contract.dart';
 import 'package:anime_app/domain/player/providers/playback_source.dart';
+import 'package:anime_app/domain/progress/checkpoint_coordinator.dart';
+import 'package:anime_app/domain/progress/playback_progress.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
@@ -120,7 +124,26 @@ final class _CatalogHomePageState extends State<CatalogHomePage>
     });
   }
 
-  Future<void> _playEpisode(PlaybackEpisode episode) async {
+  Future<void> _resumeEpisode(HomeEpisode episode) async {
+    final PlaybackEpisode? playback = episode.playback;
+    if (playback == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Este progreso no tiene un episodio reproducible.'),
+        ),
+      );
+      return;
+    }
+    await _playEpisode(
+      playback,
+      startPosition: Duration(milliseconds: episode.positionMs),
+    );
+  }
+
+  Future<void> _playEpisode(
+    PlaybackEpisode episode, {
+    Duration? startPosition,
+  }) async {
     final PlaybackProviderManager? manager = widget.playbackProviders;
     if (manager == null || _resolvingPlayback) return;
     final PlaybackCancellationToken cancellation = PlaybackCancellationToken();
@@ -153,6 +176,24 @@ final class _CatalogHomePageState extends State<CatalogHomePage>
                 _PlaybackSourcePicker(streams: streams),
           );
       if (!mounted || cancellation.isCancelled || selected == null) return;
+      final identity = await widget.service.identities.getById(episode.animeId);
+      final bool hasLocalIdentity =
+          identity is Success<AnimeIdentity?> && identity.value != null;
+      Duration? resume = startPosition;
+      if (resume == null && hasLocalIdentity) {
+        final saved = await widget.service.getEpisodeProgress(
+          episode.animeId,
+          episode.episodeNumber,
+        );
+        if (saved
+            case Success<PlaybackProgress?>(
+              value: final PlaybackProgress progress,
+            )
+            when progress.completion == CompletionState.inProgress) {
+          resume = Duration(milliseconds: progress.resumePositionMs);
+        }
+      }
+      if (!mounted || cancellation.isCancelled) return;
       await Navigator.of(context).push<void>(
         MaterialPageRoute<void>(
           builder: (_) => ProviderPlaybackRoute(
@@ -160,9 +201,25 @@ final class _CatalogHomePageState extends State<CatalogHomePage>
             episode: episode,
             streams: streams,
             initialStream: selected,
+            startPosition: resume ?? Duration.zero,
+            trackProgress: hasLocalIdentity
+                ? (player) => PlaybackProgressSession(
+                    player,
+                    CheckpointCoordinator(
+                      write: widget.service.progress.upsert,
+                    ),
+                    CatalogService.episodeProgressKey(
+                      episode.animeId,
+                      episode.episodeNumber,
+                    ),
+                  )
+                : null,
           ),
         ),
       );
+      if (mounted && !cancellation.isCancelled) {
+        setState(() => _homeRevision++);
+      }
     } finally {
       if (identical(_playbackCancellation, cancellation)) {
         _playbackCancellation = null;
@@ -287,6 +344,7 @@ final class _CatalogHomePageState extends State<CatalogHomePage>
                           load: CatalogHomeSource(widget.service).load,
                           onDetails: _openDetails,
                           onLibraryAction: _applyCardLibraryAction,
+                          onResume: _resumeEpisode,
                           refreshRevision: _homeRevision,
                         ),
                         CatalogSearchPage(
@@ -367,7 +425,7 @@ final class _PlaybackSourcePicker extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Servidores disponibles',
+            'Fuentes encontradas',
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 8),
@@ -385,8 +443,8 @@ final class _PlaybackSourcePicker extends StatelessWidget {
                     'source-${stream.providerId.value}-${stream.serverId}',
                   ),
                   leading: const Icon(Icons.play_circle_outline),
-                  title: Text(stream.providerId.value),
-                  subtitle: Text(stream.serverId),
+                  title: Text(stream.sourceLabel ?? stream.providerId.value),
+                  subtitle: Text(stream.displayName ?? stream.serverId),
                   onTap: () => Navigator.of(context).pop(stream),
                 );
               },

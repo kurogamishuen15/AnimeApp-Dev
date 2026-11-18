@@ -7,8 +7,12 @@ import 'package:anime_app/app/catalog/detail/anime_detail_header.dart';
 import 'package:anime_app/app/home/home_appearance.dart';
 import 'package:anime_app/application/catalog/catalog_service.dart';
 import 'package:anime_app/core/result/result.dart';
+import 'package:anime_app/domain/catalog/episode_index_provider.dart';
+import 'package:anime_app/domain/catalog/external_anime_id.dart';
 import 'package:anime_app/domain/catalog/library_entry.dart';
+import 'package:anime_app/domain/catalog/metadata_provenance.dart';
 import 'package:anime_app/domain/catalog/provider_anime_metadata.dart';
+import 'package:anime_app/domain/catalog/provider_result.dart';
 import 'package:anime_app/domain/progress/playback_progress.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -78,6 +82,7 @@ void main() {
       () => CatalogModule.open(
         databaseFile: File('${directory.path}/catalog.sqlite'),
         useDemoProvider: true,
+        episodeIndex: const _FixtureEpisodeIndex(),
         clock: () => DateTime.utc(2026, 11, 9, 12),
       ),
     ))!;
@@ -146,6 +151,7 @@ void main() {
       () => CatalogModule.open(
         databaseFile: File('${directory.path}/catalog.sqlite'),
         useDemoProvider: true,
+        episodeIndex: const _FixtureEpisodeIndex(),
       ),
     ))!;
     try {
@@ -217,6 +223,7 @@ void main() {
         () => CatalogModule.open(
           databaseFile: databaseFile,
           useDemoProvider: true,
+          episodeIndex: const _FixtureEpisodeIndex(),
           clock: () => DateTime.utc(2026, 11, 9, 12),
         ),
       ))!;
@@ -328,7 +335,10 @@ void main() {
 
         await tester.tap(find.byKey(const ValueKey('detail-tab-episodes')));
         await tester.pump();
-        expect(find.text('12 episodios'), findsOneWidget);
+        expect(
+          find.text('12 de 12 indexados · fuentes sin verificar'),
+          findsOneWidget,
+        );
         expect(find.byKey(const ValueKey('episode-card-1')), findsOneWidget);
 
         await tester.tap(statusDropdown);
@@ -406,6 +416,7 @@ void main() {
           () => CatalogModule.open(
             databaseFile: databaseFile,
             useDemoProvider: true,
+            episodeIndex: const _FixtureEpisodeIndex(),
             clock: () => DateTime.utc(2026, 11, 9, 13),
           ),
         ))!;
@@ -441,4 +452,44 @@ final class _DenyNetworkOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) =>
       throw StateError('Unexpected HTTP client in offline catalog test.');
+}
+
+/// Deterministic public-index stand-in: no network in widget tests.
+final class _FixtureEpisodeIndex implements EpisodeIndexProvider {
+  const _FixtureEpisodeIndex();
+
+  @override
+  MetadataProviderId get id => MetadataProviderId('fixture');
+
+  @override
+  Future<ProviderResult<EpisodeIndexPage>> listEpisodes(
+    ExternalAnimeId anime, {
+    int offset = 0,
+    int limit = 20,
+  }) async {
+    final DateTime retrieved = DateTime.utc(2026, 11, 9);
+    return ProviderSuccess(
+      EpisodeIndexPage(
+        episodes: [
+          for (
+            var number = 1 + offset;
+            number <= 12 && number <= offset + limit;
+            number++
+          )
+            ProviderEpisodeMetadata(
+              animeId: anime,
+              externalEpisodeId: 'fixture:$number',
+              episodeNumber: number,
+              title: 'Fixture $number',
+              provenance: MetadataProvenance(
+                externalId: anime,
+                retrievedAtUtc: retrieved,
+              ),
+            ),
+        ],
+        totalCount: 12,
+        hasMore: offset + limit < 12,
+      ),
+    );
+  }
 }

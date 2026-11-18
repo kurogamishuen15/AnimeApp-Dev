@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:anime_app/domain/player/providers/playback_provider_contract.dart';
 import 'package:anime_app/domain/player/providers/playback_source.dart';
 import 'package:anime_app/domain/player/subtitles/external_subtitle_catalog.dart';
 import 'package:anime_app/domain/player/subtitles/hardsub_policy.dart';
@@ -45,11 +46,19 @@ final class SpikePlayerCoordinator implements ExternalSubtitleLoader {
   PlaybackRequestHeaders _sourceHttpHeaders =
       const PlaybackRequestHeaders.empty();
   int _mediaContextRevision = 0;
+  PlaybackCancellationToken _mediaContextCancellation =
+      PlaybackCancellationToken();
 
   /// Changes synchronously when an open, source switch, or Stop is requested,
   /// before its serialized engine operation starts. UI actions use it to
   /// invalidate track choices created for the preceding media context.
   int get mediaContextRevision => _mediaContextRevision;
+
+  void _invalidateMediaContext() {
+    _mediaContextRevision++;
+    _mediaContextCancellation.cancel();
+    _mediaContextCancellation = PlaybackCancellationToken();
+  }
 
   Stream<PlaybackSessionSnapshot> get states => _states.stream;
   PlaybackSessionSnapshot get state => _state;
@@ -82,7 +91,7 @@ final class SpikePlayerCoordinator implements ExternalSubtitleLoader {
     Uri source, {
     PlaybackRequestHeaders httpHeaders = const PlaybackRequestHeaders.empty(),
   }) {
-    _mediaContextRevision++;
+    _invalidateMediaContext();
     return _serialize(() async {
       _ensureInitialized();
       final bool allowedExternal =
@@ -124,14 +133,91 @@ final class SpikePlayerCoordinator implements ExternalSubtitleLoader {
       _seekAnchor = null;
       _requestedPlaying = false;
       _publishState(
-        _state.playback.copyWith(
-          playing: false,
-          stopped: false,
-          clearError: true,
-        ),
-        status: PlaybackSessionStatus.ready,
+        _state.playback.copyWith(playing: false, stopped: false),
+        status: _state.error == null
+            ? PlaybackSessionStatus.ready
+            : PlaybackSessionStatus.error,
         sourceUri: source,
       );
+    });
+  }
+
+  /// Restores a paused opening and confirms the position from the engine.
+  /// The deadline bounds snapshot waits. An in-flight native seek must settle
+  /// before the caller can safely close or replace the engine.
+  Future<void> restoreStartPosition(
+    Duration target, {
+    required PlaybackCancellationToken cancellation,
+    Duration budget = const Duration(seconds: 12),
+  }) {
+    final int revision = _mediaContextRevision;
+    final PlaybackCancellationToken mediaContext = _mediaContextCancellation;
+    return _serialize(() async {
+      _ensureInitialized();
+      final int generation = _sourceGeneration;
+      final Stopwatch elapsed = Stopwatch()..start();
+
+      void checkActive() {
+        if (cancellation.isCancelled ||
+            revision != _mediaContextRevision ||
+            _disposeRequested) {
+          throw const PlaybackResumeFailure(
+            PlaybackResumeFailureReason.seekFailed,
+          );
+        }
+      }
+
+      bool failed(PlaybackSessionSnapshot snapshot) => snapshot.error != null;
+
+      checkActive();
+      PlaybackSessionSnapshot snapshot;
+      try {
+        snapshot = await _waitForSwitchSnapshot(
+          generation,
+          (snapshot) => failed(snapshot) || snapshot.duration > Duration.zero,
+          timeout: budget - elapsed.elapsed,
+          cancellation: cancellation,
+          mediaContextCancellation: mediaContext,
+        );
+      } on TimeoutException {
+        throw const PlaybackResumeFailure(
+          PlaybackResumeFailureReason.durationUnknown,
+        );
+      }
+      checkActive();
+      if (!_hasOpenedSource ||
+          failed(snapshot) ||
+          target <= Duration.zero ||
+          target > snapshot.duration) {
+        throw const PlaybackResumeFailure(
+          PlaybackResumeFailureReason.seekFailed,
+        );
+      }
+
+      try {
+        await _engine.seek(target);
+        checkActive();
+        final Duration tolerance =
+            target ~/ 2 < const Duration(milliseconds: 500)
+            ? target ~/ 2
+            : const Duration(milliseconds: 500);
+        snapshot = await _waitForSwitchSnapshot(
+          generation,
+          (snapshot) =>
+              failed(snapshot) ||
+              (snapshot.observedPosition > Duration.zero &&
+                  (snapshot.observedPosition - target).abs() <= tolerance),
+          timeout: budget - elapsed.elapsed,
+          cancellation: cancellation,
+          mediaContextCancellation: mediaContext,
+        );
+        checkActive();
+        if (failed(snapshot)) throw StateError('Resume seek failed.');
+      } on Object {
+        throw const PlaybackResumeFailure(
+          PlaybackResumeFailureReason.seekFailed,
+        );
+      }
     });
   }
 
@@ -146,7 +232,7 @@ final class SpikePlayerCoordinator implements ExternalSubtitleLoader {
     Duration? rollbackPosition,
     bool preserveTracks = false,
   }) {
-    _mediaContextRevision++;
+    _invalidateMediaContext();
     return _serialize(() async {
       _ensureInitialized();
       final bool allowedExternal =
@@ -514,7 +600,7 @@ final class SpikePlayerCoordinator implements ExternalSubtitleLoader {
   }
 
   Future<void> stop() {
-    _mediaContextRevision++;
+    _invalidateMediaContext();
     return _serialize(() async {
       _ensureInitialized();
       _seekTarget = null;
@@ -548,6 +634,10 @@ final class SpikePlayerCoordinator implements ExternalSubtitleLoader {
     _playbackCommandInFlight = true;
     try {
       await operation();
+      if (_state.error != null) {
+        _requestedPlaying = null;
+        return;
+      }
       final PlaybackSpikeSnapshot playback = _state.playback.copyWith(
         playing: shouldPlay,
         stopped: shouldPlay ? false : _state.stopped,
@@ -564,7 +654,9 @@ final class SpikePlayerCoordinator implements ExternalSubtitleLoader {
       );
     } catch (_) {
       _requestedPlaying = null;
-      _emitError(shouldPlay ? 'Playback failed.' : 'Pause failed.');
+      if (_state.error == null) {
+        _emitError(shouldPlay ? 'Playback failed.' : 'Pause failed.');
+      }
       rethrow;
     } finally {
       _playbackCommandInFlight = false;
@@ -578,6 +670,7 @@ final class SpikePlayerCoordinator implements ExternalSubtitleLoader {
     if (current != null) return current;
 
     _disposeRequested = true;
+    _mediaContextCancellation.cancel();
     final Future<void> future = _serialize(_disposeResources);
     _disposeFuture = future;
     unawaited(
@@ -729,10 +822,16 @@ final class SpikePlayerCoordinator implements ExternalSubtitleLoader {
 
   Future<PlaybackSessionSnapshot> _waitForSwitchSnapshot(
     int generation,
-    bool Function(PlaybackSessionSnapshot snapshot) predicate,
-  ) async {
+    bool Function(PlaybackSessionSnapshot snapshot) predicate, {
+    Duration timeout = const Duration(seconds: 12),
+    PlaybackCancellationToken? cancellation,
+    PlaybackCancellationToken? mediaContextCancellation,
+  }) async {
     bool matches(PlaybackSessionSnapshot snapshot) =>
         snapshot.sourceGeneration == generation && predicate(snapshot);
+    if (timeout <= Duration.zero) {
+      throw TimeoutException('Playback state timed out.');
+    }
     if (matches(_state)) return _state;
     final Completer<PlaybackSessionSnapshot> completer = Completer();
     final StreamSubscription<PlaybackSessionSnapshot> subscription = states
@@ -741,9 +840,24 @@ final class SpikePlayerCoordinator implements ExternalSubtitleLoader {
             completer.complete(snapshot);
           }
         });
+    void cancelWait() {
+      if (!completer.isCompleted) {
+        completer.completeError(
+          const PlaybackResumeFailure(PlaybackResumeFailureReason.seekFailed),
+        );
+      }
+    }
+
+    final void Function()? unregister = cancellation?.addCancelListener(
+      cancelWait,
+    );
+    final void Function()? unregisterMedia = mediaContextCancellation
+        ?.addCancelListener(cancelWait);
     try {
-      return await completer.future.timeout(const Duration(seconds: 12));
+      return await completer.future.timeout(timeout);
     } finally {
+      unregister?.call();
+      unregisterMedia?.call();
       await subscription.cancel();
     }
   }

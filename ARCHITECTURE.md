@@ -1,6 +1,6 @@
 # Arquitectura de AnimeApp
 
-Este documento conserva la arquitectura de referencia aprobada para F1.3 y registra las implementaciones locales posteriores. No todos los módulos conceptuales están implementados: el estado real se indica por módulo y en `PROGRESS.md`. El producto abre [Inicio](app/lib/app/home/README.md) dentro del shell de catálogo. S0-S registra `AnimesDigitalPlaybackProvider` como candidato, conectado al manager y al engine existentes; obtuvo HLS/segmento públicos, pero una captura de libmpv mostró error de decodificación y pantalla negra. No hay reproducción externa de anime confirmada. El progreso del player sigue sin integración.
+Este documento conserva la arquitectura de referencia aprobada para F1.3 y registra las implementaciones locales posteriores. No todos los módulos conceptuales están implementados: el estado real se indica por módulo y en `PROGRESS.md`. El producto abre [Inicio](app/lib/app/home/README.md) dentro del shell de catálogo. La migración OC-03 retiró los proveedores/resolutores experimentales anteriores y registra `MiruroCatalogPlaybackProvider` con el manager existente más `DirectMediaHostResolver`; consultas Miruro ordinarias devolvieron HTTP 403 antes del episodio y media. No hay reproducción externa de anime confirmada. Wikimedia y las fuentes manuales siguen siendo opt-in, y el progreso del player todavía no está integrado.
 
 ## Decisión de plataforma
 
@@ -59,7 +59,7 @@ Estos nombres describen límites de responsabilidad; no ordenan crear de anteman
 | `app` | Arranque, composición y selección de implementaciones. | Parcial: bootstrap Flutter, catálogo AniList/SQLite y ruta de proveedores hacia el player existente Linux-first. |
 | `application` | Coordinación de casos de uso Dart puros. | Implementado para catálogo; no depende de Flutter, SQL ni HTTP. |
 | `domain` | Identidades, modelos, reglas y contratos Dart puros. | Implementado para identidad, catálogo, biblioteca, progreso, credenciales y sincronización. |
-| `data` | Adaptadores de persistencia, proveedores y servicios externos. | Implementado para Drift/SQLite y AniList. El composition root de playback registra AnimeHeaven y su resolver MP4; los intentos anteriores AnimeAV1/TioAnime/AnimeGG/Miruro y sus límites se conservan en informes. Ningún episodio externo está acreditado como reproducible. |
+| `data` | Adaptadores de persistencia, proveedores y servicios externos. | Implementado para Drift/SQLite, AniList y el catálogo Miruro adaptado. Wikimedia es opt-in. Las consultas Miruro live respondieron 403; ningún episodio externo de anime está acreditado como reproducible. |
 | `core` | Tipos y utilidades transversales realmente compartidos; contratos solo cuando haya necesidad concreta. | Implementado para `Result`, errores y logging; no debe convertirse en depósito de funcionalidades. |
 | `shared` | Componentes reutilizables por más de una feature, con límites y ciclo de vida propios. | Planificado; crear al aparecer reutilización demostrada. |
 | `features` | Recorridos independientes, cada uno con presentación y coordinación propias. | Planificado; lógica de negocio invoca aplicación/dominio y no importa otras UIs. |
@@ -115,7 +115,7 @@ La composición normal consulta metadata pública AniList sin OAuth y conserva c
 sequenceDiagram
   participant Detail as Ficha de anime
   participant Catalog as PlaybackProviderManager
-  participant Site as AnimeAV1 / TioAnime
+  participant Site as Miruro catalog
   participant Picker as Selector de servidores
   participant Route as ProviderPlaybackRoute
   participant Module as SpikePlayerModule existente
@@ -132,7 +132,7 @@ sequenceDiagram
   Engine-->>Route: estado del medio
 ```
 
-La ruta conserva `CatalogHomePage` → `PlaybackProviderManager` → selector → `ProviderPlaybackRoute` → el único `SpikePlayerModule`, `SpikePlayerCoordinator`, `MediaKitSpikeEngine` y `VideoController`. S0-S retiró AnimeHeaven y los adapters anteriores que no reprodujeron; `PlaybackProvidersModule` registra AnimesDigital únicamente como candidato y un normalizador `direct-media`. Su manifiesto y primer segmento HLS respondieron HTTP 200, pero el smoke del episodio en la ventana real mostró pantalla negra/error de decodificación y no representa playback. El manager no controla libmpv. El entrypoint `main_player_spike.dart` sigue disponible para pruebas locales del motor; la superficie desactiva controles adaptativos y el player se cierra mediante su módulo. La vida nativa completa de `VideoController` aún carece de prueba end-to-end automatizada. Ver los [READMEs de providers](app/lib/data/player/providers/README.md), [resolver directo](app/lib/data/player/providers/hosts/README.md), el [README del player](app/lib/app/player/README.md) y el [informe S0-S](docs/ai-system/missions/S0-S-BASELINE-AND-IMPLEMENTATION.md).
+La ruta conserva `CatalogHomePage` → `PlaybackProviderManager` → selector → `ProviderPlaybackRoute` → el único `SpikePlayerModule`, `SpikePlayerCoordinator`, `MediaKitSpikeEngine` y `VideoController`. `PlaybackProvidersModule` registra el adapter Miruro y un normalizador `direct-media`; los antiguos providers y profiles de host no se conectan al registro. El adapter no llega a episodios o media en la evidencia live actual por HTTP 403. El manager no controla libmpv. El entrypoint `main_player_spike.dart` sigue disponible para pruebas locales del motor; la superficie desactiva controles adaptativos y el player se cierra mediante su módulo. La vida nativa completa de `VideoController` aún carece de prueba end-to-end automatizada. Ver los [READMEs de providers](app/lib/data/player/providers/README.md), [resolver directo](app/lib/data/player/providers/hosts/README.md), el [README del player](app/lib/app/player/README.md), el [informe de migración OC-03](docs/ai-system/audits/OC03-MIRURO-MIGRATION-audit-2026-11-17.md) y la [evidencia histórica S0-S](docs/ai-system/missions/S0-S-BASELINE-AND-IMPLEMENTATION.md).
 
 ## Contratos y adaptadores
 

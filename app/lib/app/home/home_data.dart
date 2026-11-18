@@ -5,6 +5,8 @@ import '../../domain/catalog/anime_id.dart';
 import '../../domain/catalog/external_anime_id.dart';
 import '../../domain/catalog/library_entry.dart';
 import '../../domain/catalog/provider_anime_metadata.dart';
+import '../../domain/player/providers/playback_source.dart';
+import '../../domain/progress/playback_progress.dart';
 
 typedef HomeLoader = Future<Result<HomeContent>> Function();
 
@@ -41,11 +43,18 @@ final class HomeTitle {
 }
 
 final class HomeEpisode {
-  const HomeEpisode(this.anime, this.label, this.positionMs, this.durationMs);
+  const HomeEpisode(
+    this.anime,
+    this.label,
+    this.positionMs,
+    this.durationMs, {
+    this.playback,
+  });
 
   final HomeTitle anime;
   final String label;
   final int positionMs;
+  final PlaybackEpisode? playback;
   final int? durationMs;
 
   double? get fraction => durationMs == null ? null : positionMs / durationMs!;
@@ -79,29 +88,55 @@ final class HomeContent {
 
 /// Joins the existing local catalog and episode-one progress contract for Home.
 final class CatalogHomeSource {
-  const CatalogHomeSource(this.service);
+  const CatalogHomeSource(this.service, {this.sectionBudget = defaultBudget});
   final CatalogService service;
+  final Duration sectionBudget;
+
+  /// Each section has its own budget so one slow feed cannot blank Home.
+  static const Duration defaultBudget = Duration(seconds: 10);
 
   Future<Result<HomeContent>> load() async {
-    final catalogFuture = service.browsePopular(limit: 20);
-    final trendingFuture = service.browseTrending(limit: 20);
-    final libraryFuture = service.loadLibrary();
+    final catalogFuture = service
+        .browsePopular(limit: 20)
+        .timeout(
+          sectionBudget,
+          onTimeout: () => Failure(const TimeoutAppError()),
+        );
+    final trendingFuture = service
+        .browseTrending(limit: 20)
+        .timeout(
+          sectionBudget,
+          onTimeout: () => Failure(const TimeoutAppError()),
+        );
+    final libraryFuture = service.loadLibrary().timeout(
+      sectionBudget,
+      onTimeout: () => Failure(const TimeoutAppError()),
+    );
     final (catalog, trending, library) = await (
       catalogFuture,
       trendingFuture,
       libraryFuture,
     ).wait;
-    if (library case Failure<List<CatalogLibraryItem>>(:final error)) {
-      return Failure(error);
-    }
+    final AppError? catalogError = switch (catalog) {
+      Failure<List<ProviderAnimeMetadata>>(:final error) => error,
+      Success<List<ProviderAnimeMetadata>>() => null,
+    };
+    final AppError? trendingError = switch (trending) {
+      Failure<List<ProviderAnimeMetadata>>(:final error) => error,
+      Success<List<ProviderAnimeMetadata>>() => null,
+    };
+    final List<CatalogLibraryItem> libraryItems = switch (library) {
+      Success<List<CatalogLibraryItem>>(:final value) => value,
+      Failure<List<CatalogLibraryItem>>() => const <CatalogLibraryItem>[],
+    };
     final offline =
-        catalog is Failure<List<ProviderAnimeMetadata>> &&
-        catalog.error is NetworkError;
-    if (catalog case Failure<List<ProviderAnimeMetadata>>(:final error)
-        when !offline) {
-      return Failure(error);
+        catalogError is NetworkError && trendingError is NetworkError;
+    if (catalogError != null &&
+        trendingError != null &&
+        libraryItems.isEmpty &&
+        !offline) {
+      return Failure(catalogError);
     }
-    final libraryItems = (library as Success<List<CatalogLibraryItem>>).value;
     final byExternalId = <String, CatalogLibraryItem>{
       for (final item in libraryItems)
         if (item.metadata case final metadata?)
@@ -124,11 +159,12 @@ final class CatalogHomeSource {
       (_) => <HomeTitle>[],
     );
     final watching = <HomeTitle>[];
-    final episodes = <HomeEpisode>[];
+    final episodes = await _continueWatching(libraryItems);
     for (final item in libraryItems) {
       final anime = item.metadata == null
           ? HomeTitle(
               title: item.title,
+              externalId: item.externalId,
               animeId: item.entry.animeId,
               libraryStatus: item.entry.status,
             )
@@ -159,6 +195,59 @@ final class CatalogHomeSource {
         offline: offline,
       ),
     );
+  }
+
+  /// Reads only saved local progress. A failed read degrades to an empty row.
+  Future<List<HomeEpisode>> _continueWatching(
+    List<CatalogLibraryItem> libraryItems,
+  ) async {
+    final Result<List<PlaybackProgress>> saved = await service.listProgress();
+    if (saved is! Success<List<PlaybackProgress>>) return const [];
+    final Map<String, CatalogLibraryItem> byAnimeId = {
+      for (final item in libraryItems) item.entry.animeId.value: item,
+    };
+    final List<HomeEpisode> episodes = [];
+    for (final PlaybackProgress progress in saved.value) {
+      if (progress.completion != CompletionState.inProgress ||
+          progress.positionMs <= 0) {
+        continue;
+      }
+      final CatalogLibraryItem? item = byAnimeId[progress.key.contentId.value];
+      if (item == null) continue;
+      final HomeTitle anime = item.metadata == null
+          ? HomeTitle(
+              title: item.title,
+              externalId: item.externalId,
+              animeId: item.entry.animeId,
+              libraryStatus: item.entry.status,
+            )
+          : _title(item.metadata!, item);
+      final int? number = _episodeNumber(progress.key.episodeId.value);
+      episodes.add(
+        HomeEpisode(
+          anime,
+          number == null ? 'Episodio' : 'Episodio $number',
+          progress.positionMs,
+          progress.durationMs,
+          playback: number == null
+              ? null
+              : PlaybackEpisode(
+                  animeId: item.entry.animeId,
+                  episodeNumber: number,
+                  externalAnimeId: anime.externalId,
+                  animeTitles: [anime.title],
+                ),
+        ),
+      );
+    }
+    return List.unmodifiable(episodes);
+  }
+
+  static int? _episodeNumber(String episodeId) {
+    final match = RegExp(r'^episode:(\d{1,4})$').firstMatch(episodeId);
+    if (match == null) return null;
+    final int number = int.parse(match.group(1)!);
+    return number < 1 ? null : number;
   }
 
   HomeTitle _title(

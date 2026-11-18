@@ -2,7 +2,10 @@ import 'dart:async';
 
 import 'package:material_ui/material_ui.dart';
 
+import '../../application/player/playback_progress_session.dart';
+import '../../application/player/playback_spike_contract.dart';
 import '../../application/player/providers/playback_provider_manager.dart';
+import '../../application/player/spike_player_coordinator.dart';
 import '../../domain/player/providers/playback_source.dart';
 import 'playback_route_session.dart';
 import 'spike_player_module.dart';
@@ -20,6 +23,8 @@ final class ProviderPlaybackRoute extends StatefulWidget {
     required this.episode,
     required this.streams,
     required this.initialStream,
+    this.startPosition = Duration.zero,
+    this.trackProgress,
     @visibleForTesting this.moduleLoader,
     super.key,
   });
@@ -28,6 +33,8 @@ final class ProviderPlaybackRoute extends StatefulWidget {
   final PlaybackEpisode episode;
   final List<ResolvedPlaybackStream> streams;
   final ResolvedPlaybackStream initialStream;
+  final Duration startPosition;
+  final PlaybackProgressSession Function(SpikePlayerCoordinator)? trackProgress;
   final PlaybackRouteSessionLoader? moduleLoader;
 
   @override
@@ -35,7 +42,9 @@ final class ProviderPlaybackRoute extends StatefulWidget {
 }
 
 final class _ProviderPlaybackRouteState extends State<ProviderPlaybackRoute> {
-  late final Future<PlaybackRouteSession> _moduleFuture =
+  late Future<PlaybackRouteSession> _moduleFuture = _open(widget.startPosition);
+
+  Future<PlaybackRouteSession> _open(Duration startPosition) =>
       Future<PlaybackRouteSession>.sync(
         () =>
             widget.moduleLoader?.call(_openCancellation) ??
@@ -45,11 +54,14 @@ final class _ProviderPlaybackRouteState extends State<ProviderPlaybackRoute> {
                 sourceProviderManager: widget.manager,
                 sourceEpisode: widget.episode,
                 initialResolvedSource: widget.initialStream,
+                authorizedAlternatives: widget.streams,
                 trustedExternalSources: {
                   for (final ResolvedPlaybackStream stream in widget.streams)
                     stream.uri,
                 },
                 startupCancellation: _openCancellation,
+                startPosition: startPosition,
+                trackProgress: widget.trackProgress,
               ),
             ),
       );
@@ -136,6 +148,10 @@ final class _ProviderPlaybackRouteState extends State<ProviderPlaybackRoute> {
             state.error is SpikePlayerStartupCleanupFailure
             ? state.error! as SpikePlayerStartupCleanupFailure
             : null;
+        final PlaybackResumeFailure? resumeFailure =
+            state.error is PlaybackResumeFailure
+            ? state.error! as PlaybackResumeFailure
+            : null;
         final bool nativePlayerStillOwned =
             cleanupFailure?.nativePlayerStillOwned ?? false;
         return PopScope<Object?>(
@@ -152,7 +168,13 @@ final class _ProviderPlaybackRouteState extends State<ProviderPlaybackRoute> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          cleanupFailure != null
+                          resumeFailure != null
+                              ? resumeFailure.reason ==
+                                        PlaybackResumeFailureReason
+                                            .durationUnknown
+                                    ? 'No se pudo confirmar la duración de esta fuente para reanudar.'
+                                    : 'No se pudo recuperar la posición guardada.'
+                              : cleanupFailure != null
                               ? nativePlayerStillOwned
                                     ? 'No se pudo confirmar la liberación del reproductor nativo. Reinicia la aplicación antes de volver a intentarlo.'
                                     : cleanupFailure.nonNativeCleanupFailed
@@ -163,6 +185,14 @@ final class _ProviderPlaybackRouteState extends State<ProviderPlaybackRoute> {
                               : 'No se pudo abrir el reproductor.',
                           textAlign: TextAlign.center,
                         ),
+                        if (resumeFailure != null &&
+                            widget.moduleLoader == null)
+                          TextButton(
+                            onPressed: () => setState(() {
+                              _moduleFuture = _open(Duration.zero);
+                            }),
+                            child: const Text('Abrir desde el inicio'),
+                          ),
                         if (!nativePlayerStillOwned) ...[
                           const SizedBox(height: 16),
                           FilledButton.icon(

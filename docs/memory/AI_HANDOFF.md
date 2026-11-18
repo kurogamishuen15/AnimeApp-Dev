@@ -1,5 +1,316 @@
 # Transferencia a otra IA
 
+## Misión de los 9 proveedores · 2026-11-18 (GLM-5.3)
+
+Leer la [misión del día](../ai-system/missions/ANILILI-9PROVIDERS-2026-11-18.md)
+y la **documentación maestra** exigida:
+[`app/lib/data/player/providers/README.md`](../../app/lib/data/player/providers/README.md)
+(KONGROO — Proveedores y servidores de reproducción, 8 secciones).
+
+Estado de los 9 registros automáticos:
+
+- **animeav1 — RESUELTO (N4):** bug crítico arreglado (faltaba
+  `sourceAlternatives`: el manager rechazaba sus fuentes multi-servidor con
+  `invalidResponse` sistemático; tests previos no pasaban por el manager).
+  VOE resuelto en vivo (`VoeVideoHostResolver` → HLS cloudwindow-route
+  720p) y **motor verificado** con captura. Regresión por manager añadida.
+- **allanime/-dub — protocolo client-crypto completo (N2 protocolo):** API
+  migrada a `mkissa.to/api.mkissa.net`. Reconstruido con el módulo real del
+  sitio ejecutado en Node: bootstrap (`x-aa-boot` = doble HMAC sobre máscara
+  de build), `aaReq` AES-GCM con clave `partB^máscara`, hash de query
+  actual `670bbf38...`, `tobeparsed` AES-GCM con clave dinámica. **El
+  servidor aceptó el token reconstruido y se descifraron sourceUrls reales
+  sub+dub (MP4 `Yt-mp4` 206/370 MB verificado).** Tras el volumen de la
+  investigación la API exigió `NEED_CAPTCHA` (Turnstile) desde esta IP:
+  clasificado `challenge` sin evasión (regresión dedicada); reproducción
+  N4 pendiente de ventana sin captcha. Materiales por build en
+  `AllAnimeBootMaterials` (build 190). `PlaybackRequestHeaders` acepta
+  ahora `x-build-id`/`x-aa-boot` públicos validados.
+- **miruro-catalog — bloqueo externo re-verificado:** 403 Cloudflare
+  (`cf-mitigated: challenge`) en REST y pipe de los 4 orígenes; Anilili usa
+  WebView real (prohibido). Sin acción legítima.
+- **Los 5 operativos revalidados con motor** (SEEK-RESTORE 20 s → FRAME →
+  ADVANCE → REOPEN): megaplay, megaplay-dub, anizone, animegg (espejo sub
+  227251), animegg-dub (espejo dub 226001).
+- **Regresión:** suite completa **401 aprobadas / 10 omitidas**;
+  `flutter analyze` **0 hallazgos**. Sin commits ni pushes (HEAD `6cc3e5e`).
+- Niveles finales: megaplay/megaplay-dub/anizone/animegg/animegg-dub/animeav1
+  = **N4/N5**; allanime/allanime-dub = protocolo verificado con descifrado
+  real, reproducción pendiente de captcha; miruro = N0 externo documentado.
+
+## Integración de proveedores Anilili · 2026-11-17 (misión ANILILI, GLM-5.3)
+
+Leer [la misión completa](../ai-system/missions/ANILILI-PROVIDERS-2026-11-17.md)
+antes de tocar providers. Resumen del estado tras la misión:
+
+- **MegaPlay/bee sigue operativo y MEJORADO**: misma prioridad y variante
+  sub/dub, más fallback a la ruta `/stream/mal/{malId}/...` cuando la ruta
+  AniList falla (404/403/sin data-id) y la identidad publica `idMal`; verificado
+  en vivo (ruta MAL devuelve data-id y getSources completo) y con regresión
+  dedicada (12/12 megaplay). 2Dhive solo embebe MegaPlay: no se duplicó su host.
+- **AniZone integrado y verificado con motor** (N4): marcado actual Livewire
+  (JSON escapado `\u0022`/`\/` en x-data/wire:snapshot y kPlayer), HLS directo
+  `seiryuu.vid-cdn.xyz`, subtítulos solo `.ass` (el contrato VTT los descarta).
+- **AnimeGG integrado y verificado con motor** (N4): pestañas
+  `data-toggle="tab"` (sub/dub), MP4 progresivos jwplayer y HLS de embeds.
+  **Hallazgo real**: vidcache throttlea por UA (~28 KB/s con UA de biblioteca);
+  los candidatos llevan UA de navegador (A/B documentado). Seek en
+  MP4 progresivo: `restoreStartPosition` pre-apertura falla
+  (`PlaybackResumeFailure`, ya conocido de Commons); el seek se verifica
+  durante la reproducción.
+- **AllAnime integrado (N1/N2-búsqueda)**: búsqueda GraphQL en vivo OK con
+  crosswalk `malId` (la API lo entrega como cadena) o título exacto. **Fuentes
+  bloqueadas**: la API exige desde julio 2026 el token anti-scraping `aaReq`
+  (GCM + clave rotativa epoch/partB+mask en bundle ofuscado 1,1 MB; valida
+  lane/build/ventana). Respuesta live `AA_CRYPTO_MISSING` reproducida como
+  regresión; el adaptador la traduce a `noSources` y el fallback continúa.
+  ani-cli abandonó AllAnime en v5 por lo mismo; no se evadió el control.
+- **Bloqueos demostrados (evidencia en la misión)**: ReAnime (HLS solo por
+  flixcloud WASM/JS en WebView), AniNeko y AnimeKai (hosts caídos: TLS sin
+  datos / timeout TCP en todos los mirrors), 2Dhive (sin contenido propio;
+  su API `/api/hianime` responde "No streamable video playlist" para todos
+  los títulos probados, incl. One Piece/Bleach), Miruro (Cloudflare 403, sin
+  cambios), Senshi/AniBD/KickAssAnime/RareAnimes (no existen en el ZIP).
+- **Infraestructura**: `PublicPlaybackHttp` ganó POST JSON acotado (search de
+  AllAnime); `html_playback_parsers.dart` porta `NativeProviderParsers.kt`
+  (attr/decodeEntities/titleScore bigram-Dice/absoluteUrl/hlsUrls/
+  decodeJsonEscapes) compartido por los scrapers.
+- **Arsenales de verificación**: `tool/anilili_live_player_app.dart`
+  (motor real paramétrico: resolve → play → frame → advance → seek → shot →
+  stop/reopen; usa `KONGROO_LIVE_SHOT`/`KONGROO_LIVE_SEEK`) y runners N2
+  `tool/allanime_live_check.dart` + `tool/anizone_live_check.dart`. Capturas
+  en `.ai-local/anilili-live/` (megaplay/anizone/animegg, 1920×1080).
+- **Suite**: **398 aprobadas / 10 omitidas** (25 pruebas nuevas), analyze
+  limpio salvo 3 infos/1 lint PREEXISTENTES (voe_video_host_resolver ×2,
+  public_playback_http_test ×1). Build Linux debug de `lib/main.dart`
+  restaurado como bundle actual. Sin commits ni pushes.
+- Diagnósticos de cadena en vivo (manager): miruro=forbidden,
+  animeav1=missingId→invalidResponse (según idMal), allanime=noSources,
+  resto OK — el fallback del manager se comporta según diseño.
+- **Correcciones tras el informe (2026-11-18, PASO 7 de la misión):**
+  `restoreStartPosition(20 s)` sobre MP4 progresivo verificado en el motor
+  (SEEK-RESTORE 20000 ms → FRAME → ADVANCE) — la causa raíz era el
+  throttling por UA ya corregido, no el coordinador; `flutter analyze` ahora
+  **0 avisos** (corregidos los 3 infos preexistentes de Codex en
+  `voe_video_host_resolver.dart` ×2 y `public_playback_http_test.dart` ×1);
+  documentada la varianza de red del presupuesto de 6 s (GET frío ~5-7 s;
+  sonda `tool/animegg_timing_probe.dart`, 3/3 OK sin motor).
+- **Pendiente para la próxima misión (MODULARIZACIÓN)**: duplicación de
+  `_read/_check/validMatch` entre adapters (plantilla pendiente);
+  `html_playback_parsers` debería moverse a un módulo compartido con los
+  parsers de AnimeAV1 (devalue) y MegaPlay (AES); los tres scrapers repiten
+  el patrón de bucles de títulos idéntico; prioridades 110→50 repartidas sin
+  ADR propio; `direct_media_host_resolver.dart` concentra validación de URL
+  que convendría fragmentar por criterio; los tres runners tool/ comparten
+  composición duplicable; falta N4 con la UI real (ficha→selector) para
+  anizone/animegg (el motor se verificó por SpikePlayerModule, la ficha solo
+  cambió el registro, no el flujo); Android sigue sin validar.
+
+## Variantes y subtítulos del proveedor · 2026-11-17
+
+MegaPlay registra sub/dub con un único adapter/resolver y transporte compartido
+para Retry-After. Se verificó Tokyo Ghoul:re 9 en dub con texto inglés visible y
+Attack on Titan 1 (AniList 16498) en sub con Spanish VTT superpuesto. Ambas
+ventanas mostraron 1920×1080; seek, progreso y retorno pasaron. El recorrido
+español final guardó 68818 ms y valida también un seek hacia atrás.
+Los subtítulos publicados viajan por el contrato ProviderSubtitle; los IDs
+caducan al cambiar fuente/Stop, y Stop→Play restaura catálogo. AudioLanguage
+sigue unknown cuando el servidor no publica ISO; sub/dub son variantes anunciadas.
+**Audio español pendiente**: AnimeAV1 declara DUB latino pero su único GET de
+catálogo devolvió 403; AnikenTV/Zangetsu/KickAssAnime no aportaron otra ruta ES
+verificable. No se reintroducen resolutores experimentales ni se cierran OC-03
+ni la petición completa de audio/subtítulos en tres idiomas.
+Suite final: **357 aprobadas / 7 omitidas**, incluidas HTTP/HLS/reanudación local.
+Análisis limpio y build Linux debug normal de lib/main.dart aprobado.
+Evidencia y pruebas finales: [auditoría de idiomas](../ai-system/audits/OC04-LANGUAGES-audit-2026-11-17.md).
+Lanzador: `tools/player/run_kongroo_linux.sh --debug --openh264`.
+Sin commits, pushes o cambios globales.
+
+
+## Reproducción real de anime · MegaPlay/bee · 2026-11-17
+
+Tokyo Ghoul:re 9 (AniList 100240) funciona en Kongroo mediante el backend
+directo de bee publicado por Anilili como MegaPlay. Se verificó desde main():
+búsqueda, ficha, episodios Kitsu, selector, video visible 1920×1080, reanudación,
+seek en pausa, progreso SQLite y retorno a la ficha. El último recorrido guardó
+143351 ms de 1449629 ms. Las capturas muestran fotogramas diferentes.
+El registro conserva Miruro y añade MegaPlay con el resolver directo existente.
+Miruro mantiene su 403. Se corrigió un uso de VideoOutput liberado en el
+callback GTK mediante una copia generada de la traducción del plugin Linux.
+Fedora aporta noopenh264, así que esta reproducción usa el códec Cisco
+descargado separadamente dentro del proyecto y elegido por proceso.
+Lanzamiento desde la raíz: `tools/player/run_kongroo_linux.sh --debug --openh264`.
+Suite final 350 aprobadas y 8 omitidas, análisis limpio y build Linux debug
+normal aprobado. No hay commits ni pushes. Otros hosts/plataformas pendientes.
+[Auditoría y evidencia](../ai-system/audits/OC04-MEGAPLAY-PLAYBACK-audit-2026-11-17.md)
+y [licencias/control del códec](../third-party/PLAYBACK-DEPENDENCIES.md).
+
+## Corrección del catálogo binario de Miruro · 2026-11-17
+
+Se reprodujo y corrigió un P1 en `PublicPlaybackHttp.readBytes`: la
+decodificación UTF-8 previa rechazaba el catálogo XOR+gzip. Miruro adjunta
+ahora el Referer del origen en cada petición. La prueba del manager recorre
+título, configuración y episodio con cuerpos binarios. Pasan 32 pruebas de
+providers y el análisis queda limpio con Flutter 3.50.0-0.4.pre del proyecto.
+La ejecución posterior del manager real para AniList 100240, episodio 9,
+devuelve `forbidden stage=anime status=403` en Miruro. No hay reproducción
+de ese episodio. Un auditor independiente verificó la corrección interna.
+[Auditoría y evidencia](../ai-system/audits/OC04-BINARY-TRANSPORT-audit-2026-11-17.md).
+
+## Intento manual de episodio · 2026-11-17
+
+La build actual Linux debug se compiló y abrió. La ventana mostró Home (captura
+local `.ai-local/review/kongroo-episode-test-rebuilt.png`); en el primer arranque
+se vio One Piece con 20/1410 episodios y estado “fuentes sin verificar”. No se
+pudo pulsar: `mcp__wayland__describe_environment` indica Spectacle para captura,
+pero sin backend de teclado/puntero, portal remoto no disponible y `ydotool` sin
+acceso a `/dev/uinput`; el intento de clic devolvió `no usable pointer backend`.
+Por tanto, el intento de UI no abrió un episodio. No cambiar permisos ni instalar
+herramientas; el recorrido visual desde ficha queda pendiente de entrada gráfica
+autorizada. La ventana principal se cerró antes del runner por CLI.
+
+Verificación directa posterior: se ejecutó un runner temporal sin seek inicial,
+basado en `app/tool/commons_live_player_app.dart`, mediante Flutter CLI. El
+manager resolvió Wikimedia 480p para el único episodio catalogado de *Namakura
+Gatana* (1917; película completa de dominio público); `media_kit` confirmó primer
+cuadro y, a los 25 s, posición 23.233 s / duración 258.800 s / `error=null`.
+Esto demuestra cuadro remoto y avance en el motor real, no el flujo desde la
+ficha ni audio. La ejecución original con seek de 20 s falló con
+`PlaybackResumeFailure`; no se depuró ni modificó el player. No valida Miruro/
+`bee` y no resuelve su 403. El runner cerró automáticamente; el temporal está en
+`.ai-local/review/commons-live-no-seek.dart` (ignorado por Git).
+
+## Handoff vigente · OC-04 alternativa ante HTTP 403 · 2026-11-17
+
+Leer la [auditoría OC-04](../ai-system/audits/OC04-HTTP403-FALLBACK-audit-2026-11-17.md),
+el estado de Git y los README de AniList y ficha. Miruro sigue devolviendo 403
+según la evidencia anterior; no se volvió a solicitar ni se intentó eludir. La
+ficha permite copiar URLs HTTPS públicas de `streamingEpisodes` para abrirlas en
+el servicio externo; nunca se pasan a libmpv. El manager sigue con providers
+registrados tras error, cubierto por prueba fake, pero no hay provider alterno
+real confirmado. 47/47 tests focalizados, analyze y build Linux debug pasaron.
+Suite completa: 336 pass, 10 skip, 2 timeouts nativos; ambos casos pasaron
+aislados. No hubo prueba live, verificación manual de clipboard ni playback
+del flujo Miruro (0 fuentes confirmadas para AniList 100240). La reproducción
+histórica opt-in de Namakura Gatana con Wikimedia es un caso independiente.
+Android/Windows y equipo 4 GB pendientes. Engine intacto. No commit/push. Antes
+de afirmar solución integral, se requiere autorización del operador del origen o
+un provider independiente accesible por protocolo normal, y reproducción real
+desde la ficha.
+
+Hallazgo de Anilili añadido el 2026-11-17: el selector DoH corrige DNS local sin
+respuesta/sinkhole, no un HTTP 403 ya servido por Cloudflare. `MiruroCatalogApi`
+de Android y el cliente desktop de Anilili paran en respuestas 4xx; los mirrors
+no son fallback para 403. Anilili maneja Cloudflare aparte con emulación de
+cliente navegador y estado de clearance de WebView; no portarlo, según la regla
+del propietario contra evadir challenges/controles. Kongroo ya lista los
+orígenes Miruro y no debe probar aliases como workaround. Solución permitida:
+operador autoriza/corrige ruta o usar otro provider público que funcione con
+protocolo ordinario; fallback AniList externo sigue siendo copia/apertura manual.
+Ver el anexo DNS de la auditoría OC-04.
+
+Addendum de comparación: el ZIP Android adjunto muestra que el cliente Miruro
+usa GET ordinario sin el interceptor Cloudflare; su nota de cinco respuestas
+200 es de 2026-10-03. Anilili desktop usa `wreq` con perfil TLS/HTTP2 de Chrome,
+posible diferencia con Dio de Kongroo, pero no hay A/B que confirme causalidad.
+Las cachés de fuentes de Anilili pueden conservar brevemente una URL ya resuelta.
+El log de Kongroo solo tiene 403/HTML/Cloudflare: no prueba CAPTCHA ni su regla
+concreta. No hacer nuevas sondas ni reutilizar challenge/clearance; seguir solo
+con autorización del operador o provider alternativo ordinario. Ver addendum en
+OC04.
+
+Petición posterior de integrar el método Android: la comparación confirmó que
+ya están portados endpoints/parámetros, decode XOR+gzip, parseo de `/play` y
+entrega al manager. No hay un cambio de protocolo seguro pendiente que resuelva
+el 403. No modificar fingerprint/contexto para pasar la denegación ni repetir
+la sonda. Pruebas focalizadas actuales: 20/20 (provider Miruro, transporte HTTP,
+composition root), solo fixtures/fakes; no prueban acceso live. Esperar ruta o
+permiso documentado del operador, o continuar con otro provider de acceso público
+ordinario; ver follow-up del informe OC-04.
+
+## Snapshot anterior · OC-03 migración de proveedores · 2026-11-17
+
+Leer primero la [auditoría de migración](../ai-system/audits/OC03-MIRURO-MIGRATION-audit-2026-11-17.md),
+los README de providers y el estado de Git. El runtime retira adapters
+experimentales antiguos e integra `MiruroCatalogPlaybackProvider` en el manager
+existente con `DirectMediaHostResolver`; Wikimedia y fuentes manuales siguen
+opt-in. El engine media_kit/libmpv permanece único. No reactivar el código
+antiguo. Los GET públicos Miruro para AniList 100240 dieron 403 en dos orígenes
+antes de episodios/media; no repetir ni evadirlo sin evidencia nueva. Playback
+externo de anime no está confirmado (0). Flutter focalizado pasó 62/62; suite
+completa pasó 334 y omitió 10 opt-in; Flutter analyze y build Linux debug
+pasaron. Home rasterizó primer frame, pero Wayland no dejó interactuar. Se
+corrigió el límite HTTP configurable >2 MiB y su loopback de 3 MiB pasó. La
+regresión local del engine reportó RSS 251,928,576 B antes / 396,959,744 B pico
+tras Stop / 377,868,288 B tras dispose; no equivale a perfil de stream ni a
+prueba de fugas. Comprobaciones finales: memoria `[]`, 40 tests Python,
+checker de imports (fixtures y árbol real), formato sin cambios, enlaces
+Markdown en 20 documentos y `git diff --check` pasaron. Android/Windows y
+hardware de 4 GB siguen sin validar. No commit ni push.
+
+## Snapshot anterior · Comparación de Anilili con Kongroo · 2026-11-17
+
+El episodio de referencia fue Tokyo Ghoul:re 9 (AniList 100240), que el
+usuario reprodujo en Anilili con `bee`. En el código de escritorio `bee`
+es AniKoto a través de Miruro. Kongroo carece de ese registro activo y
+los GET directos de configuración e identificación devolvieron HTTP 403
+de Cloudflare en dos orígenes de Miruro, antes de obtener el episodio o el
+medio. Anilili implementa emulación de Chrome en ese transporte. No se
+confirmó qué condición originó la denegación ni que ese episodio se vea
+en Kongroo.
+[Comparación y pruebas](../ai-system/audits/OC03-ANILILI-BEE-audit-2026-11-17.md).
+
+## OC-03 · Limpieza de proveedores · 2026-11-17
+
+Ambas herramientas de AnimesDigital usan el registro de producción y se
+retiraron comprobaciones redundantes del adaptador. Los resolutores de
+MP4Upload y YourUpload siguen compartiendo una implementación con perfiles
+separados. Antes y después de la limpieza, la suite aprobó 348 pruebas y
+omitió 10. El análisis quedó limpio. Está pendiente comparar un episodio y
+servidor concretos de Anilili con Kongroo.
+[Inventario, validación y auditoría](../ai-system/audits/OC03-CLEANUP-audit-2026-11-17.md).
+
+## OC-03.2 · Hosts de anime · 2026-11-17
+
+AnimeAV1 y TioAnime alcanzan sus embeds. Los CDN devolvieron 403 para
+MP4Upload y 500 para YourUpload (HEAD y Range). Se verificaron los errores
+por etapa y se añadieron el HEAD MP4 por perfil, UA compartido por sonda y
+medio, Retry-After por origen, aislamiento de cabeceras y preservación del
+error al reabrir. Los dos hosts siguen experimentales y sin cuadros visibles.
+Wikimedia conserva la validación anterior. HLS local pasó con segmento
+relativo y distinguió el 403 de segmento pese a playlist 200.
+[Checkpoint](../ai-system/missions/OC03-2-ANIME-TRANSPORT-2026-11-17.md)
+y [auditoría](../ai-system/audits/OC03-2-ANIME-TRANSPORT-audit-2026-11-17.md).
+
+
+## OC-03.1 · Transporte remoto · 2026-11-16
+
+Wikimedia 480p dio HTTP 429 a ffprobe con UA `libmpv` y abrió con el UA de
+Kongroo en un A/B controlado. Fedora mostró cuadros remotos de *Namakura
+Gatana* desde el módulo de producto en el lanzador de diagnóstico, con seek
+confirmado a 20 s. Se verificó el UA en la red local, ausencia de fuga al
+cambiar de medio y reutilización de los derivados. La API respeta
+Retry-After y el producto registra perfiles de host en datos. MP4Upload
+devolvió 403 a HEAD y YourUpload 500, ambos experimentales. La segunda
+fuente externa y la prueba integrada de progreso remoto siguen abiertas.
+[Checkpoint de transporte](../ai-system/missions/OC03-1-REMOTE-TRANSPORT-2026-11-16.md)
+y [auditoría](../ai-system/audits/OC03-1-TRANSPORT-audit-2026-11-16.md).
+
+
+## OC-03.1 · 2026-11-16
+
+Wikimedia Commons se registra para *Namakura Gatana* (AniList 6654). AnimeAV1
+y TioAnime descubren medios mediante los resolutores compartidos de MP4Upload
+y YourUpload con pruebas de red aprobadas. Ambos y AnimesDigital se habilitan
+por separado. La reanudación requiere confirmación de libmpv y el progreso
+se escribe por episodio para identidades locales. En Fedora se recorrió
+ficha → episodio Kitsu → selector → player → alternativa → ficha. El video
+remoto falló en el motor. Se comprobó HTTP 429 en ffprobe remoto y un cuadro
+decodificado con FFmpeg desde la descarga íntegra de control. J5 permanece
+parcial. [Checkpoint](../ai-system/missions/OC03-1-EXECUTION-STATUS.md) y
+[auditoría](../ai-system/audits/OC03-1-audit-2026-11-16.md).
+
+
 Fuente: auditoría local autorizada y referencias enlazadas
 Fecha: 2026-11-16
 Módulo: infraestructura IA
@@ -7,7 +318,22 @@ Estado: vigente
 Decisión: AI-001, AI-002
 Evidencia: Herramientas, docs y resultados reproducibles
 
-### Último handoff: S0-S — source-first/host-first — 2026-11-16
+### Handoff histórico: OC-02 continuación (Home, episodios, Continuar viendo, R0, R4 control) — 2026-11-16
+
+Checkpoint: `docs/ai-system/missions/OC02-EXECUTION-STATUS.md`; inventario R0:
+`docs/ai-system/missions/OC02-R0-INVENTORY.md`. Base sin commit en `6cc3e5e`.
+Hecho y probado: timeouts por sección (sin 12 s globales); caché acotada de
+populares/tendencias (esquema v9); diagnóstico de imagen sin URL; campos AniList
+opcionales inválidos anulan solo el campo; índice de episodios Kitsu (AniList→Kitsu,
+sin cuenta) conectado a la ficha; Continuar viendo desde progreso local. Fedora:
+Home con banners y carátula reales (capturas en `.ai-local/oc02-fedora/`); video
+visible con `media_kit/libmpv` y fixture local (control R4). Suite 320 pasan /
+8 opt-in omitidas; analyze y formato limpios; reproductor sin cambios; lock intacto.
+Pendiente: 0 fuentes externas verificadas (R3/R4 externo), captura de la ficha y
+de filas inferiores de Home, decisión sobre AnimesDigital, persistencia de caché
+de episodios, Android/Windows no ejecutados. Sin commit ni push.
+
+### Handoff anterior: S0-S — source-first/host-first — 2026-11-16
 
 La limpieza retiró AnimeHeaven y archivó READMEs/evidencias anteriores. El root
 registra `AnimesDigitalPlaybackProvider` v1.0.0 como candidato y
@@ -406,3 +732,10 @@ El panel lee solo `VideoTrackInfo` de la fuente activa. Resoluciones estándar s
 ### Mantenimiento documental modular — 2026-11-12
 
 README añadidos a submódulos previamente sin guía en `app/lib/core`, `app/lib/data/local_db/tables`, `app/lib/data/testing` y subcarpetas application/domain/data del reproductor. El índice se actualizó en `MODULE_INDEX.md`. Sin cambios funcionales. `spike_player_page.dart` y `spike_player_coordinator.dart` son archivos grandes, pero no se refactorizaron al no haber defecto aislado demostrado ni autorización de cambio de comportamiento.
+
+## 2026-11-16 — OC-03 continuación (Continuar viendo)
+- Continuar viendo reanuda por el flujo de fuentes existente; sin fuente muestra mensaje y conserva progreso. Posición inicial aún no conectada (archivos protegidos).
+- Suite 322/8/0, análisis limpio, `memory.py check` = `[]`. No commit ni push.
+- Detalle: `docs/ai-system/missions/OC02-EXECUTION-STATUS.md` (checkpoint OC-03).
+- 2026-11-16 (OC-03): posición de reanudación conectada; seek validado en motor real con fixture local (opt-in). Suite 322/9/0. Sin fuente externa legítima.
+- 2026-11-16 (OC-03): proveedor `user-defined` (URLs https registradas por el usuario vía `KONGROO_USER_SOURCES`). Suite 326/9/0. Sin fuentes de terceros.

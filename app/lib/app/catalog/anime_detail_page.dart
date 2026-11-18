@@ -1,11 +1,13 @@
 import 'package:anime_app/application/catalog/catalog_service.dart';
 import 'package:anime_app/core/result/result.dart';
 import 'package:anime_app/domain/catalog/anime_id.dart';
+import 'package:anime_app/domain/catalog/episode_index_provider.dart';
 import 'package:anime_app/domain/catalog/external_anime_id.dart';
 import 'package:anime_app/domain/catalog/library_entry.dart';
 import 'package:anime_app/domain/catalog/provider_anime_metadata.dart';
 import 'package:anime_app/domain/player/providers/playback_source.dart';
 import 'package:anime_app/domain/progress/playback_progress.dart';
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'confirm_completed_status.dart';
@@ -42,6 +44,10 @@ final class _AnimeDetailPageState extends State<AnimeDetailPage> {
     text: '0',
   );
   ProviderAnimeMetadata? _metadata;
+  EpisodeIndexPage? _episodeIndex;
+  int _episodeIndexRequest = 0;
+  bool _loadingEpisodes = false;
+  bool _episodeIndexFailed = false;
   LibraryEntry? _libraryEntry;
   PlaybackProgress? _progress;
   bool _loading = true;
@@ -97,6 +103,53 @@ final class _AnimeDetailPageState extends State<AnimeDetailPage> {
           _metadataError = error.message;
       }
     });
+    final ProviderAnimeMetadata? loaded = _metadata;
+    if (loaded != null) await _loadEpisodeIndex(loaded.externalId, more: false);
+  }
+
+  /// The index is separate from AniList metadata: it lists episodes only and
+  /// never grants playback.
+  Future<void> _loadEpisodeIndex(
+    ExternalAnimeId id, {
+    required bool more,
+  }) async {
+    final EpisodeIndexPage? current = _episodeIndex;
+    if (more && _loadingEpisodes) return;
+    final int request = ++_episodeIndexRequest;
+    final int offset = more && current != null
+        ? current.nextOffset ?? current.episodes.length
+        : 0;
+    setState(() {
+      _loadingEpisodes = true;
+      _episodeIndexFailed = false;
+    });
+    final Result<EpisodeIndexPage> result = await widget.service.listEpisodes(
+      id,
+      offset: offset,
+    );
+    if (!mounted || request != _episodeIndexRequest) return;
+    setState(() {
+      _loadingEpisodes = false;
+      switch (result) {
+        case Success(:final value):
+          _episodeIndex = more && current != null
+              ? EpisodeIndexPage(
+                  episodes: {
+                    for (final episode in [
+                      ...current.episodes,
+                      ...value.episodes,
+                    ])
+                      episode.externalEpisodeId: episode,
+                  }.values,
+                  totalCount: value.totalCount,
+                  hasMore: value.hasMore,
+                  nextOffset: value.nextOffset,
+                )
+              : value;
+        case Failure():
+          _episodeIndexFailed = _episodeIndex == null;
+      }
+    });
   }
 
   Future<void> _retryMetadata() async {
@@ -105,6 +158,24 @@ final class _AnimeDetailPageState extends State<AnimeDetailPage> {
       _metadataError = null;
     });
     await _loadMetadata();
+  }
+
+  Future<void> _copyExternalEpisodeLink(Uri uri) async {
+    try {
+      await Clipboard.setData(ClipboardData(text: uri.toString()));
+    } on Exception {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo copiar el enlace externo.')),
+      );
+      return;
+    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Enlace copiado. Ábrelo en el servicio indicado.'),
+      ),
+    );
   }
 
   Future<void> _loadLibrary() async {
@@ -253,6 +324,7 @@ final class _AnimeDetailPageState extends State<AnimeDetailPage> {
       animeId: requestId,
       episodeNumber: number,
       externalAnimeId: externalId,
+      externalAnimeIds: metadata.detail?.externalIds ?? const [],
       animeTitles: {
         metadata.preferredTitle,
         if (metadata.romajiTitle case final String title) title,
@@ -262,6 +334,7 @@ final class _AnimeDetailPageState extends State<AnimeDetailPage> {
     );
     try {
       await requestPlayback(episode);
+      if (mounted && number == 1) await _loadProgress();
     } on Object {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -333,9 +406,19 @@ final class _AnimeDetailPageState extends State<AnimeDetailPage> {
               saving: _saving,
               error: _error,
               onSaveProgress: _saveProgress,
+              onCopyExternalEpisodeLink: _copyExternalEpisodeLink,
               onPlayEpisode: widget.onPlaybackRequested == null
                   ? null
                   : _playEpisode,
+              episodeIndex: _episodeIndex,
+              episodeIndexLoading: _loadingEpisodes,
+              episodeIndexError: _episodeIndexFailed
+                  ? 'No se pudo cargar el índice de episodios.'
+                  : null,
+              onLoadMoreEpisodes:
+                  metadata != null && _episodeIndex?.hasMore == true
+                  ? () => _loadEpisodeIndex(metadata.externalId, more: true)
+                  : null,
             ),
           ),
         ],

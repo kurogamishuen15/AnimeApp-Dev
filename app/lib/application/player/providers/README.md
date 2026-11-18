@@ -83,19 +83,21 @@ half-open ante respuestas transitorias y no transitorias, 60 s sin sleeps,
 probe único, aislamiento, deduplicación pública/interna, cancelación por
 llamador y respuesta inválida.
 
-La limpieza S0-S retiró también AnimeHeaven: los tres mirrors live fallaron en
-libmpv, y su protocolo de gate y resolver estaban acoplados al sitio. El
-composition root registra AnimesDigital únicamente como candidato; no hay
-fuente marcada `verified_video`. Las guías anteriores quedaron en el
-[archivo S0](../../../../../docs/ai-system/archive/providers/S0-2026-11-16/README.md).
+La migración OC-03 retiró los adapters anteriores, incluidos AnimeHeaven y
+AnimesDigital, del runtime. El composition root actual registra
+`MiruroCatalogPlaybackProvider` y el `DirectMediaHostResolver` compartido;
+Wikimedia y las fuentes configuradas por el usuario son opt-in. Miruro aún no
+entrega fuentes en la validación live disponible (403 en configuración y
+lookup), así que ninguna fuente externa de anime está marcada como reproducción
+verificada. La evidencia previa queda en el
+[archivo histórico](../../../../../docs/ai-system/archive/providers/S0-2026-11-16/README.md)
+y las auditorías.
 
 El dominio incluye `EpisodeSourceAdapter` con búsqueda, enumeración de
 episodios y descubrimiento de fuentes separados; su bridge usa este manager y
-rechaza matches fuzzy antes del playback. El composition root registra el
-candidato AnimesDigital y únicamente `DirectMediaHostResolver` como resolver
-concreto; no hay extractor específico de host activo. El HLS del episodio 1180
-respondió por HTTP pero mostró error de decodificación en la ventana real; no
-se declara funcional ninguna fuente de anime. Ver el
-[baseline e implementación S0-S](../../../../../docs/ai-system/missions/S0-S-BASELINE-AND-IMPLEMENTATION.md),
-el [informe de limpieza](../../../../../docs/ai-system/audits/S0-provider-cleanup-audit-2026-11-15.md)
-y el [reporte S0](../../../../../docs/ai-system/missions/S0-REAL-PLAYBACK-REPORT.md).
+rechaza matches fuzzy antes del playback. Los candidatos directos que produce
+Miruro pasan por un único `DirectMediaHostResolver`; no hay extractores de embeds
+activos. El adapter devuelve HTTP 403 antes del episodio y media. Para detalle
+actual, límites y verificación consultar el
+[README de providers](../../../../../app/lib/data/player/providers/README.md)
+y la [auditoría de migración](../../../../../docs/ai-system/audits/OC03-MIRURO-MIGRATION-audit-2026-11-17.md).

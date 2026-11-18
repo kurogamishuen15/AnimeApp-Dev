@@ -197,6 +197,37 @@ void main() {
   );
 
   test(
+    'a provider 403 does not prevent a configured fallback provider',
+    () async {
+      final MockPlaybackProvider forbidden = MockPlaybackProvider(
+        id: PlaybackProviderId('forbidden'),
+        scenario: MockPlaybackScenario.forbidden,
+      );
+      final MockPlaybackProvider authorizedFallback = MockPlaybackProvider(
+        id: PlaybackProviderId('authorized-fallback'),
+      );
+      final PlaybackProviderManager manager = _manager([
+        (forbidden, 20),
+        (authorizedFallback, 10),
+      ]);
+
+      final PlaybackProviderSuccess<List<PlaybackSource>> result =
+          await manager.findSources(
+            _episode(),
+            cancellation: PlaybackCancellationToken(),
+          ) as PlaybackProviderSuccess<List<PlaybackSource>>;
+
+      expect(result.value.single.providerId, authorizedFallback.id);
+      expect(forbidden.findCalls, 1);
+      expect(authorizedFallback.findCalls, 1);
+      expect(
+        manager.diagnostics.first.lastFailure,
+        PlaybackProviderFailureKind.forbidden,
+      );
+    },
+  );
+
+  test(
     'falls back to the next provider when every server for a source fails',
     () async {
       final MockPlaybackProvider unavailableSource = MockPlaybackProvider(

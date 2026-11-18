@@ -262,9 +262,10 @@ final class PlaybackProviderManager {
           lastFailure = failure;
       }
     }
-    return lastFailure == null
-        ? const PlaybackProviderEmpty()
-        : PlaybackProviderFailed(lastFailure);
+    return switch (lastFailure) {
+      final PlaybackProviderFailure failure => PlaybackProviderFailed(failure),
+      null => const PlaybackProviderEmpty(),
+    };
   }
 
   Future<PlaybackProviderResult<List<ResolvedPlaybackStream>>>
@@ -274,6 +275,22 @@ final class PlaybackProviderManager {
     required bool stopAfterFirst,
   }) async {
     PlaybackProviderFailure? lastFailure;
+    void recordFailure(PlaybackProviderFailure failure) {
+      int detail(PlaybackProviderFailure value) {
+        if (value.kind == PlaybackProviderFailureKind.rateLimited &&
+            value.retryAfter != null) {
+          return 10;
+        }
+        if (value.httpStatus == null) return 0;
+        return 1 + (value.stage?.index ?? 0);
+      }
+
+      final PlaybackProviderFailure? previous = lastFailure;
+      if (previous == null || detail(failure) >= detail(previous)) {
+        lastFailure = failure;
+      }
+    }
+
     final List<ResolvedPlaybackStream> candidates = [];
     final Map<String, _HostResolutionAttempt> hostAttempts = {};
     for (final PlaybackProviderRegistration registration in _ordered) {
@@ -294,7 +311,7 @@ final class PlaybackProviderManager {
       if (sourceResult case PlaybackProviderFailed<List<PlaybackSource>>(
         :final failure,
       )) {
-        lastFailure = failure;
+        recordFailure(failure);
         continue;
       }
       if (sourceResult is PlaybackProviderEmpty<List<PlaybackSource>> ||
@@ -320,30 +337,25 @@ final class PlaybackProviderManager {
               const PlaybackProviderFailure failure = PlaybackProviderFailure(
                 PlaybackProviderFailureKind.expired,
               );
-              lastFailure = failure;
-              continue;
-            }
-            if (server.kind != PlaybackCandidateKind.media) {
-              final PlaybackProviderFailure failure = PlaybackProviderFailure(
-                server.kind == PlaybackCandidateKind.embed
-                    ? PlaybackProviderFailureKind.unsupportedEmbed
-                    : PlaybackProviderFailureKind.unsupported,
-              );
-              lastFailure = failure;
+              recordFailure(failure);
               continue;
             }
             final PlaybackVideoHostResolver? resolver = _resolverFor(server);
             if (resolver == null) {
-              lastFailure ??= const PlaybackProviderFailure(
-                PlaybackProviderFailureKind.unsupported,
+              lastFailure ??= PlaybackProviderFailure(
+                server.kind == PlaybackCandidateKind.embed
+                    ? PlaybackProviderFailureKind.unsupportedEmbed
+                    : PlaybackProviderFailureKind.unsupported,
               );
               continue;
             }
             final String hostKey = server.hostKey;
             final ProviderCircuitBreaker? hostBreaker = _hostBreaker(hostKey);
             if (hostBreaker == null) {
-              lastFailure = const PlaybackProviderFailure(
-                PlaybackProviderFailureKind.circuitOpen,
+              recordFailure(
+                const PlaybackProviderFailure(
+                  PlaybackProviderFailureKind.circuitOpen,
+                ),
               );
               continue;
             }
@@ -352,9 +364,11 @@ final class PlaybackProviderManager {
             if (attempt == null) {
               final CircuitPermit permit = breaker.acquirePermit();
               if (permit == CircuitPermit.deny) {
-                lastFailure = PlaybackProviderFailure(
-                  PlaybackProviderFailureKind.circuitOpen,
-                  retryAfter: _remainingCooldown(breaker),
+                recordFailure(
+                  PlaybackProviderFailure(
+                    PlaybackProviderFailureKind.circuitOpen,
+                    retryAfter: _remainingCooldown(breaker),
+                  ),
                 );
                 continue;
               }
@@ -362,9 +376,11 @@ final class PlaybackProviderManager {
               hostAttempts[hostKey] = attempt;
             }
             if (attempt.permit == CircuitPermit.deny) {
-              lastFailure = PlaybackProviderFailure(
-                PlaybackProviderFailureKind.circuitOpen,
-                retryAfter: _remainingCooldown(breaker),
+              recordFailure(
+                PlaybackProviderFailure(
+                  PlaybackProviderFailureKind.circuitOpen,
+                  retryAfter: _remainingCooldown(breaker),
+                ),
               );
               continue;
             }
@@ -385,7 +401,7 @@ final class PlaybackProviderManager {
                           PlaybackProviderFailureKind.expired,
                         );
                     attempt.lastFailure = failure;
-                    lastFailure = failure;
+                    recordFailure(failure);
                     continue;
                   }
                   if (value.providerId != provider.id ||
@@ -396,7 +412,7 @@ final class PlaybackProviderManager {
                           PlaybackProviderFailureKind.invalidResponse,
                         );
                     attempt.lastFailure = failure;
-                    lastFailure = failure;
+                    recordFailure(failure);
                     continue;
                   }
                   attempt.succeeded = true;
@@ -418,7 +434,7 @@ final class PlaybackProviderManager {
                   :final failure,
                 ):
                   attempt.lastFailure = failure;
-                  lastFailure = failure;
+                  recordFailure(failure);
               }
             } catch (_) {
               if (cancellation.isCancelled) {
@@ -433,7 +449,7 @@ final class PlaybackProviderManager {
                 PlaybackProviderFailureKind.unavailable,
               );
               attempt.lastFailure = failure;
-              lastFailure = failure;
+              recordFailure(failure);
             }
           }
         }
@@ -443,9 +459,10 @@ final class PlaybackProviderManager {
     if (candidates.isNotEmpty) {
       return PlaybackProviderSuccess(List.unmodifiable(candidates));
     }
-    return lastFailure == null
-        ? const PlaybackProviderEmpty()
-        : PlaybackProviderFailed(lastFailure);
+    return switch (lastFailure) {
+      final PlaybackProviderFailure failure => PlaybackProviderFailed(failure),
+      null => const PlaybackProviderEmpty(),
+    };
   }
 
   PlaybackVideoHostResolver? _resolverFor(SourceCandidate server) {
@@ -494,7 +511,7 @@ final class PlaybackProviderManager {
       }
       final PlaybackProviderFailure? failure = attempt.lastFailure;
       if (failure != null) {
-        if (failure.kind.countsTowardCircuit) {
+        if (failure.countsTowardCircuit) {
           _recordFailure(attempt.breaker, attempt.permit, failure);
         } else {
           if (attempt.permit == CircuitPermit.probe) {

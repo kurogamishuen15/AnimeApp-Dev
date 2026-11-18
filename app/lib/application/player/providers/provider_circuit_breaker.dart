@@ -59,7 +59,7 @@ final class ProviderCircuitBreaker {
       return;
     }
     if (_probeInFlight) {
-      if (!failure.kind.countsTowardCircuit) {
+      if (!failure.countsTowardCircuit) {
         // A permanent/non-transient response (for example 403 or unsupported)
         // ends the probe without imposing another transport cooldown.
         releaseProbe();
@@ -68,7 +68,7 @@ final class ProviderCircuitBreaker {
       _openForCooldown();
       return;
     }
-    if (!failure.kind.countsTowardCircuit) return;
+    if (!failure.countsTowardCircuit) return;
     _consecutiveFailures++;
     if (_consecutiveFailures >= failureThreshold) _openForCooldown();
   }

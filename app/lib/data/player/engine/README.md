@@ -21,9 +21,9 @@ La fábrica llama `MediaKit.ensureInitialized()`, adquiere el lease único y cre
 
 `play`, `pause`, `seek` y `stop` traducen operaciones nativas. `stop` descarga el medio y deja reusable el Player; el adaptador conserva la URI que se abrió correctamente y marca el snapshot `stopped`, sin destruir Player ni VideoController. El siguiente `play` revalida el archivo y lo abre de nuevo en el mismo Player con reproducción desde el inicio. Si la validación/reapertura falla, la operación propaga el error y mantiene la fuente y el estado stopped para permitir reintentar. Play tras Pause solo llama a `Player.play()` y conserva la posición. La prueba libmpv cubre ambos contratos, ciclos Stop→Play repetidos, archivo retenido ausente y recuperación. La reapertura de la misma URI en Linux aún requiere confirmación de imagen en compositor: upstream mantiene abierta la issue [#957](https://github.com/media-kit/media-kit/issues/957), que informa pantalla negra para una secuencia similar; el test nativo comprueba estado/avance, no píxeles presentados. `dispose` hace el engine no utilizable y delega a `ActivePlayerLease`: llamadas concurrentes comparten Future. El lease representa solo la propiedad del Player nativo: se libera cuando `Player.dispose()` termina, aunque luego falle una limpieza auxiliar Dart. El engine reintenta de forma idempotente la cancelación de subscriptions/cierre del stream mediante su propio `dispose()`; no libera un Player nativo incierto. El dispose nativo es un intento único porque media_kit 1.2.6 cambia su indicador `disposed` antes de completar todo el teardown. Si ese Future falla, se conserva el lease y no se repite la operación. El error tipado `MediaKitSpikeEngineDisposeFailure` informa `nativePlayerStillOwned`; los fallos de subscriptions o del stream se marcan como auxiliares y no conservan el lease si el dispose nativo terminó. Un error de `Player.dispose()` también cierra el stream de snapshots; una prueba con fallo inyectado confirma `onDone`, aunque no simula internamente un fallo parcial de libmpv. Esta cuarentena requiere reiniciar el proceso antes de crear otro Player tras fallo nativo. `retryPendingDispose()` atiende exclusivamente un lease nativo huérfano o retenido y propaga su fallo. Si el Player ya se liberó y solo falló una etapa auxiliar, se reintenta llamando `dispose()` sobre el mismo engine mientras siga accesible. No desplaza un engine activo antes de dispose. `Player.stream.error` se publica como texto fijo sin rutas/detalles arbitrarios. Los errores de reproducción persisten a través de cambios no relacionados y solo se limpian en una recuperación de `open` sin un nuevo error.
 
-Los streams resueltos pueden llevar `PlaybackRequestHeaders`, que actualmente
-solo permite un `Referer` público HTTPS validado en domain. `MediaKitSpikeEngine`
-lo entrega a `Media(httpHeaders: ...)` y lo conserva junto a la fuente lógica
+Los streams resueltos pueden llevar `PlaybackRequestHeaders` con Referer,
+Origin y User-Agent validados en domain. `MediaKitSpikeEngine`
+los entrega a `Media(httpHeaders: ...)` y los conserva junto a la fuente lógica
 para Stop→Play. El contexto se reemplaza con cada apertura/cambio de servidor y
 el servicio de rollback restaura el contexto de la fuente previa; no se heredan
 cookies, Authorization ni cabeceras arbitrarias. En AnimeGG, la integración
@@ -33,6 +33,20 @@ resolución o reproducción de sus cinco medios públicos observados.
 El `VideoController` está ligado a la vida del mismo Player. En la versión fijada `media_kit_video 2.0.1`, el release de la plataforma del Player elimina sus listeners/recursos; `VideoController` no expone `dispose()` público. La UI informa tres estados separables: `platform.future` completado (controller creado), `id` no nulo (textura registrada en Flutter) y `waitUntilFirstFrameRendered` resuelto (primer frame procesado/renderizado por el plugin). Ninguna señal demuestra que el compositor de escritorio presentó el frame; se requiere inspección visual independiente.
 
 ## Configuración y dependencias
+
+En Linux, `app/linux/media_kit_video_lifetime.cmake` compila una copia generada
+de `video_output.cc` de media_kit_video 2.0.1 con propiedad explícita del objeto
+durante los callbacks GTK pendientes. El fallo observado al cerrar era un idle
+de software que accedía a `VideoOutput` con contador de referencias cero. La
+copia usa `gdk_threads_add_idle_full`, retiene el objeto y lo libera al retirar
+el idle. El código del paquete y el caché de dependencias quedan intactos.
+El test de dispositivo recorre reproducción, pausa, seek y cierre por la ruta
+real y verifica el retorno a la ficha.
+
+Cuando Fedora aporta `noopenh264` en lugar de un decodificador, el lanzador
+opcional de `tools/player/run_kongroo_linux.sh` permite seleccionar OpenH264
+descargado separadamente en el proyecto. La selección se limita al proceso.
+[Licencias y control del códec](../../../../../docs/third-party/PLAYBACK-DEPENDENCIES.md).
 
 | Opción | Valor F2.2 | Lugar | Efecto/limitación |
 |---|---|---|---|
@@ -175,3 +189,16 @@ completo de `VideoController` no quedan demostrados por esta captura.
 ## Audio y transportes de la operación extendida
 
 AudioTrackInfo se publica desde tracks y track junto con los subtítulos. La selección usa el ID nativo de la generación actual y confirma aid en mpv. El coordinador serializa la operación y rechaza selecciones atrasadas. Las entradas de red se limitan a URI HTTP loopback exactas del DEMO. El resto conserva la validación de archivo regular. Consultar la [guía de ejecución, fixtures y pruebas](../../../../../docs/player/operacion-extendida.md).
+
+## Pistas VTT del proveedor
+
+El composition root entrega catálogos de `ProviderSubtitle` exclusivamente para
+medios autorizados. Catálogos contradictorios para una misma URI se rechazan
+antes de adquirir el player. El motor añade opciones al menú existente y
+selecciona mediante `SubtitleTrack.uri` del media_kit fijado; no crea otro motor.
+Los IDs de menú llevan revisión de apertura/Stop y una elección antigua se
+rechaza aunque otra fuente tenga un índice igual. Cambiar fuente oculta el
+catálogo anterior; Stop→Play restaura las pistas de la fuente retenida.
+La importación manual de subtítulos continúa limitada a archivos locales;
+no se amplía esa API a URLs arbitrarias. Las pistas remotas publicadas usan
+el contexto del medio vigente y solo se cargan al seleccionarlas.

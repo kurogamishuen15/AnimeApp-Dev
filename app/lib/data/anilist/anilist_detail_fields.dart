@@ -1,10 +1,18 @@
 import '../../domain/catalog/anime_detail_metadata.dart';
+import '../../domain/catalog/external_anime_id.dart';
 
 AnimeDetailMetadata decodeAniListDetails(Map<Object?, Object?> media) {
   final trailer = _map(media['trailer']);
   final List<Object?> streamingEpisodes = _list(media['streamingEpisodes'])
       .toList(growable: false);
   return AnimeDetailMetadata(
+    externalIds: [
+      if (_id(media['idMal']) case final id?)
+        ExternalAnimeId(
+          providerId: MetadataProviderId('myanimelist'),
+          value: id.toString(),
+        ),
+    ],
     episodeCount: _id(media['episodes']),
     studios: List.unmodifiable([
       for (final item in _list(_map(media['studios'])['nodes']))
@@ -44,11 +52,13 @@ AnimeEpisodeMetadata? _episode(Object? value, int fallbackNumber) {
       int.tryParse(match?.group(1) ?? '') ??
       fallbackNumber;
   final thumbnail = _httpsUrl(_text(episode['thumbnail']));
+  final externalWatchUri = _httpsUri(_text(episode['url']));
   return AnimeEpisodeMetadata(
     number: number,
     title: title,
     thumbnailUrl: thumbnail,
     site: _text(episode['site']),
+    externalWatchUri: externalWatchUri,
   );
 }
 
@@ -98,6 +108,13 @@ RelatedAnime? _relation(Object? value) {
 
 Map<String, Object?> encodeAniListDetails(AnimeDetailMetadata details) => {
   'episodes': details.episodeCount,
+  'idMal': int.tryParse(
+    details.externalIds
+            .where((id) => id.providerId.value == 'myanimelist')
+            .firstOrNull
+            ?.value ??
+        '',
+  ),
   'streamingEpisodes': [
     for (final episode in details.episodes)
       {
@@ -105,6 +122,7 @@ Map<String, Object?> encodeAniListDetails(AnimeDetailMetadata details) => {
         'title': episode.title,
         'thumbnail': episode.thumbnailUrl,
         'site': episode.site,
+        'url': episode.externalWatchUri?.toString(),
       },
   ],
   'episodeMetadataFetched': details.episodeMetadataFetched,
@@ -161,6 +179,18 @@ String? _httpsUrl(String? value) {
     return null;
   }
   return uri.replace(scheme: 'https').toString();
+}
+
+Uri? _httpsUri(String? value) {
+  if (value == null) return null;
+  final Uri? uri = Uri.tryParse(value);
+  if (uri == null ||
+      uri.scheme != 'https' ||
+      uri.host.isEmpty ||
+      uri.userInfo.isNotEmpty) {
+    return null;
+  }
+  return uri;
 }
 
 Map<Object?, Object?> _map(Object? value) =>

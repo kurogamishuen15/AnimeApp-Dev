@@ -18,12 +18,20 @@ String? playbackResolutionMessage(
     'Los proveedores disponibles no admiten esta reproducción.',
   PlaybackProviderFailed<List<ResolvedPlaybackStream>>(:final failure) =>
     switch (failure.kind) {
+      PlaybackProviderFailureKind.unavailable
+          when failure.stage == PlaybackHttpStage.media &&
+              failure.httpStatus != null =>
+        'El servidor del vídeo respondió HTTP ${failure.httpStatus}. Intenta otra fuente o vuelve más tarde.',
       PlaybackProviderFailureKind.unavailable =>
         'No hay episodio o servidor disponible para esta fuente.',
       PlaybackProviderFailureKind.network => 'No se pudo conectar con los proveedores. Comprueba la conexión e inténtalo de nuevo.',
       PlaybackProviderFailureKind.timeout =>
         'La consulta a los proveedores tardó demasiado. Inténtalo de nuevo.',
-      PlaybackProviderFailureKind.rateLimited => 'Un proveedor limitó las consultas. Espera un momento e inténtalo de nuevo.',
+      PlaybackProviderFailureKind.rateLimited => switch (failure.retryAfter) {
+        final Duration delay =>
+          'El proveedor limitó las consultas. Vuelve a intentar en ${(delay.inMilliseconds / 1000).ceil()} s.',
+        null => 'Un proveedor limitó las consultas. Espera un momento e inténtalo de nuevo.',
+      },
       PlaybackProviderFailureKind.invalidResponse => 'Un proveedor devolvió una respuesta que la aplicación no pudo validar.',
       PlaybackProviderFailureKind.unauthorized =>
         'Un proveedor rechazó la solicitud del episodio.',
@@ -38,7 +46,22 @@ String? playbackResolutionMessage(
         'El proveedor no encontró el episodio solicitado.',
       PlaybackProviderFailureKind.noSources =>
         'El episodio no tiene una fuente de reproducción disponible.',
-      PlaybackProviderFailureKind.forbidden ||
+      PlaybackProviderFailureKind.challenge =>
+        'El servidor exige una verificación de navegador.',
+      PlaybackProviderFailureKind.policyBlocked =>
+        'Una regla de seguridad del servidor rechazó la solicitud.',
+      PlaybackProviderFailureKind.ipBlocked =>
+        'El servidor bloqueó el acceso desde esta conexión.',
+      PlaybackProviderFailureKind.iframeDenied =>
+        'El servidor restringe el acceso desde reproductores incrustados.',
+      PlaybackProviderFailureKind.geoRestricted =>
+        'El servidor restringe la reproducción en esta región.',
+      PlaybackProviderFailureKind.drm => 'Esta fuente requiere DRM.',
+      PlaybackProviderFailureKind.forbidden
+          when failure.stage == PlaybackHttpStage.media =>
+        'El servidor del vídeo denegó el acceso (HTTP 403).',
+      PlaybackProviderFailureKind.forbidden =>
+        'El proveedor denegó la solicitud (HTTP ${failure.httpStatus ?? 403}). Kongroo no la repetirá; consulta los enlaces externos de la ficha si están disponibles.',
       PlaybackProviderFailureKind.blocked =>
         'El proveedor no permite acceder a esta fuente.',
       PlaybackProviderFailureKind.notFound =>

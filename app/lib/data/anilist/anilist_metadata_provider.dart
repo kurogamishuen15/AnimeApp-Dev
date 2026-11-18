@@ -135,10 +135,22 @@ final class AniListMetadataProvider
     Result<AnimeSearchResult> result,
   ) => switch (result) {
     Success(:final value) => ProviderSuccess(
-      List.unmodifiable(value.items.map(_convert)),
+      List.unmodifiable(_convertAll(value.items)),
     ),
     Failure(:final error) => _failure(error),
   };
+
+  List<ProviderAnimeMetadata> _convertAll(List<AnimeSummary> items) {
+    final List<ProviderAnimeMetadata> converted = [];
+    for (final AnimeSummary item in items) {
+      try {
+        converted.add(_convert(item));
+      } on ArgumentError {
+        continue;
+      }
+    }
+    return converted;
+  }
 
   ProviderFailure<T> _failure<T>(AppError error) =>
       ProviderFailure(switch (error) {

@@ -23,8 +23,9 @@ final class DirectMediaHostResolver implements PlaybackVideoHostResolver {
   bool supports(SourceCandidate candidate) =>
       candidate.hostId == stableHostId &&
       candidate.kind == PlaybackCandidateKind.media &&
-      _isSyntacticallyPublicHttps(candidate.endpoint) &&
-      _formatFor(candidate.endpoint) != PlaybackMediaFormat.unknown;
+      isSyntacticallyPublicHttps(candidate.endpoint) &&
+      formatFor(candidate.endpoint, declared: candidate.mediaFormat) !=
+          PlaybackMediaFormat.unknown;
 
   @override
   Future<PlaybackProviderResult<PlayableSource>> resolve(
@@ -55,30 +56,38 @@ final class DirectMediaHostResolver implements PlaybackVideoHostResolver {
         sourceId: source.id,
         serverId: candidate.id,
         uri: candidate.endpoint,
-        format: _formatFor(candidate.endpoint),
+        format: formatFor(candidate.endpoint, declared: candidate.mediaFormat),
+        sourceLabel: source.displayName,
+        displayName: candidate.displayName,
+        availability: candidate.availability,
         expiresAt: candidate.expiresAt,
         provenance: candidate.provenance,
         httpHeaders: candidate.requestHeaders,
+        subtitles: source.subtitles,
       ),
     );
   }
 
-  static PlaybackMediaFormat _formatFor(Uri uri) {
+  static PlaybackMediaFormat formatFor(
+    Uri uri, {
+    PlaybackMediaFormat declared = PlaybackMediaFormat.unknown,
+  }) {
     final String path = uri.path.toLowerCase();
     if (path.endsWith('.mp4')) return PlaybackMediaFormat.mp4;
     if (path.endsWith('.m3u8')) return PlaybackMediaFormat.hls;
+    if (path.endsWith('.webm')) return PlaybackMediaFormat.webm;
     if (path.endsWith('.mpd')) return PlaybackMediaFormat.dash;
-    return PlaybackMediaFormat.unknown;
+    return declared;
   }
 
   /// Rejects obvious local/private destinations before handing a source to
   /// libmpv. DNS names are not resolved here; host-specific network adapters
   /// must validate redirects and resolved addresses at their own boundary.
-  static bool _isSyntacticallyPublicHttps(Uri uri) {
+  static bool isSyntacticallyPublicHttps(Uri uri, {int port = 443}) {
     if (uri.scheme != 'https' ||
         uri.userInfo.isNotEmpty ||
         uri.hasFragment ||
-        uri.port != 443) {
+        uri.port != port) {
       return false;
     }
 

@@ -1,6 +1,6 @@
 # Código Flutter
 
-La aplicación sigue una separación por capas; `main.dart` y los composition roots conectan implementaciones concretas. La ficha conserva el `SpikePlayerModule` y el único motor media_kit/libmpv. S0-S registra `AnimesDigitalPlaybackProvider` como candidato y el normalizador genérico `DirectMediaHostResolver`. El HLS y su primer segmento se descargaron por HTTP ordinario, pero la ventana de libmpv mostró pantalla negra y error de decodificación; no se acredita reproducción. El progreso todavía no está integrado con el player.
+La aplicación sigue una separación por capas; `main.dart` y los composition roots conectan implementaciones concretas. La ficha conserva el `SpikePlayerModule` y el único motor media_kit/libmpv. El runtime de proveedores registra el adaptador de catálogo Miruro y el normalizador genérico de fuentes directas; los proveedores de anime anteriores fueron retirados. Miruro respondió HTTP 403 a consultas públicas ordinarias antes de episodios o media, por lo que no se acredita reproducción externa. Wikimedia sigue opt-in para su título documentado y el progreso todavía no está integrado con el player. Ver [`data/player/providers`](data/player/providers/README.md) y la [auditoría de migración](../../docs/ai-system/audits/OC03-MIRURO-MIGRATION-audit-2026-11-17.md).
 
 | Carpeta | Responsabilidad | Guía |
 |---|---|---|
