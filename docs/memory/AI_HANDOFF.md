@@ -1,5 +1,33 @@
 # Transferencia a otra IA
 
+## Refactorización modular · 2026-11-18 (GLM-5.3)
+
+Rama **`refactor/modularizacion`** (local, sin push; `main` intacto en
+`6cc3e5e`). Commits: `394f1bd` (snapshot de línea base del estado
+funcional acumulado), `da87436` (extracción de `EpisodeSourceSupport`),
+`2b22f64` (docs). Detalle en
+[la misión de refactor](../ai-system/missions/REFACTOR-MODULARIZACION-2026-11-18.md).
+
+- **Duplicación eliminada:** `_read`/`_check`/`_contractTitle` existían con
+  la misma semántica en los 6 adapters; ahora delegan en
+  `episode_source_support.dart` con 5 pruebas de caracterización.
+  Alineación documentada: megaplay mapea `ArgumentError` a
+  `invalidResponse` (antes escapaba como `unavailable`).
+- **Gates preexistentes corregidos:** el formato dart del CI estaba en
+  rojo desde antes del snapshot; ahora `scripts/ci.sh` pasa los 12 gates.
+- **Auditoría sin más deuda accionable a bajo riesgo:** coordinador
+  (1086 líneas) y engine (969) quedan como P2 documentados y
+  **deliberadamente no divididos** (contrato de serialización cohesionado;
+  la división sin costuras medibles arriesgaría la cadena N4). Sin
+  dependencias sin uso (4 falsos positivos explicados) ni código muerto.
+- **Verificación:** suite **406/10** en verde, analyze 0, formato 0,
+  CI 12/12, **motor real post-refactor** (megaplay: PLAY→SEEK 20 s→FRAME→
+  ADVANCE→REOPEN). Bundle por defecto restaurado.
+- **Siguientes pasos de modularización** (si se ordena otra fase):
+  división del coordinador por costuras medidas (sesión/controles/pistas),
+  consolidación de parsers (devalue/de AES de AnimeAV1/MegaPlay junto a
+  `html_playback_parsers`), y ADR del registro de prioridades 110→50.
+
 ## Misión de los 9 proveedores · 2026-11-18 (GLM-5.3)
 
 Leer la [misión del día](../ai-system/missions/ANILILI-9PROVIDERS-2026-11-18.md)
