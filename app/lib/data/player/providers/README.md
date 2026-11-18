@@ -17,7 +17,12 @@ Proveedor → Episodio → Servidor/Host → Resolver → PlaybackProviderManage
 - **Proveedor** (`EpisodeSourceAdapter`): identifica el anime por crosswalk
   (AniList/MAL) o título exacto, enumera episodios y descubre los
   candidatos de servidor publicados (`PlaybackSource` con
-  `SourceCandidate`s).
+  `SourceCandidate`s). Los seis adapters comparten los helpers de
+  `episode_source_support.dart` (`read`/`check`/`contractTitle`): un único
+  mapeo null→Empty, fallos de transporte→resultado propio y
+  FormatException/ArgumentError→`invalidResponse`, con pruebas de
+  caracterización en
+  `test/data/player/providers/episode_source_support_test.dart`.
 - **Resolver** (`PlaybackVideoHostResolver`): convierte un candidato en un
   medio reproducible (`ResolvedPlaybackStream`): `DirectMediaHostResolver`
   normaliza URLs directas HTTPS (HLS/MP4/DASH) y `VoeVideoHostResolver`
@@ -266,8 +271,11 @@ distintos se conservan (p. ej. animegg sub `227251` vs dub `226001`).
   unsupported + episodio sintético verificado en fuentes) y
   `findEpisodeSources`. Declara `episodeSources`; añade
   `sourceAlternatives` **solo si devuelves >1 servidor por fuente** (la
-  validación del manager lo exige). Regístralo en
-  `playback_providers_module.dart` con prioridad y toggle de entorno.
+  validación del manager lo exige). **No copies los helpers privados**:
+  usa `EpisodeSourceSupport.read/check/contractTitle` para el mapeo de
+  resultados, la cancelación y la normalización conservadora de títulos.
+  Regístralo en `playback_providers_module.dart` con prioridad y toggle
+  de entorno.
 - **Registrar un resolver:** implementa `PlaybackVideoHostResolver`
   (`resolverId`, `hostId`, `supports`, `resolve`) y añádelo a
   `videoHostResolvers` del módulo. El manager valida que el stream
