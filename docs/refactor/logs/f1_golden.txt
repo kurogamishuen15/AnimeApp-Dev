@@ -1,0 +1,15 @@
+00:00 +0: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/refactor/parser_characterization_test.dart
+00:00 +0: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/refactor/parser_characterization_test.dart: current HTML, Miruro and AnimeAV1 parsers match frozen output
+00:00 +1: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/refactor/parser_characterization_test.dart: public Miruro media preserves source order, qualities and headers
+00:00 +2: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/refactor/source_characterization_test.dart: voe preserves source data and exact HTTP requests
+00:00 +3: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/refactor/source_characterization_test.dart: wikimedia preserves source data and exact HTTP requests
+00:00 +4: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/refactor/source_characterization_test.dart: allanime preserves source data and exact HTTP requests
+  Skip: B0-09: DateTime.now changes aaReq; frozen expectation retained
+00:00 +4 ~1: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/refactor/source_characterization_test.dart: animeav1 preserves source data and exact HTTP requests
+00:00 +5 ~1: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/refactor/source_characterization_test.dart: animegg preserves source data and exact HTTP requests
+00:00 +6 ~1: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/refactor/source_characterization_test.dart: anizone preserves source data and exact HTTP requests
+00:00 +7 ~1: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/refactor/source_characterization_test.dart: megaplay preserves source data and exact HTTP requests
+00:00 +8 ~1: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/refactor/source_characterization_test.dart: AllAnime preserves exact source output independently of timestamped request
+00:00 +9 ~1: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/refactor/source_characterization_test.dart: AllAnime preserves exact source output independently of timestamped request
+00:00 +10 ~1: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/data/player/providers/refactor_characterization_test.dart: Miruro config preserves exact pre-refactor output
+00:00 +11 ~1: All tests passed!

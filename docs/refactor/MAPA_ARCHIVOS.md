@@ -54,7 +54,7 @@ Incluye archivos versionados y no ignorados presentes al generar. Backups locale
 | app/integration_test/anime_playback_live_test.dart | app/integration_test/anime_playback_live_test.dart | conservar |
 | app/lib/README.md | app/lib/README.md | conservar |
 | app/lib/app/README.md | app/lib/app/README.md | conservar |
-| app/lib/app/anime_app.dart | app/lib/core/bootstrap/anime_app.dart | mover |
+| app/lib/core/bootstrap/anime_app.dart | app/lib/core/bootstrap/anime_app.dart | mover |
 | app/lib/app/catalog/README.md | app/lib/features/home/view/catalog_README.md | mover |
 | app/lib/app/catalog/anime_detail_page.dart | app/lib/features/detail/view/anime_detail_page.dart | mover |
 | app/lib/app/catalog/catalog_home_page.dart | app/lib/features/home/view/catalog_home_page.dart | mover |

@@ -2,9 +2,9 @@ import 'package:anime_app/application/catalog/catalog_service.dart';
 import 'package:anime_app/domain/app_identity.dart';
 import 'package:material_ui/material_ui.dart';
 
-import '../data/player/providers/playback_providers_module.dart';
-import 'catalog/catalog_home_page.dart';
-import 'home/home_appearance.dart';
+import '../../app/catalog/catalog_home_page.dart';
+import '../../app/home/home_appearance.dart';
+import '../../data/player/providers/playback_providers_module.dart';
 
 class AnimeApp extends StatefulWidget {
   const AnimeApp({

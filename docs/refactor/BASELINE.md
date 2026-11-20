@@ -157,3 +157,12 @@ No se observaron flujos gráficos ni reproducción native en esta sesión.
 
 Los logs conservan todos los mensajes; solo se retiró whitespace final de líneas
 para superar git diff --check. No se filtraron errores ni se alteraron resultados.
+
+
+## F1.1 — comprobaciones actuales
+
+Después del movimiento: analyze 141 incidencias (frente a 142 de baseline; un info
+de orden de imports anterior desapareció, sin errores nuevos). Golden focalizados
+se repitieron: ver `logs/f1_golden.txt`. El widget test no llega a cargar por el
+manager; Linux build falla en compilación Dart de baseline. El cuerpo movido sigue
+idéntico y `rg` no encuentra el URI anterior.

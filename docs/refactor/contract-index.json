@@ -2,7 +2,7 @@
   {
     "id": "S0001",
     "kind": "símbolo",
-    "path": "app/lib/app/anime_app.dart",
+    "path": "app/lib/core/bootstrap/anime_app.dart",
     "line": 9,
     "value": "class AnimeApp extends StatefulWidget",
     "destination": "app/lib/core/bootstrap/anime_app.dart"
@@ -10,7 +10,7 @@
   {
     "id": "S0002",
     "kind": "símbolo",
-    "path": "app/lib/app/anime_app.dart",
+    "path": "app/lib/core/bootstrap/anime_app.dart",
     "line": 10,
     "value": "const AnimeApp({ required this.catalogService, this.playbackModule, super.key, })",
     "destination": "app/lib/core/bootstrap/anime_app.dart"
@@ -18,7 +18,7 @@
   {
     "id": "S0003",
     "kind": "símbolo",
-    "path": "app/lib/app/anime_app.dart",
+    "path": "app/lib/core/bootstrap/anime_app.dart",
     "line": 16,
     "value": "catalogService",
     "destination": "app/lib/core/bootstrap/anime_app.dart"
@@ -26,7 +26,7 @@
   {
     "id": "S0004",
     "kind": "símbolo",
-    "path": "app/lib/app/anime_app.dart",
+    "path": "app/lib/core/bootstrap/anime_app.dart",
     "line": 17,
     "value": "playbackModule",
     "destination": "app/lib/core/bootstrap/anime_app.dart"
@@ -34,7 +34,7 @@
   {
     "id": "S0005",
     "kind": "símbolo",
-    "path": "app/lib/app/anime_app.dart",
+    "path": "app/lib/core/bootstrap/anime_app.dart",
     "line": 19,
     "value": "@override State<AnimeApp> createState()",
     "destination": "app/lib/core/bootstrap/anime_app.dart"
@@ -22010,7 +22010,7 @@
   {
     "id": "C0001",
     "kind": "endpoint/cabecera/parámetro",
-    "path": "app/lib/app/anime_app.dart",
+    "path": "app/lib/core/bootstrap/anime_app.dart",
     "line": 40,
     "value": "data: ThemeData(",
     "destination": "app/lib/core/bootstrap/anime_app.dart"

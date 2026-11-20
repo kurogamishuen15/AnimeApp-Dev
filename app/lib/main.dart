@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:anime_app/core/bootstrap/anime_app.dart';
 import 'package:dio/dio.dart';
-import 'package:anime_app/app/anime_app.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'app/catalog/catalog_module.dart';

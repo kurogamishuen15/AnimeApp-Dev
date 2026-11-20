@@ -1,11 +1,11 @@
 import 'dart:io';
 
-import 'package:anime_app/app/anime_app.dart';
 import 'package:anime_app/app/catalog/anime_detail_page.dart';
 import 'package:anime_app/app/catalog/catalog_module.dart';
 import 'package:anime_app/app/catalog/detail/anime_detail_header.dart';
 import 'package:anime_app/app/home/home_appearance.dart';
 import 'package:anime_app/application/catalog/catalog_service.dart';
+import 'package:anime_app/core/bootstrap/anime_app.dart';
 import 'package:anime_app/core/result/result.dart';
 import 'package:anime_app/domain/catalog/episode_index_provider.dart';
 import 'package:anime_app/domain/catalog/external_anime_id.dart';

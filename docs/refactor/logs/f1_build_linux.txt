@@ -1,0 +1,310 @@
+Building Linux application...
+ERROR: lib/main.dart:36:5: Error: No named parameter with the name 'miruroProxy'.
+ERROR:     miruroProxy: miruroProxy,
+ERROR:     ^^^^^^^^^^^
+ERROR: lib/data/player/providers/playback_providers_module.dart:28:11: Context: Found this candidate, but the arguments don't match.
+ERROR:   factory PlaybackProvidersModule.open({
+ERROR:           ^^^^
+ERROR: lib/data/player/providers/jkanime/jkanime_playback_provider.dart:90:51: Error: String starting with " must end with ".
+ERROR:         RegExp(r'<iframe[^>]{0,4096}src=[\"\']([^\"\'<>]{1,2048})[\"\']', multiLine: true);
+ERROR:                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ERROR: lib/data/player/providers/jkanime/jkanime_playback_provider.dart:90:48: Error: Can't find ']' to match '['.
+ERROR:         RegExp(r'<iframe[^>]{0,4096}src=[\"\']([^\"\'<>]{1,2048})[\"\']', multiLine: true);
+ERROR:                                                ^
+ERROR: lib/data/player/providers/jkanime/jkanime_playback_provider.dart:90:47: Error: Can't find ')' to match '('.
+ERROR:         RegExp(r'<iframe[^>]{0,4096}src=[\"\']([^\"\'<>]{1,2048})[\"\']', multiLine: true);
+ERROR:                                               ^
+ERROR: lib/data/player/providers/jkanime/jkanime_playback_provider.dart:90:15: Error: Can't find ')' to match '('.
+ERROR:         RegExp(r'<iframe[^>]{0,4096}src=[\"\']([^\"\'<>]{1,2048})[\"\']', multiLine: true);
+ERROR:               ^
+ERROR: lib/data/player/providers/jkanime/jkanime_playback_provider.dart:22:13: Error: The non-abstract class 'JKAnimePlaybackProvider' is missing implementations for these members:
+ERROR:  - EpisodeSourceAdapter.findEpisodeSources
+ERROR:  - EpisodeSourceAdapter.listEpisodes
+ERROR:  - EpisodeSourceAdapter.searchAnime
+ERROR: Try to either
+ERROR:  - provide an implementation,
+ERROR:  - inherit an implementation from a superclass or mixin,
+ERROR:  - mark the class as abstract, or
+ERROR:  - provide a 'noSuchMethod' implementation.
+ERROR: final class JKAnimePlaybackProvider extends EpisodeSourceAdapter {
+ERROR:             ^^^^^^^^^^^^^^^^^^^^^^^
+ERROR: lib/domain/player/providers/playback_provider_contract.dart:238:56: Context: 'EpisodeSourceAdapter.findEpisodeSources' is defined here.
+ERROR:   Future<PlaybackProviderResult<List<PlaybackSource>>> findEpisodeSources(
+ERROR:                                                        ^^^^^^^^^^^^^^^^^^
+ERROR: lib/domain/player/providers/playback_provider_contract.dart:202:52: Context: 'EpisodeSourceAdapter.listEpisodes' is defined here.
+ERROR:   Future<PlaybackProviderResult<List<EpisodeRef>>> listEpisodes(
+ERROR:                                                    ^^^^^^^^^^^^
+ERROR: lib/domain/player/providers/playback_provider_contract.dart:197:58: Context: 'EpisodeSourceAdapter.searchAnime' is defined here.
+ERROR:   Future<PlaybackProviderResult<List<SourceAnimeMatch>>> searchAnime(
+ERROR:                                                          ^^^^^^^^^^^
+ERROR: lib/data/player/providers/jkanime/jkanime_playback_provider.dart:90:16: Error: Expected ';' after this.
+ERROR:         RegExp(r'<iframe[^>]{0,4096}src=[\"\']([^\"\'<>]{1,2048})[\"\']', multiLine: true);
+ERROR:                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ERROR: lib/data/player/providers/jkanime/jkanime_playback_provider.dart:90:46: Error: Expected an identifier, but got ']'.
+ERROR: Try inserting an identifier before ']'.
+ERROR:         RegExp(r'<iframe[^>]{0,4096}src=[\"\']([^\"\'<>]{1,2048})[\"\']', multiLine: true);
+ERROR:                                              ^
+ERROR: lib/data/player/providers/jkanime/jkanime_playback_provider.dart:90:46: Error: Unexpected token ';'.
+ERROR:         RegExp(r'<iframe[^>]{0,4096}src=[\"\']([^\"\'<>]{1,2048})[\"\']', multiLine: true);
+ERROR:                                              ^
+ERROR: lib/data/player/providers/jkanime/jkanime_playback_provider.dart:90:49: Error: Expected an identifier, but got '^'.
+ERROR: Try inserting an identifier before '^'.
+ERROR:         RegExp(r'<iframe[^>]{0,4096}src=[\"\']([^\"\'<>]{1,2048})[\"\']', multiLine: true);
+ERROR:                                                 ^
+ERROR: lib/data/player/providers/jkanime/jkanime_playback_provider.dart:90:50: Error: Expected an identifier, but got '\'.
+ERROR: Try inserting an identifier before '\'.
+ERROR:         RegExp(r'<iframe[^>]{0,4096}src=[\"\']([^\"\'<>]{1,2048})[\"\']', multiLine: true);
+ERROR:                                                  ^
+ERROR: lib/data/player/providers/jkanime/jkanime_playback_provider.dart:90:51: Error: Expected ',' before this.
+ERROR:         RegExp(r'<iframe[^>]{0,4096}src=[\"\']([^\"\'<>]{1,2048})[\"\']', multiLine: true);
+ERROR:                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ERROR: lib/data/player/providers/jkanime/jkanime_playback_provider.dart:90:51: Error: Expected ';' after this.
+ERROR:         RegExp(r'<iframe[^>]{0,4096}src=[\"\']([^\"\'<>]{1,2048})[\"\']', multiLine: true);
+ERROR:                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ERROR: lib/data/player/providers/jkanime/jkanime_playback_provider.dart:203:32: Error: Too many positional arguments: 1 allowed, but 2 found.
+ERROR: Try removing the extra positional arguments.
+ERROR:         PlaybackProviderFailure(
+ERROR:                                ^
+ERROR: lib/domain/player/providers/playback_provider_contract.dart:77:9: Context: Found this candidate, but the arguments don't match.
+ERROR:   const PlaybackProviderFailure(
+ERROR:         ^^^^^^^^^^^^^^^^^^^^^^^
+ERROR: lib/data/player/providers/jkanime/jkanime_playback_provider.dart:214:32: Error: Too many positional arguments: 1 allowed, but 2 found.
+ERROR: Try removing the extra positional arguments.
+ERROR:         PlaybackProviderFailure(
+ERROR:                                ^
+ERROR: lib/domain/player/providers/playback_provider_contract.dart:77:9: Context: Found this candidate, but the arguments don't match.
+ERROR:   const PlaybackProviderFailure(
+ERROR:         ^^^^^^^^^^^^^^^^^^^^^^^
+ERROR: lib/data/player/providers/jkanime/jkanime_playback_provider.dart:231:11: Error: No named parameter with the name 'mediaFormat'.
+ERROR:           mediaFormat: PlaybackMediaFormat.hls,
+ERROR:           ^^^^^^^^^^^
+ERROR: lib/domain/player/providers/playback_source.dart:411:3: Context: Found this candidate, but the arguments don't match.
+ERROR:   PlayableSource({
+ERROR:   ^^^^^^^^^^^^^^
+ERROR: lib/data/player/providers/jkanime/jkanime_playback_provider.dart:238:30: Error: Too many positional arguments: 1 allowed, but 2 found.
+ERROR: Try removing the extra positional arguments.
+ERROR:       PlaybackProviderFailure(
+ERROR:                              ^
+ERROR: lib/domain/player/providers/playback_provider_contract.dart:77:9: Context: Found this candidate, but the arguments don't match.
+ERROR:   const PlaybackProviderFailure(
+ERROR:         ^^^^^^^^^^^^^^^^^^^^^^^
+ERROR: lib/data/player/providers/jkanime/jkanime_playback_provider.dart:347:46: Error: Member not found: 'unavailable'.
+ERROR:           availability: PlaybackAvailability.unavailable,
+ERROR:                                              ^^^^^^^^^^^
+ERROR: lib/data/player/providers/jkanime/jkanime_playback_provider.dart:347:11: Error: No named parameter with the name 'availability'.
+ERROR:           availability: PlaybackAvailability.unavailable,
+ERROR:           ^^^^^^^^^^^^
+ERROR: lib/domain/player/providers/playback_source.dart:168:3: Context: Found this candidate, but the arguments don't match.
+ERROR:   PlaybackSource({
+ERROR:   ^^^^^^^^^^^^^^
+ERROR: lib/data/player/providers/jkanime/jkanime_playback_provider.dart:262:14: Error: A value of type 'List<PlaybackSource>' can't be returned from an async function with return type 'Future<PlaybackProviderResult<List<PlaybackSource>>>'.
+ERROR:  - 'List' is from 'dart:core'.
+ERROR:  - 'PlaybackSource' is from 'package:anime_app/domain/player/providers/playback_source.dart' ('lib/domain/player/providers/playback_source.dart').
+ERROR:  - 'Future' is from 'dart:async'.
+ERROR:  - 'PlaybackProviderResult' is from 'package:anime_app/domain/player/providers/playback_provider_contract.dart' ('lib/domain/player/providers/playback_provider_contract.dart').
+ERROR:       return _emitEntriesOnly(servers);
+ERROR:              ^
+ERROR: lib/data/player/providers/jkanime/jkanime_playback_provider.dart:329:20: Error: A value of type 'PlayableSource' can't be assigned to a variable of type 'SourceCandidate'.
+ERROR:  - 'PlayableSource' is from 'package:anime_app/domain/player/providers/playback_source.dart' ('lib/domain/player/providers/playback_source.dart').
+ERROR:  - 'SourceCandidate' is from 'package:anime_app/domain/player/providers/playback_source.dart' ('lib/domain/player/providers/playback_source.dart').
+ERROR:             result.value,
+ERROR:                    ^
+ERROR: lib/data/player/providers/jkanime/jkanime_playback_provider.dart:374:13: Error: 'http.Client' can't be used as a type because 'http' doesn't refer to an import prefix.
+ERROR:       final http.Client client = httpClient ?? http.Client();
+ERROR:             ^^^^^^^^^^^
+ERROR: lib/data/player/providers/jkanime/jkanime_playback_provider.dart:375:13: Error: 'RequestRequest' isn't a type.
+ERROR:       final RequestRequest request = Request(
+ERROR:             ^^^^^^^^^^^^^^
+ERROR: lib/data/player/providers/jkanime/jkanime_playback_provider.dart:384:13: Error: 'Response' isn't a type.
+ERROR:       final Response response = await client.send(request);
+ERROR:             ^^^^^^^^
+ERROR: lib/data/player/providers/jkanime/jkanime_playback_provider.dart:374:48: Error: The getter 'http' isn't defined for the type 'JKAnimePlaybackProvider'.
+ERROR:  - 'JKAnimePlaybackProvider' is from 'package:anime_app/data/player/providers/jkanime/jkanime_playback_provider.dart' ('lib/data/player/providers/jkanime/jkanime_playback_provider.dart').
+ERROR: Try correcting the name to the name of an existing getter, or defining a getter or field named 'http'.
+ERROR:       final http.Client client = httpClient ?? http.Client();
+ERROR:                                                ^^^^
+ERROR: lib/data/player/providers/jkanime/jkanime_playback_provider.dart:375:38: Error: The method 'Request' isn't defined for the type 'JKAnimePlaybackProvider'.
+ERROR:  - 'JKAnimePlaybackProvider' is from 'package:anime_app/data/player/providers/jkanime/jkanime_playback_provider.dart' ('lib/data/player/providers/jkanime/jkanime_playback_provider.dart').
+ERROR: Try correcting the name to the name of an existing method, or defining a method named 'Request'.
+ERROR:       final RequestRequest request = Request(
+ERROR:                                      ^^^^^^^
+ERROR: lib/data/player/providers/jkanime/jkanime_playback_provider.dart:423:11: Error: No named parameter with the name 'requestedIdentity'.
+ERROR:           requestedIdentity: AnimeIdentity(
+ERROR:           ^^^^^^^^^^^^^^^^^
+ERROR: lib/domain/player/providers/playback_source.dart:8:3: Context: Found this candidate, but the arguments don't match.
+ERROR:   PlaybackEpisode({
+ERROR:   ^^^^^^^^^^^^^^^
+ERROR: lib/data/player/providers/jkanime/jkanime_playback_provider.dart:437:44: Error: Member not found: 'unavailable'.
+ERROR:         availability: PlaybackAvailability.unavailable,
+ERROR:                                            ^^^^^^^^^^^
+ERROR: lib/data/player/providers/jkanime/jkanime_playback_provider.dart:437:9: Error: No named parameter with the name 'availability'.
+ERROR:         availability: PlaybackAvailability.unavailable,
+ERROR:         ^^^^^^^^^^^^
+ERROR: lib/domain/player/providers/playback_source.dart:168:3: Context: Found this candidate, but the arguments don't match.
+ERROR:   PlaybackSource({
+ERROR:   ^^^^^^^^^^^^^^
+ERROR: lib/data/player/providers/registry/provider_spec.dart:70:64: Error: A value of type 'Null' can't be returned from a function with return type 'ProviderSpec'.
+ERROR:  - 'ProviderSpec' is from 'package:anime_app/data/player/providers/registry/provider_spec.dart' ('lib/data/player/providers/registry/provider_spec.dart').
+ERROR:       _specs.firstWhere((spec) => spec.key == k, orElse: () => null);
+ERROR:                                                                ^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:293:5: Error: Expected a class member, but got 'return'.
+ERROR:     return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+ERROR:     ^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:293:36: Error: Expected '>' after this.
+ERROR:     return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+ERROR:                                    ^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:296:3: Error: Can't have modifier 'static' here.
+ERROR: Try removing 'static'.
+ERROR:   static int _qualityScore(String? quality) {
+ERROR:   ^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:817:3: Error: Can't have modifier 'static' here.
+ERROR: Try removing 'static'.
+ERROR:   static final RegExp _semanticVersionPattern = RegExp(
+ERROR:   ^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:824:3: Error: Can't have modifier 'static' here.
+ERROR: Try removing 'static'.
+ERROR:   static bool _isSemanticVersion(String version) =>
+ERROR:   ^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:826:1: Error: Expected a declaration, but got '}'.
+ERROR: }
+ERROR: ^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:79:13: Error: The non-abstract class 'PlaybackProviderManager' is missing implementations for these members:
+ERROR:  - PlaybackProviderManager.PlaybackProviderSuccess
+ERROR: Try to either
+ERROR:  - provide an implementation,
+ERROR:  - inherit an implementation from a superclass or mixin,
+ERROR:  - mark the class as abstract, or
+ERROR:  - provide a 'noSuchMethod' implementation.
+ERROR: final class PlaybackProviderManager {
+ERROR:             ^^^^^^^^^^^^^^^^^^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:293:12: Context: 'PlaybackProviderManager.PlaybackProviderSuccess' is defined here.
+ERROR:     return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+ERROR:            ^^^^^^^^^^^^^^^^^^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:206:9: Error: 'PlaybackProviderSuccess' isn't a type.
+ERROR:         PlaybackProviderSuccess<List<ResolvedPlaybackStream>>(:final value)
+ERROR:         ^^^^^^^^^^^^^^^^^^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:209:9: Error: 'PlaybackProviderSuccess' isn't a type.
+ERROR:         PlaybackProviderSuccess<List<ResolvedPlaybackStream>>() ||
+ERROR:         ^^^^^^^^^^^^^^^^^^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:259:14: Error: 'PlaybackProviderSuccess' isn't a type.
+ERROR:         case PlaybackProviderSuccess<List<PlaybackSource>>(:final value):
+ERROR:              ^^^^^^^^^^^^^^^^^^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:283:36: Error: This expression is not supported as a constant pattern.
+ERROR: Try wrapping the expression in 'const ( ... )'.
+ERROR:         case PlaybackProviderFailed<List<PlaybackSource>>:
+ERROR:                                    ^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:287:5: Error: 'default' can't be used as an identifier because it's a keyword.
+ERROR: Try renaming this to be an identifier that isn't a keyword.
+ERROR:     default:
+ERROR:     ^^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:287:5: Error: Expected ';' after this.
+ERROR:     default:
+ERROR:     ^^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:287:12: Error: Expected an identifier, but got ':'.
+ERROR: Try inserting an identifier before ':'.
+ERROR:     default:
+ERROR:            ^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:287:12: Error: Unexpected token ';'.
+ERROR:     default:
+ERROR:            ^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:287:5: Error: The getter 'default' isn't defined for the type 'PlaybackProviderManager'.
+ERROR:  - 'PlaybackProviderManager' is from 'package:anime_app/application/player/providers/playback_provider_manager.dart' ('lib/application/player/providers/playback_provider_manager.dart').
+ERROR: Try correcting the name to the name of an existing getter, or defining a getter or field named 'default'.
+ERROR:     default:
+ERROR:     ^^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:235:56: Error: A non-null value must be returned since the return type 'PlaybackProviderResult<List<PlaybackSource>>' doesn't allow null.
+ERROR:  - 'PlaybackProviderResult' is from 'package:anime_app/domain/player/providers/playback_provider_contract.dart' ('lib/domain/player/providers/playback_provider_contract.dart').
+ERROR:  - 'List' is from 'dart:core'.
+ERROR:  - 'PlaybackSource' is from 'package:anime_app/domain/player/providers/playback_source.dart' ('lib/domain/player/providers/playback_source.dart').
+ERROR:   Future<PlaybackProviderResult<List<PlaybackSource>>> _findSources(
+ERROR:                                                        ^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:291:41: Error: Undefined name 'deduped'.
+ERROR:     final List<PlaybackSource> result = deduped.values.toList()
+ERROR:                                         ^^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:329:61: Error: Undefined name '_ordered'.
+ERROR:     for (final PlaybackProviderRegistration registration in _ordered) {
+ERROR:                                                             ^^^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:369:38: Error: Method not found: '_clock'.
+ERROR:                 when !expiry.isAfter(_clock())) {
+ERROR:                                      ^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:431:41: Error: Method not found: '_clock'.
+ERROR:                   if (value.isExpiredAt(_clock())) {
+ERROR:                                         ^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:503:12: Error: Undefined name '_videoHostResolvers'.
+ERROR:         in _videoHostResolvers) {
+ERROR:            ^^^^^^^^^^^^^^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:510:46: Error: Undefined name '_hostBreakers'.
+ERROR:     final ProviderCircuitBreaker? existing = _hostBreakers.remove(hostId);
+ERROR:                                              ^^^^^^^^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:512:7: Error: Undefined name '_hostBreakers'.
+ERROR:       _hostBreakers[hostId] = existing;
+ERROR:       ^^^^^^^^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:516:9: Error: Undefined name '_hostBreakers'.
+ERROR:     if (_hostBreakers.length >= maxHostCircuitBreakers) {
+ERROR:         ^^^^^^^^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:516:33: Error: Undefined name 'maxHostCircuitBreakers'.
+ERROR:     if (_hostBreakers.length >= maxHostCircuitBreakers) {
+ERROR:                                 ^^^^^^^^^^^^^^^^^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:519:14: Error: Undefined name '_hostBreakers'.
+ERROR:           in _hostBreakers.entries) {
+ERROR:              ^^^^^^^^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:527:7: Error: Undefined name '_hostBreakers'.
+ERROR:       _hostBreakers.remove(evictable);
+ERROR:       ^^^^^^^^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:531:14: Error: Undefined name '_clock'.
+ERROR:       clock: _clock,
+ERROR:              ^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:532:25: Error: Undefined name 'circuitFailureThreshold'.
+ERROR:       failureThreshold: circuitFailureThreshold,
+ERROR:                         ^^^^^^^^^^^^^^^^^^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:533:17: Error: Undefined name 'circuitCooldown'.
+ERROR:       cooldown: circuitCooldown,
+ERROR:                 ^^^^^^^^^^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:535:5: Error: Undefined name '_hostBreakers'.
+ERROR:     _hostBreakers[hostId] = created;
+ERROR:     ^^^^^^^^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:576:65: Error: Method not found: '_clock'.
+ERROR:     final List<PlaybackSource>? cached = _sourceCache.read(key, _clock());
+ERROR:                                                                 ^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:576:42: Error: Undefined name '_sourceCache'.
+ERROR:     final List<PlaybackSource>? cached = _sourceCache.read(key, _clock());
+ERROR:                                          ^^^^^^^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:582:11: Error: Undefined name '_providerRequests'.
+ERROR:           _providerRequests,
+ERROR:           ^^^^^^^^^^^^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:591:11: Error: Undefined name '_registrations'.
+ERROR:           _registrations[provider.id];
+ERROR:           ^^^^^^^^^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:592:28: Error: Method not found: '_clock'.
+ERROR:       final DateTime now = _clock();
+ERROR:                            ^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:603:7: Error: Undefined name '_sourceCache'.
+ERROR:       _sourceCache.write(
+ERROR:       ^^^^^^^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:624:44: Error: Undefined name '_breakers'.
+ERROR:     final ProviderCircuitBreaker breaker = _breakers[provider.id]!;
+ERROR:                                            ^^^^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:712:49: Error: Method not found: '_clock'.
+ERROR:     final Duration remaining = until.difference(_clock());
+ERROR:                                                 ^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:730:44: Error: Undefined name '_breakers'.
+ERROR:     final ProviderCircuitBreaker breaker = _breakers[id]!;
+ERROR:                                            ^^^^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:733:16: Error: Undefined name '_registrations'.
+ERROR:       version: _registrations[id]!.version,
+ERROR:                ^^^^^^^^^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:743:44: Error: Undefined name '_hostBreakers'.
+ERROR:     final ProviderCircuitBreaker breaker = _hostBreakers[hostId]!;
+ERROR:                                            ^^^^^^^^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:761:23: Error: Undefined name '_inFlight'.
+ERROR:   ) => _joinShared<T>(_inFlight, key, cancellation, create);
+ERROR:                       ^^^^^^^^^
+ERROR: lib/application/player/providers/playback_provider_manager.dart:258:15: Error: The type 'PlaybackProviderResult<List<PlaybackSource>>' is not exhaustively matched by the switch cases since it doesn't match 'PlaybackProviderFailed<List<PlaybackSource>>(value: Object())'.
+ERROR:  - 'PlaybackProviderResult' is from 'package:anime_app/domain/player/providers/playback_provider_contract.dart' ('lib/domain/player/providers/playback_provider_contract.dart').
+ERROR:  - 'List' is from 'dart:core'.
+ERROR:  - 'PlaybackSource' is from 'package:anime_app/domain/player/providers/playback_source.dart' ('lib/domain/player/providers/playback_source.dart').
+ERROR: Try adding a default case or cases that match 'PlaybackProviderFailed<List<PlaybackSource>>(value: Object())'.
+ERROR:       switch (result) {
+ERROR:               ^
+ERROR: Target kernel_snapshot_program failed: Exception
+Build process failed

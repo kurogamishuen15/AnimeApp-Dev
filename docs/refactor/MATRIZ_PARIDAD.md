@@ -4,11 +4,11 @@ Estado pendiente significa revalidar tras movimiento; el código está presente 
 
 | ID | Tipo | Actual | Destino | Estado |
 | --- | --- | --- | --- | --- |
-| S0001 | símbolo | app/lib/app/anime_app.dart:9 | app/lib/core/bootstrap/anime_app.dart | pendiente |
-| S0002 | símbolo | app/lib/app/anime_app.dart:10 | app/lib/core/bootstrap/anime_app.dart | pendiente |
-| S0003 | símbolo | app/lib/app/anime_app.dart:16 | app/lib/core/bootstrap/anime_app.dart | pendiente |
-| S0004 | símbolo | app/lib/app/anime_app.dart:17 | app/lib/core/bootstrap/anime_app.dart | pendiente |
-| S0005 | símbolo | app/lib/app/anime_app.dart:19 | app/lib/core/bootstrap/anime_app.dart | pendiente |
+| S0001 | símbolo | app/lib/core/bootstrap/anime_app.dart:9 | app/lib/core/bootstrap/anime_app.dart | pendiente |
+| S0002 | símbolo | app/lib/core/bootstrap/anime_app.dart:10 | app/lib/core/bootstrap/anime_app.dart | pendiente |
+| S0003 | símbolo | app/lib/core/bootstrap/anime_app.dart:16 | app/lib/core/bootstrap/anime_app.dart | pendiente |
+| S0004 | símbolo | app/lib/core/bootstrap/anime_app.dart:17 | app/lib/core/bootstrap/anime_app.dart | pendiente |
+| S0005 | símbolo | app/lib/core/bootstrap/anime_app.dart:19 | app/lib/core/bootstrap/anime_app.dart | pendiente |
 | S0006 | símbolo | app/lib/app/catalog/anime_detail_page.dart:18 | app/lib/features/detail/view/anime_detail_page.dart | pendiente |
 | S0007 | símbolo | app/lib/app/catalog/anime_detail_page.dart:19 | app/lib/features/detail/view/anime_detail_page.dart | pendiente |
 | S0008 | símbolo | app/lib/app/catalog/anime_detail_page.dart:30 | app/lib/features/detail/view/anime_detail_page.dart | pendiente |
@@ -2755,7 +2755,7 @@ Estado pendiente significa revalidar tras movimiento; el código está presente 
 | S2749 | símbolo | app/lib/settings/store/settings_store.dart:19 | app/lib/settings/store/settings_store.dart | pendiente |
 | S2750 | símbolo | app/lib/settings/store/settings_store.dart:39 | app/lib/settings/store/settings_store.dart | pendiente |
 | S2751 | símbolo | app/lib/settings/store/settings_store.dart:66 | app/lib/settings/store/settings_store.dart | pendiente |
-| C0001 | endpoint/cabecera/parámetro | app/lib/app/anime_app.dart:40 | app/lib/core/bootstrap/anime_app.dart | pendiente |
+| C0001 | endpoint/cabecera/parámetro | app/lib/core/bootstrap/anime_app.dart:40 | app/lib/core/bootstrap/anime_app.dart | pendiente |
 | C0002 | ruta/pantalla | app/lib/app/catalog/anime_detail_page.dart:18 | app/lib/features/detail/view/anime_detail_page.dart | pendiente |
 | C0003 | endpoint/cabecera/parámetro | app/lib/app/catalog/anime_detail_page.dart:110 | app/lib/features/detail/view/anime_detail_page.dart | pendiente |
 | C0004 | endpoint/cabecera/parámetro | app/lib/app/catalog/anime_detail_page.dart:354 | app/lib/features/detail/view/anime_detail_page.dart | pendiente |

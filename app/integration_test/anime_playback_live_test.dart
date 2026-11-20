@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:anime_app/app/anime_app.dart';
 import 'package:anime_app/app/player/media_kit_video_surface.dart';
 import 'package:anime_app/app/player/provider_playback_route.dart';
 import 'package:anime_app/app/player/spike_player_page.dart';
 import 'package:anime_app/application/catalog/catalog_service.dart';
+import 'package:anime_app/core/bootstrap/anime_app.dart';
 import 'package:anime_app/core/result/result.dart';
 import 'package:anime_app/data/player/engine/mpv_subtitle_properties.dart';
 import 'package:anime_app/domain/progress/playback_progress.dart';

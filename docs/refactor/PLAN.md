@@ -5,8 +5,8 @@
 Fecha: 2026-11-20 (America/Bogota). Rama exclusiva `refactor-modular`.
 Objetivo: reorganizar sin alterar ninguna función, extractor, fuente, endpoint,
 header, firma, clave persistida, pantalla, calidad ni dependencia.
-Esta sesión prepara documentación y caracterización; **no ejecutar Fase 1** sin
-nueva orden del propietario. Ningún movimiento de lib está ejecutado.
+El propietario autorizó comenzar movimientos en la sesión 2026-11-20. F1 inició;
+`AnimeApp` fue movida a core/bootstrap. No iniciar F2 automáticamente.
 
 Respaldo confirmado en `origin`:
 `https://github.com/kurogamishuen15/AnimeApp-Dev.git`.
@@ -181,7 +181,9 @@ No borrar dependencias/assets/fuentes; listarlos para decisión. Ver RENDIMIENTO
 | F0 documentación/plan | entrega documental; límites de cobertura y gates abiertos | HEAD de la entrega: docs: fase 0 y planificación completa | 2026-11-20 | push normal requerido y verificado al cerrar; SHA por git log del archivo |
 | F0 caracterización completa | parcial: 11 golden pasan / 1 omitido; JKAnime bloqueado | incluido en entrega documental | 2026-11-20 | según commit final |
 | F0-B prerrequisitos | pendiente de decisión | — | — | no |
-| F1–F10 refactor/paridad | pendientes; NO ejecutar en esta sesión | — | — | no |
+| F1.1 bootstrap | parcial: movimiento realizado; validación total bloqueada por baseline | commit F1.1 | 2026-11-20 | push normal |
+| F1 tema visual | pendiente: tema vive dentro de HomeAppearance; revisar destinos sin alterar diseño | — | — | no |
+| F2–F10 refactor/paridad | pendientes; no avanzar automáticamente | — | — | no |
 | F11 optimización | pendiente de paridad y mediciones | — | — | no |
 
 ## 9. Mapa individual completo
@@ -242,7 +244,7 @@ Incluye archivos versionados y no ignorados presentes al generar. Backups locale
 | app/integration_test/anime_playback_live_test.dart | app/integration_test/anime_playback_live_test.dart | conservar |
 | app/lib/README.md | app/lib/README.md | conservar |
 | app/lib/app/README.md | app/lib/app/README.md | conservar |
-| app/lib/app/anime_app.dart | app/lib/core/bootstrap/anime_app.dart | mover |
+| app/lib/app/anime_app.dart | app/lib/core/bootstrap/anime_app.dart | movido en F1.1 |
 | app/lib/app/catalog/README.md | app/lib/features/home/view/catalog_README.md | mover |
 | app/lib/app/catalog/anime_detail_page.dart | app/lib/features/detail/view/anime_detail_page.dart | mover |
 | app/lib/app/catalog/catalog_home_page.dart | app/lib/features/home/view/catalog_home_page.dart | mover |
@@ -4192,5 +4194,5 @@ clasificación de análisis, inventario y mapa individual, auditoría, zona prot
 investigación y golden offline sin cambiar lib/manifiestos/assets.
 Pendiente: corregir errores previos mediante tarea autorizada distinta; completar
 caracterización de módulos sin golden; resolver timeouts y validar UI/native.
-Decisiones del propietario: sección 6. No recomendar aceptación funcional de
-Fase 0 con gaps abiertos. No iniciar Fase 1 sin nueva instrucción del propietario.
+Decisiones del propietario: sección 6. Fase 0 documental quedó comprometida; paridad total sigue incompleta. F1.1
+registrada abajo. No avanzar a F2 sin instrucción del propietario.
