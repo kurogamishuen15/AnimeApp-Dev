@@ -1,0 +1,11 @@
+00:00 +0: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/core/core_test.dart
+00:00 +0: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/core/core_test.dart: Result maps successful values and propagates typed failures
+00:00 +1: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/core/core_test.dart: SafeLogger redacts sensitive keys and values recursively
+00:00 +2: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/core/core_test.dart: SafeLogger redacts URI query credentials and is case insensitive
+00:00 +3: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/core/core_test.dart: SafeLogger does not throw when sanitizing a malformed URL-like value
+00:00 +4: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/core/core_test.dart: SafeLogger redacts URI user info and multiple sinks stop receiving records
+00:00 +5: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/core/core_integration_test.dart
+00:02 +5: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/core/core_integration_test.dart: remote failure leaves persisted local progress unchanged
+00:02 +6: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/core/f1_12_real_integration_test.dart
+00:04 +6: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/core/f1_12_real_integration_test.dart: runs settings, SQLite, HTTP, cache, offline, restart and recovery
+00:07 +7: All tests passed!

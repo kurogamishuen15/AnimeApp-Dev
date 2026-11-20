@@ -1,0 +1,31 @@
+00:00 +0: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/home/home_card_actions_test.dart
+00:00 +0: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/home/home_card_actions_test.dart: library action policy exposes all six persisted states
+00:00 +1: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/home/home_card_actions_test.dart: unlinked public title only offers a confirmed library add
+00:00 +2: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/home/home_screen_test.dart
+00:02 +2: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/home/home_screen_test.dart: loading, network failure, retry and empty
+00:03 +3: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/home/home_screen_test.dart: offline content stays visible while a single retry runs
+00:03 +4: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/home/home_screen_test.dart: backstop ceiling becomes a recoverable error
+00:03 +5: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/home/home_screen_test.dart: desktop at 720 shows resume; keyboard opens hero details
+00:04 +6: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/home/home_screen_test.dart: narrow with scaled text, fallback art and a long lazy shelf
+00:04 +7: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/home/home_screen_test.dart: poster captions fit below the art and shelf scrolls without a bar
+00:04 +8: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/home/home_screen_test.dart: desktop hover keeps actions inside the cover and opens menu
+00:05 +9: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/home/home_screen_test.dart: hero exposes provider metadata and selectable highlight dots
+00:05 +10: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/home/home_screen_test.dart: banner auto-advances on hover and resets after manual selection
+00:05 +11: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/home/home_screen_test.dart: banner defaults to six seconds and respects reduced motion
+00:06 +12: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/home/home_screen_test.dart: banner pauses while scrolled out of the Home viewport
+00:07 +13: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/home/home_screen_test.dart: Android always shows only the touch options control
+00:07 +14: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/home/home_screen_test.dart: TV focused card exposes remote menu and Escape restores focus
+00:07 +15: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/home/home_data_test.dart
+00:08 +15: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/home/home_data_test.dart: keeps popular titles when trending and library fail
+00:08 +16: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/home/home_data_test.dart: continue watching uses only saved in-progress local episodes
+00:08 +17: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/home/home_data_test.dart: a failed progress read leaves continue watching empty only
+00:08 +18: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/home/home_data_test.dart: continue watching keeps the persisted episode identity for resume
+00:08 +19: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/home/home_data_test.dart: a slow library is bounded and does not hide loaded feeds
+00:08 +20: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/home/home_data_test.dart: keeps trending titles when popular fails without network
+00:08 +21: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/home/home_data_test.dart: fails visibly only when no catalog or library content exists
+00:08 +22: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/home/home_data_test.dart: marks content offline only when both feeds lost the network
+00:08 +23: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/home/home_artwork_diagnostics_test.dart
+00:09 +23: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/home/home_artwork_diagnostics_test.dart: classifies failures without exposing URL details
+00:09 +24: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/home/home_artwork_diagnostics_test.dart: logs only the host, never the query or path
+00:09 +25: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/home/home_artwork_diagnostics_test.dart: a failed network poster is counted and falls back
+00:10 +26: All tests passed!

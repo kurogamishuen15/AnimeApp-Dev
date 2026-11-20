@@ -1,0 +1,73 @@
+{
+  "sources": [
+    {
+      "id": "megaplay:100240:9:sub",
+      "provider": "megaplay",
+      "episodeKey": "4:test;9;1[17:7:anilist6:100240]0[]",
+      "language": "sub",
+      "quality": "Auto",
+      "priority": 0,
+      "audio": "unknown",
+      "subLanguage": null,
+      "dubbingType": "unknown",
+      "announced": "sub",
+      "label": "MegaPlay · Original (sub)",
+      "subtitles": [],
+      "servers": [
+        {
+          "id": "megaplay-hls",
+          "endpoint": "https://fetch.nexabloom.top/a/master.m3u8?token=fixture",
+          "hostId": "direct-media",
+          "priority": 0,
+          "kind": "media",
+          "language": "unknown",
+          "format": "hls",
+          "quality": null,
+          "displayName": null,
+          "availability": "listed",
+          "episodeId": "megaplay:100240:9:sub",
+          "expiresAt": null,
+          "provenance": "MegaPlay exact AniList/episode endpoint (Anilili MIT-0)",
+          "headers": {
+            "Referer": "https://megaplay.buzz/",
+            "Origin": "https://megaplay.buzz",
+            "User-Agent": "Kongroo/0.1 (public anime catalog client)"
+          }
+        }
+      ]
+    }
+  ],
+  "requests": [
+    {
+      "method": "GET",
+      "uri": "https://megaplay.buzz/stream/ani/100240/9/sub",
+      "headers": {
+        "Accept": "application/json, application/octet-stream;q=0.9, text/html;q=0.8",
+        "User-Agent": "Kongroo/0.1 (public anime catalog client)",
+        "Referer": "https://hianimes.re/"
+      },
+      "data": null
+    },
+    {
+      "method": "GET",
+      "uri": "https://megaplay.buzz/lib/newclient.min.js",
+      "headers": {
+        "Accept": "application/json, application/octet-stream;q=0.9, text/html;q=0.8",
+        "User-Agent": "Kongroo/0.1 (public anime catalog client)",
+        "Referer": "https://megaplay.buzz/stream/ani/100240/9/sub"
+      },
+      "data": null
+    },
+    {
+      "method": "GET",
+      "uri": "https://megaplay.buzz/stream/getSourcesNew?id=File09&id=File09",
+      "headers": {
+        "Accept": "application/json, application/octet-stream;q=0.9, text/html;q=0.8",
+        "User-Agent": "Kongroo/0.1 (public anime catalog client)",
+        "X-Requested-With": "XMLHttpRequest",
+        "Referer": "https://megaplay.buzz/"
+      },
+      "data": null
+    }
+  ]
+}

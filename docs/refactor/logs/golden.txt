@@ -1,0 +1,5 @@
+00:00 +0: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/refactor/parser_characterization_test.dart
+00:00 +0: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/refactor/parser_characterization_test.dart: current HTML, Miruro and AnimeAV1 parsers match frozen output
+00:00 +1: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/refactor/parser_characterization_test.dart: current HTML, Miruro and AnimeAV1 parsers match frozen output
+00:00 +2: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/refactor/parser_characterization_test.dart: public Miruro media preserves source order, qualities and headers
+00:00 +3: All tests passed!

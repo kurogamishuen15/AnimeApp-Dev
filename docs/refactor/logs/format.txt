@@ -1,0 +1,3 @@
+Formatted test/refactor/parser_characterization_test.dart
+Formatted test/refactor/parser_snapshots.dart
+Formatted 2 files (2 changed) in 0.04 seconds.

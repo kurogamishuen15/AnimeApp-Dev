@@ -1,0 +1,23 @@
+app/lib/application/player/providers/playback_provider_manager.dart: app/lib/application/player/providers/playback_provider_manager.dart(10736..10736): This expression is not supported as a constant pattern.
+app/lib/application/player/providers/playback_provider_manager.dart: app/lib/application/player/providers/playback_provider_manager.dart(10847..10853): 'default' can't be used as an identifier because it's a keyword.
+app/lib/application/player/providers/playback_provider_manager.dart: app/lib/application/player/providers/playback_provider_manager.dart(10847..10853): Expected to find ';'.
+app/lib/application/player/providers/playback_provider_manager.dart: app/lib/application/player/providers/playback_provider_manager.dart(10847..10853): Expected a statement.
+app/lib/application/player/providers/playback_provider_manager.dart: app/lib/application/player/providers/playback_provider_manager.dart(10854..10854): Expected an identifier.
+app/lib/application/player/providers/playback_provider_manager.dart: app/lib/application/player/providers/playback_provider_manager.dart(10854..10854): Unexpected text ';'.
+app/lib/application/player/providers/playback_provider_manager.dart: app/lib/application/player/providers/playback_provider_manager.dart(11048..11053): Expected a class member.
+app/lib/application/player/providers/playback_provider_manager.dart: app/lib/application/player/providers/playback_provider_manager.dart(11079..11082): Expected to find '>'.
+app/lib/application/player/providers/playback_provider_manager.dart: app/lib/application/player/providers/playback_provider_manager.dart(11117..11122): Can't have modifier 'static' here.
+app/lib/application/player/providers/playback_provider_manager.dart: app/lib/application/player/providers/playback_provider_manager.dart(30259..30264): Can't have modifier 'static' here.
+app/lib/application/player/providers/playback_provider_manager.dart: app/lib/application/player/providers/playback_provider_manager.dart(30531..30536): Can't have modifier 'static' here.
+app/lib/application/player/providers/playback_provider_manager.dart: app/lib/application/player/providers/playback_provider_manager.dart(30637..30637): Expected a method, getter, setter or operator declaration.
+app/lib/data/player/providers/jkanime/jkanime_playback_provider.dart: app/lib/data/player/providers/jkanime/jkanime_playback_provider.dart(2905..2934): Expected to find ';'.
+app/lib/data/player/providers/jkanime/jkanime_playback_provider.dart: app/lib/data/player/providers/jkanime/jkanime_playback_provider.dart(2935..2935): Expected an identifier.
+app/lib/data/player/providers/jkanime/jkanime_playback_provider.dart: app/lib/data/player/providers/jkanime/jkanime_playback_provider.dart(2935..2935): Unexpected text ';'.
+app/lib/data/player/providers/jkanime/jkanime_playback_provider.dart: app/lib/data/player/providers/jkanime/jkanime_playback_provider.dart(2938..2938): Expected an identifier.
+app/lib/data/player/providers/jkanime/jkanime_playback_provider.dart: app/lib/data/player/providers/jkanime/jkanime_playback_provider.dart(2939..2939): Expected an identifier.
+app/lib/data/player/providers/jkanime/jkanime_playback_provider.dart: app/lib/data/player/providers/jkanime/jkanime_playback_provider.dart(2940..2980): Expected to find ','.
+app/lib/data/player/providers/jkanime/jkanime_playback_provider.dart: app/lib/data/player/providers/jkanime/jkanime_playback_provider.dart(2940..2980): Expected to find ';'.
+app/lib/data/player/providers/jkanime/jkanime_playback_provider.dart: app/lib/data/player/providers/jkanime/jkanime_playback_provider.dart(2980..2980): Unterminated string literal.
+app/lib/data/player/providers/jkanime/jkanime_playback_provider.dart: app/lib/data/player/providers/jkanime/jkanime_playback_provider.dart(2986..2986): Expected to find ']'.
+app/lib/data/player/providers/jkanime/jkanime_playback_provider.dart: app/lib/data/player/providers/jkanime/jkanime_playback_provider.dart(2986..2986): Expected to find ')'.
+app/lib/data/player/providers/jkanime/jkanime_playback_provider.dart: app/lib/data/player/providers/jkanime/jkanime_playback_provider.dart(2935..2935): Expected to find ')'.

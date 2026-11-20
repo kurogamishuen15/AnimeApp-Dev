@@ -1,0 +1,5 @@
+allanime: captured nonempty sources
+animeav1: captured nonempty sources
+animegg: captured nonempty sources
+anizone: captured nonempty sources
+megaplay: captured nonempty sources

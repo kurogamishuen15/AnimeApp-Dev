@@ -1,0 +1,9 @@
+{
+  "html": "<a HREF='https://example.test/a?x=1&amp;y=2' data-id=42><b>Tokyo</b>&nbsp;Ghoul &#x3a;re</a><script>var x='https://cdn.example.test/a.m3u8?x=1&amp;y=2'; var y='//cdn.example.test/b.m3u8';</script>",
+  "titles": ["Tokyo Ghoul:re", "tokyo ghoul", "Tokyo Ghoul:re 2", "", "Naruto"],
+  "title": {"data":[{"id":"title-1","anilist_id":100240,"title":"Tokyo Ghoul:re","episode_counts":{"sub":12,"dub":12}},{"id":"other","anilist_id":20}]},
+  "episodes": {"data":[{"episode_number":2,"title":"Two","kind":"regular"},{"episode_number":1,"title":"One"},{"episode_number":2},{"episode_number":1.5},{"episode_number":3,"kind":"special"}],"has_more":true,"next_cursor":"next"},
+  "play": {"tracks":[{"track":"sub","providers":[{"provider":"alpha","audio_language":"ja","subtitle_language":"en","servers":[{"server":"One","headers":{"Referer":"https://example.test/","Origin":"https://example.test"},"streams":[{"url":"https://cdn.example.test/720.m3u8","quality":"720p"},{"url":"https://cdn.example.test/1080.m3u8","quality":"1080p"}]}]}]}]},
+  "devalue": {"nodes":[{"type":"data","data":[{"title":1,"episodes":2},"Naruto",[3,4],1,2]}]},
+  "invalid_devalue": [{}, {"nodes":[{"type":"data","data":[{"loop":0}]}]}]
+}

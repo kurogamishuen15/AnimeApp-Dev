@@ -1,0 +1,99 @@
+{
+  "sources": [
+    {
+      "id": "animegg:tokyo-ghoulre:9:sub",
+      "provider": "animegg",
+      "episodeKey": "4:test;9;1[17:7:anilist6:100240]1[14:tokyo ghoul:re]",
+      "language": "sub",
+      "quality": "Auto",
+      "priority": 0,
+      "audio": "unknown",
+      "subLanguage": null,
+      "dubbingType": "unknown",
+      "announced": "sub",
+      "label": "AnimeGG · Original (sub)",
+      "subtitles": [],
+      "servers": [
+        {
+          "id": "animegg-0",
+          "endpoint": "https://www.animegg.org/play/227251/video.mp4?for=101794971615946",
+          "hostId": "direct-media",
+          "priority": 0,
+          "kind": "media",
+          "language": "unknown",
+          "format": "mp4",
+          "quality": "Auto",
+          "displayName": "AnimeGG Animegg",
+          "availability": "listed",
+          "episodeId": "animegg:tokyo-ghoulre:9:sub",
+          "expiresAt": null,
+          "provenance": "AnimeGG embed media (Anilili MIT-0, forma live)",
+          "headers": {
+            "Referer": "https://www.animegg.org/",
+            "User-Agent": "Kongroo/0.1 (public anime catalog client)"
+          }
+        },
+        {
+          "id": "animegg-1",
+          "endpoint": "https://www.animegg.org/play/227255/video.mp4?for=101794971615946",
+          "hostId": "direct-media",
+          "priority": 0,
+          "kind": "media",
+          "language": "unknown",
+          "format": "mp4",
+          "quality": "Auto",
+          "displayName": "AnimeGG Animegg",
+          "availability": "listed",
+          "episodeId": "animegg:tokyo-ghoulre:9:sub",
+          "expiresAt": null,
+          "provenance": "AnimeGG embed media (Anilili MIT-0, forma live)",
+          "headers": {
+            "Referer": "https://www.animegg.org/",
+            "User-Agent": "Kongroo/0.1 (public anime catalog client)"
+          }
+        }
+      ]
+    }
+  ],
+  "requests": [
+    {
+      "method": "GET",
+      "uri": "https://www.animegg.org/search/?q=Tokyo+Ghoul%3Are",
+      "headers": {
+        "Accept": "application/json, application/octet-stream;q=0.9, text/html;q=0.8",
+        "User-Agent": "Kongroo/0.1 (public anime catalog client)"
+      },
+      "data": null
+    },
+    {
+      "method": "GET",
+      "uri": "https://www.animegg.org/series/tokyo-ghoulre",
+      "headers": {
+        "Accept": "application/json, application/octet-stream;q=0.9, text/html;q=0.8",
+        "User-Agent": "Kongroo/0.1 (public anime catalog client)",
+        "Referer": "https://www.animegg.org/"
+      },
+      "data": null
+    },
+    {
+      "method": "GET",
+      "uri": "https://www.animegg.org/tokyo-ghoulre-episode-9",
+      "headers": {
+        "Accept": "application/json, application/octet-stream;q=0.9, text/html;q=0.8",
+        "User-Agent": "Kongroo/0.1 (public anime catalog client)",
+        "Referer": "https://www.animegg.org/"
+      },
+      "data": null
+    },
+    {
+      "method": "GET",
+      "uri": "https://www.animegg.org/embed/91335",
+      "headers": {
+        "Accept": "application/json, application/octet-stream;q=0.9, text/html;q=0.8",
+        "User-Agent": "Kongroo/0.1 (public anime catalog client)",
+        "Referer": "https://www.animegg.org/"
+      },
+      "data": null
+    }
+  ]
+}

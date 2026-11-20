@@ -1,0 +1,40 @@
+00:00 +0: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/catalog/catalog_contracts_test.dart
+00:00 +0: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/catalog/catalog_contracts_test.dart: catalog identity contracts normalizes internal IDs and compares by value
+00:00 +1: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/catalog/catalog_contracts_test.dart: catalog identity contracts local UUID generator emits distinct namespaced UUIDv4 values
+00:00 +2: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/catalog/catalog_contracts_test.dart: catalog identity contracts rejects empty, whitespace, and non-ASCII internal IDs
+00:00 +3: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/catalog/catalog_contracts_test.dart: catalog identity contracts external IDs use a provider namespace and unambiguous key
+00:00 +4: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/catalog/catalog_contracts_test.dart: catalog identity contracts identity rejects duplicate aliases and self relationships
+00:00 +5: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/catalog/catalog_contracts_test.dart: catalog identity contracts resolver uses only exact verified IDs and surfaces ambiguity
+00:00 +6: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/catalog/catalog_contracts_test.dart: provider contracts registry is disabled by default and sorts enabled capabilities
+00:00 +7: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/catalog/catalog_contracts_test.dart: provider contracts provider failures expose retry policy without leaking payloads
+00:00 +8: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/catalog/catalog_contracts_test.dart: provider contracts registry snapshots provider capabilities at registration
+00:00 +9: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/external_subtitle_catalog_test.dart
+00:00 +9: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/external_subtitle_catalog_test.dart: accepts bounded text and validated subtitle identifiers
+00:00 +10: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/external_subtitle_catalog_test.dart: rejects missing identity, malformed IDs, hash, language and episode
+00:00 +11: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/external_subtitle_catalog_test.dart: rejects overlong search strings
+00:00 +12: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/skip_automation_policy_test.dart
+00:01 +12: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/skip_automation_policy_test.dart: manual prompts are on and every automatic option defaults off
+00:01 +13: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/skip_automation_policy_test.dart: opening and ending use independent switches and require valid ranges
+00:01 +14: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/skip_automation_policy_test.dart: recap and filler need curated, episode-scoped evidence
+00:01 +15: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/subtitle_policy_test.dart
+00:02 +15: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/subtitle_policy_test.dart: external subtitle hardsub policy blocks only sources confirmed to contain hardsub
+00:02 +16: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/subtitle_policy_test.dart: subtitle style validation accepts mpv hex colors and bounded presentation values
+00:02 +17: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/subtitle_policy_test.dart: subtitle style validation rejects invalid font, colors and ranges
+00:02 +18: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/video_track_info_test.dart
+00:02 +18: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/video_track_info_test.dart: quality labels use reported dimensions and never invent resolution
+00:02 +19: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/video_track_info_test.dart: reported bitrate is included only when positive
+00:02 +20: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/episode_source_adapter_test.dart
+00:03 +20: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/episode_source_adapter_test.dart: adapter orchestration keeps identity, episode and source phases apart
+00:03 +21: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/episode_source_adapter_test.dart: fuzzy or conflicting identity matches never reach episode lookup
+00:03 +22: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/episode_source_adapter_test.dart: cancellation before lookup avoids provider work
+00:03 +23: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/playback_provider_contract_test.dart
+00:04 +23: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/playback_provider_contract_test.dart: provider captions reject private, active and non-HTTPS destinations
+00:04 +24: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/playback_provider_contract_test.dart: MockPlaybackProvider playback provider contract exposes stable identity and declared capabilities
+00:04 +25: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/playback_provider_contract_test.dart: MockPlaybackProvider playback provider contract returns normalized source and server alternatives
+00:04 +26: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/playback_provider_contract_test.dart: MockPlaybackProvider playback provider contract can resolve a server without owning a playback engine
+00:04 +27: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/playback_provider_contract_test.dart: typed empty, timeout, provider error, malformed and cancellation results
+00:04 +28: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/playback_provider_contract_test.dart: provider identifiers reject invalid values
+00:04 +29: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/playback_provider_contract_test.dart: playback bridge preserves all namespaced external anime IDs
+00:04 +30: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/playback_provider_contract_test.dart: playback request context permits public Referer and User-Agent
+00:04 +31: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/domain/playback_provider_contract_test.dart: Origin carries a public HTTPS origin without request data
+00:05 +32: All tests passed!

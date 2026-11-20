@@ -1,0 +1,80 @@
+app/lib/app/anime_app.dart:9:21: class AnimeApp extends StatefulWidget
+app/lib/app/anime_app.dart:23:58: final class _AnimeAppState extends State<AnimeApp>
+app/lib/app/catalog/anime_detail_page.dart:18:40: final class AnimeDetailPage extends StatefulWidget
+app/lib/app/catalog/anime_detail_page.dart:42:428: final class _AnimeDetailPageState extends State<AnimeDetailPage>
+app/lib/app/catalog/catalog_home_page.dart:34:46: final class CatalogHomePage extends StatefulWidget
+app/lib/app/catalog/catalog_home_page.dart:48:421: final class _CatalogHomePageState extends State<CatalogHomePage> with RestorationMixin
+app/lib/app/catalog/catalog_home_page.dart:423:473: final class _PlaybackSourcePicker extends StatelessWidget
+app/lib/app/catalog/catalog_home_page.dart:489:531: class _DesktopSidebar extends StatelessWidget
+app/lib/app/catalog/catalog_home_page.dart:533:584: class _SidebarButton extends StatelessWidget
+app/lib/app/catalog/catalog_home_page.dart:586:680: class _HomeHeader extends StatelessWidget
+app/lib/app/catalog/catalog_search_page.dart:6:18: final class CatalogSearchPage extends StatefulWidget
+app/lib/app/catalog/catalog_search_page.dart:20:131: final class _CatalogSearchPageState extends State<CatalogSearchPage>
+app/lib/app/catalog/detail/anime_detail_header.dart:5:114: final class AnimeDetailHeader extends StatelessWidget
+app/lib/app/catalog/detail/anime_detail_header.dart:116:168: final class _WideHeaderComposition extends StatelessWidget
+app/lib/app/catalog/detail/anime_detail_header.dart:170:259: final class _CompactHeaderComposition extends StatelessWidget
+app/lib/app/catalog/detail/anime_detail_header.dart:261:293: final class _Poster extends StatelessWidget
+app/lib/app/catalog/detail/anime_detail_header.dart:295:444: final class _HeaderInfo extends StatelessWidget
+app/lib/app/catalog/detail/anime_detail_header.dart:446:467: final class _GenrePill extends StatelessWidget
+app/lib/app/catalog/detail/anime_detail_header.dart:469:491: final class _Pill extends StatelessWidget
+app/lib/app/catalog/detail/anime_detail_header.dart:493:556: final class _ActionButton extends StatelessWidget
+app/lib/app/catalog/detail/anime_detail_header.dart:558:618: final class _LibraryStatusButton extends StatelessWidget
+app/lib/app/catalog/detail/anime_detail_tab_content.dart:9:85: final class AnimeDetailTabContent extends StatelessWidget
+app/lib/app/catalog/detail/anime_detail_tab_content.dart:87:115: final class _DetailTextList extends StatelessWidget
+app/lib/app/catalog/detail/anime_detail_tab_content.dart:117:314: final class _EpisodesTab extends StatelessWidget
+app/lib/app/catalog/detail/anime_detail_tab_content.dart:316:342: final class _ExternalEpisodeLink extends StatelessWidget
+app/lib/app/catalog/detail/anime_detail_tab_content.dart:344:373: final class _EpisodeIndexStatus extends StatelessWidget
+app/lib/app/catalog/detail/anime_detail_tab_content.dart:375:490: final class _EpisodeCard extends StatelessWidget
+app/lib/app/catalog/detail/anime_detail_tab_content.dart:492:549: final class _ProgressEditor extends StatelessWidget
+app/lib/app/catalog/detail/anime_detail_tab_content.dart:562:632: final class _InformationTab extends StatelessWidget
+app/lib/app/catalog/detail/anime_detail_tab_content.dart:634:677: final class _GalleryTab extends StatelessWidget
+app/lib/app/catalog/detail/anime_detail_tab_content.dart:679:709: final class _AlternativeTitlesTab extends StatelessWidget
+app/lib/app/catalog/detail/anime_detail_tab_content.dart:711:726: final class _UnavailableTab extends StatelessWidget
+app/lib/app/catalog/detail/anime_detail_tab_content.dart:728:751: final class _Fact extends StatelessWidget
+app/lib/app/catalog/detail/anime_detail_tab_content.dart:753:769: final class _GenrePill extends StatelessWidget
+app/lib/app/catalog/detail/anime_detail_tab_content.dart:771:789: final class _QuietButton extends StatelessWidget
+app/lib/app/catalog/detail/anime_detail_tabs.dart:15:78: final class AnimeDetailTabs extends StatelessWidget
+app/lib/app/catalog/local_library_page.dart:8:22: final class LocalLibraryPage extends StatefulWidget
+app/lib/app/catalog/local_library_page.dart:24:141: final class _LocalLibraryPageState extends State<LocalLibraryPage>
+app/lib/app/home/home_artwork.dart:6:58: final class HomeArtwork extends StatelessWidget
+app/lib/app/home/home_card_actions.dart:245:340: class _DesktopActionMenu extends StatelessWidget
+app/lib/app/home/home_card_actions.dart:342:398: class _DesktopActionRow extends StatelessWidget
+app/lib/app/home/home_card_actions.dart:400:417: class _DesktopMenuHeading extends StatelessWidget
+app/lib/app/home/home_card_actions.dart:419:427: class _DesktopMenuDivider extends StatelessWidget
+app/lib/app/home/home_card_actions.dart:429:454: class _TouchMenuItem extends StatelessWidget
+app/lib/app/home/home_card_actions.dart:456:472: class _TouchMenuHeading extends StatelessWidget
+app/lib/app/home/home_card_actions.dart:474:482: class _TouchMenuDivider extends StatelessWidget
+app/lib/app/home/home_hero.dart:11:28: final class HomeHero extends StatefulWidget
+app/lib/app/home/home_hero.dart:30:370: final class _HomeHeroState extends State<HomeHero> with WidgetsBindingObserver
+app/lib/app/home/home_hero.dart:372:395: class _HeroTag extends StatelessWidget
+app/lib/app/home/home_score_badge.dart:5:50: final class HomeScoreBadge extends StatelessWidget
+app/lib/app/home/home_screen.dart:11:30: final class HomeScreen extends StatefulWidget
+app/lib/app/home/home_screen.dart:32:198: final class _HomeScreenState extends State<HomeScreen>
+app/lib/app/home/home_sections.dart:74:92: class _SectionTitle extends StatelessWidget
+app/lib/app/home/home_sections.dart:94:136: class _Shelf extends StatelessWidget
+app/lib/app/home/home_sections.dart:138:152: class _ScrollableShelf extends StatefulWidget
+app/lib/app/home/home_sections.dart:154:252: class _ScrollableShelfState extends State<_ScrollableShelf>
+app/lib/app/home/home_sections.dart:254:288: class _EpisodeCard extends StatelessWidget
+app/lib/app/home/home_sections.dart:300:326: class _ArtworkCard extends StatefulWidget
+app/lib/app/home/home_sections.dart:328:584: class _ArtworkCardState extends State<_ArtworkCard>
+app/lib/app/home/home_sections.dart:586:630: class _CardActionButton extends StatelessWidget
+app/lib/app/player/audio_track_selector.dart:5:53: final class AudioTrackSelector extends StatelessWidget
+app/lib/app/player/external_subtitle_search_panel.dart:7:22: final class ExternalSubtitleSearchPanel extends StatefulWidget
+app/lib/app/player/external_subtitle_search_panel.dart:24:171: final class _ExternalSubtitleSearchPanelState extends State<ExternalSubtitleSearchPanel>
+app/lib/app/player/media_kit_video_surface.dart:6:27: final class MediaKitVideoSurface extends StatelessWidget
+app/lib/app/player/player_demo_panel.dart:8:20: final class PlayerDemoPanel extends StatefulWidget
+app/lib/app/player/player_demo_panel.dart:22:150: final class _PlayerDemoPanelState extends State<PlayerDemoPanel>
+app/lib/app/player/player_nerd_panel.dart:6:89: final class PlayerNerdPanel extends StatelessWidget
+app/lib/app/player/player_quality_panel.dart:5:71: final class PlayerQualityPanel extends StatelessWidget
+app/lib/app/player/player_subtitle_panel.dart:20:34: final class PlayerSubtitlePanel extends StatefulWidget
+app/lib/app/player/player_subtitle_panel.dart:36:311: final class _PlayerSubtitlePanelState extends State<PlayerSubtitlePanel>
+app/lib/app/player/player_video_display_panel.dart:7:94: final class PlayerVideoDisplayButton extends StatelessWidget
+app/lib/app/player/player_video_layout.dart:3:27: final class PlayerVideoLayout extends StatelessWidget
+app/lib/app/player/provider_playback_route.dart:18:52: final class ProviderPlaybackRoute extends StatefulWidget
+app/lib/app/player/provider_playback_route.dart:54:298: final class _ProviderPlaybackRouteState extends State<ProviderPlaybackRoute>
+app/lib/app/player/skip_segment_panel.dart:8:82: final class SkipSegmentPanel extends StatelessWidget
+app/lib/app/player/source_switch_panel.dart:7:79: final class SourceSwitchPanel extends StatelessWidget
+app/lib/app/player/spike_player_page.dart:29:58: final class SpikePlayerPage extends StatefulWidget
+app/lib/app/player/spike_player_page.dart:60:780: final class _SpikePlayerPageState extends State<SpikePlayerPage>
+app/lib/main_player_spike.dart:134:151: final class SpikePlayerApp extends StatefulWidget
+app/lib/main_player_spike.dart:153:234: final class _SpikePlayerAppState extends State<SpikePlayerApp>

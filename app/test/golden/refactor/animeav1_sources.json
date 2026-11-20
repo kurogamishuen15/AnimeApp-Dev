@@ -1,0 +1,140 @@
+{
+  "sources": [
+    {
+      "id": "animeav1:naruto:1:sub",
+      "provider": "animeav1",
+      "episodeKey": "6:naruto;1;2[18:11:myanimelist2:2013:7:anilist2:20]1[6:naruto]",
+      "language": "ja",
+      "quality": "unknown",
+      "priority": 0,
+      "audio": "ja",
+      "subLanguage": "es",
+      "dubbingType": "originalAudio",
+      "announced": "Japonés + subtítulos españoles incrustados (SUB)",
+      "label": "AnimeAV1 · Japonés · Sub ES incrustados",
+      "subtitles": [],
+      "servers": [
+        {
+          "id": "voe-sub-0",
+          "endpoint": "https://voe.sx/e/subfixture",
+          "hostId": "voe",
+          "priority": 30,
+          "kind": "embed",
+          "language": "ja",
+          "format": "unknown",
+          "quality": null,
+          "displayName": "Voe",
+          "availability": "listed",
+          "episodeId": "naruto:1",
+          "expiresAt": null,
+          "provenance": "AnimeAV1 episode embeds/SUB (Anilili MIT-0)",
+          "headers": {
+            "Referer": "https://animeav1.com/"
+          }
+        }
+      ]
+    },
+    {
+      "id": "animeav1:naruto:1:dub",
+      "provider": "animeav1",
+      "episodeKey": "6:naruto;1;2[18:11:myanimelist2:2013:7:anilist2:20]1[6:naruto]",
+      "language": "es",
+      "quality": "unknown",
+      "priority": 0,
+      "audio": "es",
+      "subLanguage": null,
+      "dubbingType": "latinSpanish",
+      "announced": "Español latino (DUB)",
+      "label": "AnimeAV1 · Español latino",
+      "subtitles": [],
+      "servers": [
+        {
+          "id": "yourupload-dub-0",
+          "endpoint": "https://www.yourupload.com/embed/dubfixture",
+          "hostId": "yourupload",
+          "priority": 20,
+          "kind": "embed",
+          "language": "es",
+          "format": "unknown",
+          "quality": null,
+          "displayName": "YourUpload",
+          "availability": "listed",
+          "episodeId": "naruto:1",
+          "expiresAt": null,
+          "provenance": "AnimeAV1 episode embeds/DUB (Anilili MIT-0)",
+          "headers": {
+            "Referer": "https://animeav1.com/"
+          }
+        },
+        {
+          "id": "mp4upload-dub-1",
+          "endpoint": "https://www.mp4upload.com/embed-dubfixture.html",
+          "hostId": "mp4upload",
+          "priority": 10,
+          "kind": "embed",
+          "language": "es",
+          "format": "unknown",
+          "quality": null,
+          "displayName": "MP4Upload",
+          "availability": "listed",
+          "episodeId": "naruto:1",
+          "expiresAt": null,
+          "provenance": "AnimeAV1 episode embeds/DUB (Anilili MIT-0)",
+          "headers": {
+            "Referer": "https://animeav1.com/"
+          }
+        },
+        {
+          "id": "voe-dub-2",
+          "endpoint": "https://voe.sx/e/dubfixture",
+          "hostId": "voe",
+          "priority": 30,
+          "kind": "embed",
+          "language": "es",
+          "format": "unknown",
+          "quality": null,
+          "displayName": "Voe",
+          "availability": "listed",
+          "episodeId": "naruto:1",
+          "expiresAt": null,
+          "provenance": "AnimeAV1 episode embeds/DUB (Anilili MIT-0)",
+          "headers": {
+            "Referer": "https://animeav1.com/"
+          }
+        }
+      ]
+    }
+  ],
+  "requests": [
+    {
+      "method": "GET",
+      "uri": "https://animeav1.com/catalogo/__data.json?search=Naruto",
+      "headers": {
+        "Accept": "application/json, application/octet-stream;q=0.9, text/html;q=0.8",
+        "User-Agent": "Kongroo/0.1 (public anime catalog client)",
+        "Referer": "https://animeav1.com/"
+      },
+      "data": null
+    },
+    {
+      "method": "GET",
+      "uri": "https://animeav1.com/media/naruto/__data.json",
+      "headers": {
+        "Accept": "application/json, application/octet-stream;q=0.9, text/html;q=0.8",
+        "User-Agent": "Kongroo/0.1 (public anime catalog client)",
+        "Referer": "https://animeav1.com/"
+      },
+      "data": null
+    },
+    {
+      "method": "GET",
+      "uri": "https://animeav1.com/media/naruto/1/__data.json",
+      "headers": {
+        "Accept": "application/json, application/octet-stream;q=0.9, text/html;q=0.8",
+        "User-Agent": "Kongroo/0.1 (public anime catalog client)",
+        "Referer": "https://animeav1.com/"
+      },
+      "data": null
+    }
+  ]
+}

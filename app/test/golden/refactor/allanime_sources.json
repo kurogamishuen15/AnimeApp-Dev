@@ -1,0 +1,80 @@
+{
+  "sources": [
+    {
+      "id": "allanime:show-1:9:sub",
+      "provider": "allanime",
+      "episodeKey": "4:test;9;2[21:11:myanimelist5:2119917:7:anilist6:100240]1[14:tokyo ghoul:re]",
+      "language": "sub",
+      "quality": "Auto",
+      "priority": 0,
+      "audio": "unknown",
+      "subLanguage": null,
+      "dubbingType": "unknown",
+      "announced": "sub",
+      "label": "AllAnime · Original (sub)",
+      "subtitles": [],
+      "servers": [
+        {
+          "id": "allanime-0",
+          "endpoint": "https://tools.fast4speed.rsvp/media/sub/9",
+          "hostId": "direct-media",
+          "priority": 0,
+          "kind": "media",
+          "language": "unknown",
+          "format": "mp4",
+          "quality": "Auto",
+          "displayName": "AllAnime Yt-mp4",
+          "availability": "listed",
+          "episodeId": null,
+          "expiresAt": null,
+          "provenance": "AllAnime client-crypto sources (mkissa build 190)",
+          "headers": {
+            "Referer": "https://mkissa.to/",
+            "User-Agent": "Kongroo/0.1 (public anime catalog client)"
+          }
+        }
+      ]
+    }
+  ],
+  "requests": [
+    {
+      "method": "POST",
+      "uri": "https://api.mkissa.net/api",
+      "headers": {
+        "Content-Type": "application/json",
+        "Accept": "application/json, application/octet-stream;q=0.9, text/html;q=0.8",
+        "User-Agent": "Kongroo/0.1 (public anime catalog client)",
+        "Referer": "https://mkissa.to/",
+        "Origin": "https://mkissa.to",
+        "content-length": "492"
+      },
+      "data": "{\"query\":\"query($search: SearchInput, $limit: Int, $page: Int, $translationType: VaildTranslationTypeEnumType, $countryOrigin: VaildCountryOriginEnumType) { shows(search: $search, limit: $limit, page: $page, translationType: $translationType, countryOrigin: $countryOrigin) { edges { _id name englishName malId availableEpisodes } } }\",\"variables\":{\"search\":{\"allowAdult\":false,\"allowUnknown\":false,\"query\":\"Tokyo Ghoul:re\"},\"limit\":20,\"page\":1,\"translationType\":\"sub\",\"countryOrigin\":\"ALL\"}}"
+    },
+    {
+      "method": "GET",
+      "uri": "https://api.mkissa.net/client-crypto/v1/bootstrap?buildId=190&k=k7",
+      "headers": {
+        "Accept": "application/json, application/octet-stream;q=0.9, text/html;q=0.8",
+        "User-Agent": "Kongroo/0.1 (public anime catalog client)",
+        "Referer": "https://mkissa.to/",
+        "Origin": "https://mkissa.to",
+        "x-build-id": "190",
+        "x-aa-boot": "b4bb24e44f1b1e33f975bf5385b1d40733e059309f9b2763905aabd46690833e"
+      },
+      "data": null
+    },
+    {
+      "method": "GET",
+      "uri": "https://api.mkissa.net/api?variables=%7B%22showId%22%3A%22show-1%22%2C%22translationType%22%3A%22sub%22%2C%22episodeString%22%3A%229%22%7D&extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%22670bbf38d0868f446e2346c1e956ca2c40c416e733ca248fd54e04f1c8b99145%22%7D%2C%22k%22%3A%22k7%22%2C%22aaReq%22%3A%22AdE9te9T1xfST%2BmGinCQ%2BVkWT0pQlmytWT9xDTpYb5eP3NeP9CmKcfoP0MICC1xjFEx9ApZTe7NvkqvqTzhx7fhf%2BWE7zJfK9bIfZ398CGxwHNWLPZvXyKLFF1A%2B50rAC6%2BTNt9jZ8pP9RH%2FgtzdEpJWrest0a8QHzQ2JD6lInTO3T35Eg7daPlxRpMTwS36LoKpK5BdeOQblPkO5f%2FAF%2BjNzAql%22%7D",
+      "headers": {
+        "Accept": "application/json, application/octet-stream;q=0.9, text/html;q=0.8",
+        "User-Agent": "Kongroo/0.1 (public anime catalog client)",
+        "Referer": "https://mkissa.to/",
+        "Origin": "https://mkissa.to",
+        "x-build-id": "190",
+        "x-aa-boot": "f12789a939aa0ca0a3734ecf72bd17eb9572ba124eaadccbeb6ec50a6ac6b749"
+      },
+      "data": null
+    }
+  ]
+}

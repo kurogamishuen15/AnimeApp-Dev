@@ -1,0 +1,8 @@
+00:00 +0: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/catalog/confirm_completed_status_test.dart
+00:00 +0: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/catalog/confirm_completed_status_test.dart: manual completion explains unavailable episode verification
+00:01 +1: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/catalog/playback_resolution_message_test.dart
+00:01 +1: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/catalog/playback_resolution_message_test.dart: distinguishes no results and unsupported lookup
+00:01 +2: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/catalog/playback_resolution_message_test.dart: maps typed failures to safe messages without exposing transport data
+00:01 +3: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/catalog/anime_detail_external_streaming_links_test.dart
+00:03 +3: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/catalog/anime_detail_external_streaming_links_test.dart: copies AniList external episode links through its callback
+00:04 +4: All tests passed!

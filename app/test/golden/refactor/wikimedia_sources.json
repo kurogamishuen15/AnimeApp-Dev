@@ -1,0 +1,67 @@
+{
+  "sources": [
+    {
+      "id": "Q2054133:1",
+      "provider": "wikimedia-commons",
+      "episodeKey": "15:namakura-gatana;1;1[15:7:anilist4:6654]0[]",
+      "language": "unknown",
+      "quality": "Auto",
+      "priority": 0,
+      "audio": "unknown",
+      "subLanguage": null,
+      "dubbingType": "unknown",
+      "announced": "unknown",
+      "label": null,
+      "subtitles": [],
+      "servers": [
+        {
+          "id": "Wikimedia · 480p (1)",
+          "endpoint": "https://upload.wikimedia.org/wikipedia/commons/a/ab/480.webm",
+          "hostId": "direct-media",
+          "priority": 0,
+          "kind": "media",
+          "language": "unknown",
+          "format": "unknown",
+          "quality": null,
+          "displayName": null,
+          "availability": "listed",
+          "episodeId": "Q2054133:1",
+          "expiresAt": null,
+          "provenance": "wikimedia-commons public episode alternatives",
+          "headers": {
+            "User-Agent": "Kongroo/1.0.0 (https://github.com/kurogamishuen15/AnimeApp-Dev/issues)"
+          }
+        },
+        {
+          "id": "Wikimedia · Original (2)",
+          "endpoint": "https://upload.wikimedia.org/wikipedia/commons/a/ab/original.webm",
+          "hostId": "direct-media",
+          "priority": -1,
+          "kind": "media",
+          "language": "unknown",
+          "format": "unknown",
+          "quality": null,
+          "displayName": null,
+          "availability": "listed",
+          "episodeId": "Q2054133:1",
+          "expiresAt": null,
+          "provenance": "wikimedia-commons public episode alternatives",
+          "headers": {
+            "User-Agent": "Kongroo/1.0.0 (https://github.com/kurogamishuen15/AnimeApp-Dev/issues)"
+          }
+        }
+      ]
+    }
+  ],
+  "requests": [
+    {
+      "method": "GET",
+      "uri": "https://commons.wikimedia.org/w/api.php?action=query&format=json&formatversion=2&titles=File%3AKouichi+Jun%27ichi+-+Namakura+Gatana+%281917%29+-+4-minute+restored+version.webm&prop=videoinfo&viprop=url%7Cmime%7Cderivatives%7Cextmetadata",
+      "headers": {
+        "Accept": "application/json, application/octet-stream;q=0.9, text/html;q=0.8",
+        "User-Agent": "Kongroo/1.0.0 (https://github.com/kurogamishuen15/AnimeApp-Dev/issues)"
+      },
+      "data": null
+    }
+  ]
+}

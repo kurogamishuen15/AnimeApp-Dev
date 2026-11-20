@@ -1,0 +1,59 @@
+{
+  "sources": [
+    {
+      "id": "anizone:djivt6wx:9",
+      "provider": "anizone",
+      "episodeKey": "4:test;9;1[17:7:anilist6:100240]1[14:tokyo ghoul:re]",
+      "language": "sub",
+      "quality": "Auto",
+      "priority": 0,
+      "audio": "unknown",
+      "subLanguage": null,
+      "dubbingType": "unknown",
+      "announced": "sub; el manifiesto publica pistas de audio",
+      "label": "AniZone",
+      "subtitles": [],
+      "servers": [
+        {
+          "id": "anizone-hls",
+          "endpoint": "https://seiryuu.vid-cdn.xyz/15052d20/master.m3u8",
+          "hostId": "direct-media",
+          "priority": 0,
+          "kind": "media",
+          "language": "unknown",
+          "format": "hls",
+          "quality": null,
+          "displayName": null,
+          "availability": "listed",
+          "episodeId": "anizone:djivt6wx:9",
+          "expiresAt": null,
+          "provenance": "AniZone player snapshot (Anilili MIT-0, forma live)",
+          "headers": {
+            "Referer": "https://anizone.to/"
+          }
+        }
+      ]
+    }
+  ],
+  "requests": [
+    {
+      "method": "GET",
+      "uri": "https://anizone.to/anime?search=Tokyo+Ghoul%3Are",
+      "headers": {
+        "Accept": "application/json, application/octet-stream;q=0.9, text/html;q=0.8",
+        "User-Agent": "Kongroo/0.1 (public anime catalog client)"
+      },
+      "data": null
+    },
+    {
+      "method": "GET",
+      "uri": "https://anizone.to/anime/djivt6wx/9",
+      "headers": {
+        "Accept": "application/json, application/octet-stream;q=0.9, text/html;q=0.8",
+        "User-Agent": "Kongroo/0.1 (public anime catalog client)",
+        "Referer": "https://anizone.to/anime/djivt6wx"
+      },
+      "data": null
+    }
+  ]
+}

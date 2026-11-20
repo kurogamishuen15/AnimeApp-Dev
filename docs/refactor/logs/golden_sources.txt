@@ -1,0 +1,7 @@
+00:00 +0: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/refactor/source_characterization_test.dart
+00:00 +0: allanime preserves source data and exact HTTP requests
+00:00 +1: animeav1 preserves source data and exact HTTP requests
+00:00 +2: animegg preserves source data and exact HTTP requests
+00:00 +3: anizone preserves source data and exact HTTP requests
+00:00 +4: megaplay preserves source data and exact HTTP requests
+00:00 +5: All tests passed!

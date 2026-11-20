@@ -1,0 +1,50 @@
+{
+  "plain": "{\"data\":[{\"id\":\"fixture-title\",\"anilist_id\":100240}]}",
+  "xorGzip": "{\"data\":[{\"id\":\"fixture-title\",\"anilist_id\":100240}]}",
+  "direct": [
+    {
+      "uri": "https://cdn.example.org/a.m3u8",
+      "allowed": true,
+      "format": "hls"
+    },
+    {
+      "uri": "https://cdn.example.org/a.mp4",
+      "allowed": true,
+      "format": "mp4"
+    },
+    {
+      "uri": "https://cdn.example.org/a.mpd",
+      "allowed": true,
+      "format": "dash"
+    },
+    {
+      "uri": "https://cdn.example.org/a.webm",
+      "allowed": true,
+      "format": "webm"
+    },
+    {
+      "uri": "https://127.0.0.1/a.mp4",
+      "allowed": false,
+      "format": "mp4"
+    },
+    {
+      "uri": "http://cdn.example.org/a.mp4",
+      "allowed": false,
+      "format": "mp4"
+    },
+    {
+      "uri": "https://cdn.example.test/a.mp4",
+      "allowed": false,
+      "format": "mp4"
+    }
+  ],
+  "userSources": [
+    {
+      "anime": "anilist:21",
+      "episode": 1,
+      "url": "https://cdn.example.org/a.m3u8",
+      "language": "ja",
+      "quality": "1080p"
+    }
+  ]
+}

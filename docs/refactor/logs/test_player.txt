@@ -1,0 +1,2632 @@
+00:00 +0: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/active_player_lease_test.dart
+00:00 +0: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/active_player_lease_test.dart: slot remains reserved and concurrent releases share completion
+00:00 +1: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/active_player_lease_test.dart: retry refuses to take over a live Player without a dispose request
+00:00 +2: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/active_player_lease_test.dart: failed cleanup keeps slot reserved and permits a successful retry
+00:00 +3: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/active_player_lease_test.dart: retry cannot replace the cleanup callback owned by the lease
+00:00 +4: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/external_subtitle_search_panel_test.dart
+00:08 +4: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/external_subtitle_search_panel_test.dart: searches, displays candidate and loads via service
+00:09 +5: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/external_subtitle_search_panel_test.dart: empty search reports validation without calling service
+00:09 +6: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/external_subtitle_search_panel_test.dart: search input is bounded to the domain query limit
+00:09 +7: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/external_subtitle_search_panel_test.dart: submitted search cannot race an in-flight request
+00:09 +8: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/main_player_spike_test.dart
+lib/application/player/providers/playback_provider_manager.dart:293:5: Error: Expected a class member, but got 'return'.
+    return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+    ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:293:36: Error: Expected '>' after this.
+    return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+                                   ^^^^
+lib/application/player/providers/playback_provider_manager.dart:296:3: Error: Can't have modifier 'static' here.
+Try removing 'static'.
+  static int _qualityScore(String? quality) {
+  ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:817:3: Error: Can't have modifier 'static' here.
+Try removing 'static'.
+  static final RegExp _semanticVersionPattern = RegExp(
+  ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:824:3: Error: Can't have modifier 'static' here.
+Try removing 'static'.
+  static bool _isSemanticVersion(String version) =>
+  ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:826:1: Error: Expected a declaration, but got '}'.
+}
+^
+lib/application/player/providers/playback_provider_manager.dart:79:13: Error: The non-abstract class 'PlaybackProviderManager' is missing implementations for these members:
+ - PlaybackProviderManager.PlaybackProviderSuccess
+Try to either
+ - provide an implementation,
+ - inherit an implementation from a superclass or mixin,
+ - mark the class as abstract, or
+ - provide a 'noSuchMethod' implementation.
+final class PlaybackProviderManager {
+            ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:293:12: Context: 'PlaybackProviderManager.PlaybackProviderSuccess' is defined here.
+    return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+           ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:206:9: Error: 'PlaybackProviderSuccess' isn't a type.
+        PlaybackProviderSuccess<List<ResolvedPlaybackStream>>(:final value)
+        ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:209:9: Error: 'PlaybackProviderSuccess' isn't a type.
+        PlaybackProviderSuccess<List<ResolvedPlaybackStream>>() ||
+        ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:259:14: Error: 'PlaybackProviderSuccess' isn't a type.
+        case PlaybackProviderSuccess<List<PlaybackSource>>(:final value):
+             ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:283:36: Error: This expression is not supported as a constant pattern.
+Try wrapping the expression in 'const ( ... )'.
+        case PlaybackProviderFailed<List<PlaybackSource>>:
+                                   ^
+lib/application/player/providers/playback_provider_manager.dart:287:5: Error: 'default' can't be used as an identifier because it's a keyword.
+Try renaming this to be an identifier that isn't a keyword.
+    default:
+    ^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:287:5: Error: Expected ';' after this.
+    default:
+    ^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:287:12: Error: Expected an identifier, but got ':'.
+Try inserting an identifier before ':'.
+    default:
+           ^
+lib/application/player/providers/playback_provider_manager.dart:287:12: Error: Unexpected token ';'.
+    default:
+           ^
+lib/application/player/providers/playback_provider_manager.dart:287:5: Error: The getter 'default' isn't defined for the type 'PlaybackProviderManager'.
+ - 'PlaybackProviderManager' is from 'package:anime_app/application/player/providers/playback_provider_manager.dart' ('lib/application/player/providers/playback_provider_manager.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'default'.
+    default:
+    ^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:235:56: Error: A non-null value must be returned since the return type 'PlaybackProviderResult<List<PlaybackSource>>' doesn't allow null.
+ - 'PlaybackProviderResult' is from 'package:anime_app/domain/player/providers/playback_provider_contract.dart' ('lib/domain/player/providers/playback_provider_contract.dart').
+ - 'List' is from 'dart:core'.
+ - 'PlaybackSource' is from 'package:anime_app/domain/player/providers/playback_source.dart' ('lib/domain/player/providers/playback_source.dart').
+  Future<PlaybackProviderResult<List<PlaybackSource>>> _findSources(
+                                                       ^
+lib/application/player/providers/playback_provider_manager.dart:291:41: Error: Undefined name 'deduped'.
+    final List<PlaybackSource> result = deduped.values.toList()
+                                        ^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:329:61: Error: Undefined name '_ordered'.
+    for (final PlaybackProviderRegistration registration in _ordered) {
+                                                            ^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:369:38: Error: Method not found: '_clock'.
+                when !expiry.isAfter(_clock())) {
+                                     ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:431:41: Error: Method not found: '_clock'.
+                  if (value.isExpiredAt(_clock())) {
+                                        ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:503:12: Error: Undefined name '_videoHostResolvers'.
+        in _videoHostResolvers) {
+           ^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:510:46: Error: Undefined name '_hostBreakers'.
+    final ProviderCircuitBreaker? existing = _hostBreakers.remove(hostId);
+                                             ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:512:7: Error: Undefined name '_hostBreakers'.
+      _hostBreakers[hostId] = existing;
+      ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:516:9: Error: Undefined name '_hostBreakers'.
+    if (_hostBreakers.length >= maxHostCircuitBreakers) {
+        ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:516:33: Error: Undefined name 'maxHostCircuitBreakers'.
+    if (_hostBreakers.length >= maxHostCircuitBreakers) {
+                                ^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:519:14: Error: Undefined name '_hostBreakers'.
+          in _hostBreakers.entries) {
+             ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:527:7: Error: Undefined name '_hostBreakers'.
+      _hostBreakers.remove(evictable);
+      ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:531:14: Error: Undefined name '_clock'.
+      clock: _clock,
+             ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:532:25: Error: Undefined name 'circuitFailureThreshold'.
+      failureThreshold: circuitFailureThreshold,
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:533:17: Error: Undefined name 'circuitCooldown'.
+      cooldown: circuitCooldown,
+                ^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:535:5: Error: Undefined name '_hostBreakers'.
+    _hostBreakers[hostId] = created;
+    ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:576:65: Error: Method not found: '_clock'.
+    final List<PlaybackSource>? cached = _sourceCache.read(key, _clock());
+                                                                ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:576:42: Error: Undefined name '_sourceCache'.
+    final List<PlaybackSource>? cached = _sourceCache.read(key, _clock());
+                                         ^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:582:11: Error: Undefined name '_providerRequests'.
+          _providerRequests,
+          ^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:591:11: Error: Undefined name '_registrations'.
+          _registrations[provider.id];
+          ^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:592:28: Error: Method not found: '_clock'.
+      final DateTime now = _clock();
+                           ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:603:7: Error: Undefined name '_sourceCache'.
+      _sourceCache.write(
+      ^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:624:44: Error: Undefined name '_breakers'.
+    final ProviderCircuitBreaker breaker = _breakers[provider.id]!;
+                                           ^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:712:49: Error: Method not found: '_clock'.
+    final Duration remaining = until.difference(_clock());
+                                                ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:730:44: Error: Undefined name '_breakers'.
+    final ProviderCircuitBreaker breaker = _breakers[id]!;
+                                           ^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:733:16: Error: Undefined name '_registrations'.
+      version: _registrations[id]!.version,
+               ^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:743:44: Error: Undefined name '_hostBreakers'.
+    final ProviderCircuitBreaker breaker = _hostBreakers[hostId]!;
+                                           ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:761:23: Error: Undefined name '_inFlight'.
+  ) => _joinShared<T>(_inFlight, key, cancellation, create);
+                      ^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:258:15: Error: The type 'PlaybackProviderResult<List<PlaybackSource>>' is not exhaustively matched by the switch cases since it doesn't match 'PlaybackProviderFailed<List<PlaybackSource>>(value: Object())'.
+ - 'PlaybackProviderResult' is from 'package:anime_app/domain/player/providers/playback_provider_contract.dart' ('lib/domain/player/providers/playback_provider_contract.dart').
+ - 'List' is from 'dart:core'.
+ - 'PlaybackSource' is from 'package:anime_app/domain/player/providers/playback_source.dart' ('lib/domain/player/providers/playback_source.dart').
+Try adding a default case or cases that match 'PlaybackProviderFailed<List<PlaybackSource>>(value: Object())'.
+      switch (result) {
+              ^
+00:17 +8 -1: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/main_player_spike_test.dart [E]
+  Failed to load "/home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/main_player_spike_test.dart":
+  Compilation failed for testPath=/home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/main_player_spike_test.dart: lib/application/player/providers/playback_provider_manager.dart:293:5: Error: Expected a class member, but got 'return'.
+      return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+      ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:293:36: Error: Expected '>' after this.
+      return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+                                     ^^^^
+  lib/application/player/providers/playback_provider_manager.dart:296:3: Error: Can't have modifier 'static' here.
+  Try removing 'static'.
+    static int _qualityScore(String? quality) {
+    ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:817:3: Error: Can't have modifier 'static' here.
+  Try removing 'static'.
+    static final RegExp _semanticVersionPattern = RegExp(
+    ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:824:3: Error: Can't have modifier 'static' here.
+  Try removing 'static'.
+    static bool _isSemanticVersion(String version) =>
+    ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:826:1: Error: Expected a declaration, but got '}'.
+  }
+  ^
+  lib/application/player/providers/playback_provider_manager.dart:79:13: Error: The non-abstract class 'PlaybackProviderManager' is missing implementations for these members:
+   - PlaybackProviderManager.PlaybackProviderSuccess
+  Try to either
+   - provide an implementation,
+   - inherit an implementation from a superclass or mixin,
+   - mark the class as abstract, or
+   - provide a 'noSuchMethod' implementation.
+  final class PlaybackProviderManager {
+              ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:293:12: Context: 'PlaybackProviderManager.PlaybackProviderSuccess' is defined here.
+      return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:206:9: Error: 'PlaybackProviderSuccess' isn't a type.
+          PlaybackProviderSuccess<List<ResolvedPlaybackStream>>(:final value)
+          ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:209:9: Error: 'PlaybackProviderSuccess' isn't a type.
+          PlaybackProviderSuccess<List<ResolvedPlaybackStream>>() ||
+          ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:259:14: Error: 'PlaybackProviderSuccess' isn't a type.
+          case PlaybackProviderSuccess<List<PlaybackSource>>(:final value):
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:283:36: Error: This expression is not supported as a constant pattern.
+  Try wrapping the expression in 'const ( ... )'.
+          case PlaybackProviderFailed<List<PlaybackSource>>:
+                                     ^
+  lib/application/player/providers/playback_provider_manager.dart:287:5: Error: 'default' can't be used as an identifier because it's a keyword.
+  Try renaming this to be an identifier that isn't a keyword.
+      default:
+      ^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:287:5: Error: Expected ';' after this.
+      default:
+      ^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:287:12: Error: Expected an identifier, but got ':'.
+  Try inserting an identifier before ':'.
+      default:
+             ^
+  lib/application/player/providers/playback_provider_manager.dart:287:12: Error: Unexpected token ';'.
+      default:
+             ^
+  lib/application/player/providers/playback_provider_manager.dart:287:5: Error: The getter 'default' isn't defined for the type 'PlaybackProviderManager'.
+   - 'PlaybackProviderManager' is from 'package:anime_app/application/player/providers/playback_provider_manager.dart' ('lib/application/player/providers/playback_provider_manager.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'default'.
+      default:
+      ^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:235:56: Error: A non-null value must be returned since the return type 'PlaybackProviderResult<List<PlaybackSource>>' doesn't allow null.
+   - 'PlaybackProviderResult' is from 'package:anime_app/domain/player/providers/playback_provider_contract.dart' ('lib/domain/player/providers/playback_provider_contract.dart').
+   - 'List' is from 'dart:core'.
+   - 'PlaybackSource' is from 'package:anime_app/domain/player/providers/playback_source.dart' ('lib/domain/player/providers/playback_source.dart').
+    Future<PlaybackProviderResult<List<PlaybackSource>>> _findSources(
+                                                         ^
+  lib/application/player/providers/playback_provider_manager.dart:291:41: Error: Undefined name 'deduped'.
+      final List<PlaybackSource> result = deduped.values.toList()
+                                          ^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:329:61: Error: Undefined name '_ordered'.
+      for (final PlaybackProviderRegistration registration in _ordered) {
+                                                              ^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:369:38: Error: Method not found: '_clock'.
+                  when !expiry.isAfter(_clock())) {
+                                       ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:431:41: Error: Method not found: '_clock'.
+                    if (value.isExpiredAt(_clock())) {
+                                          ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:503:12: Error: Undefined name '_videoHostResolvers'.
+          in _videoHostResolvers) {
+             ^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:510:46: Error: Undefined name '_hostBreakers'.
+      final ProviderCircuitBreaker? existing = _hostBreakers.remove(hostId);
+                                               ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:512:7: Error: Undefined name '_hostBreakers'.
+        _hostBreakers[hostId] = existing;
+        ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:516:9: Error: Undefined name '_hostBreakers'.
+      if (_hostBreakers.length >= maxHostCircuitBreakers) {
+          ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:516:33: Error: Undefined name 'maxHostCircuitBreakers'.
+      if (_hostBreakers.length >= maxHostCircuitBreakers) {
+                                  ^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:519:14: Error: Undefined name '_hostBreakers'.
+            in _hostBreakers.entries) {
+               ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:527:7: Error: Undefined name '_hostBreakers'.
+        _hostBreakers.remove(evictable);
+        ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:531:14: Error: Undefined name '_clock'.
+        clock: _clock,
+               ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:532:25: Error: Undefined name 'circuitFailureThreshold'.
+        failureThreshold: circuitFailureThreshold,
+                          ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:533:17: Error: Undefined name 'circuitCooldown'.
+        cooldown: circuitCooldown,
+                  ^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:535:5: Error: Undefined name '_hostBreakers'.
+      _hostBreakers[hostId] = created;
+      ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:576:65: Error: Method not found: '_clock'.
+      final List<PlaybackSource>? cached = _sourceCache.read(key, _clock());
+                                                                  ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:576:42: Error: Undefined name '_sourceCache'.
+      final List<PlaybackSource>? cached = _sourceCache.read(key, _clock());
+                                           ^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:582:11: Error: Undefined name '_providerRequests'.
+            _providerRequests,
+            ^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:591:11: Error: Undefined name '_registrations'.
+            _registrations[provider.id];
+            ^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:592:28: Error: Method not found: '_clock'.
+        final DateTime now = _clock();
+                             ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:603:7: Error: Undefined name '_sourceCache'.
+        _sourceCache.write(
+        ^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:624:44: Error: Undefined name '_breakers'.
+      final ProviderCircuitBreaker breaker = _breakers[provider.id]!;
+                                             ^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:712:49: Error: Method not found: '_clock'.
+      final Duration remaining = until.difference(_clock());
+                                                  ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:730:44: Error: Undefined name '_breakers'.
+      final ProviderCircuitBreaker breaker = _breakers[id]!;
+                                             ^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:733:16: Error: Undefined name '_registrations'.
+        version: _registrations[id]!.version,
+                 ^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:743:44: Error: Undefined name '_hostBreakers'.
+      final ProviderCircuitBreaker breaker = _hostBreakers[hostId]!;
+                                             ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:761:23: Error: Undefined name '_inFlight'.
+    ) => _joinShared<T>(_inFlight, key, cancellation, create);
+                        ^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:258:15: Error: The type 'PlaybackProviderResult<List<PlaybackSource>>' is not exhaustively matched by the switch cases since it doesn't match 'PlaybackProviderFailed<List<PlaybackSource>>(value: Object())'.
+   - 'PlaybackProviderResult' is from 'package:anime_app/domain/player/providers/playback_provider_contract.dart' ('lib/domain/player/providers/playback_provider_contract.dart').
+   - 'List' is from 'dart:core'.
+   - 'PlaybackSource' is from 'package:anime_app/domain/player/providers/playback_source.dart' ('lib/domain/player/providers/playback_source.dart').
+  Try adding a default case or cases that match 'PlaybackProviderFailed<List<PlaybackSource>>(value: Object())'.
+        switch (result) {
+                ^
+  .
+00:17 +8 -1: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/media_kit_spike_dispose_failure_test.dart
+00:28 +8 -1: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/media_kit_spike_dispose_failure_test.dart: auxiliary cleanup failure does not retain a disposed native Player
+media_kit: NativeReferenceHolder: Allocated 94100090553328
+00:29 +9 -1: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/media_kit_spike_dispose_failure_test.dart: adapter closes its stream and quarantines a failed dispose
+00:29 +10 -1: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/media_kit_video_surface_controls_test.dart
+00:30 +10 -1: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/media_kit_video_surface_controls_test.dart: F2.2 media_kit surface disables the package control overlay
+00:30 +11 -1: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/media_kit_video_surface_controls_test.dart: fit and aspect choices remain independent on the sole Video
+00:30 +12 -1: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/playback_spike_snapshot_test.dart
+00:31 +12 -1: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/playback_spike_snapshot_test.dart: unrelated updates preserve errors until explicit recovery
+00:31 +13 -1: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/playback_spike_snapshot_test.dart: Stop state is distinct from Pause and survives unrelated updates
+00:31 +14 -1: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/playback_spike_snapshot_test.dart: session state keeps seeking orthogonal to playback status
+00:31 +15 -1: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/player_performance_collector_test.dart
+00:32 +15 -1: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/player_performance_collector_test.dart: samples only while enabled and never overlaps native reads
+00:32 +16 -1: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/player_performance_collector_test.dart: missing metrics stay missing and a true zero remains zero
+00:32 +17 -1: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/player_performance_collector_test.dart: source failure is a marked sample and polling can recover
+00:32 +18 -1: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/player_performance_collector_test.dart: interval below one second is refused
+00:32 +19 -1: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/player_performance_integration_test.dart
+00:33 +19 -1: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/player_performance_integration_test.dart: libmpv reports live native counters for authorized local media
+KONGROO_CODEC system linux
+media_kit: NativeReferenceHolder: Allocated 93846110137872
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+KONGROO_PERF_NATIVE {"nominal_fps":null,"decoded_fps":null,"vo_drops":null,"decoder_drops":null,"avsync_seconds":null,"cache_seconds":616.678,"hwdec_current":null,"video_codec":null,"audio_codec":"Vorbis","vo":null,"ao":"pipewire","rss_bytes":350359552}
+KONGROO_PERF_NATIVE {"nominal_fps":null,"decoded_fps":null,"vo_drops":null,"decoder_drops":null,"avsync_seconds":null,"cache_seconds":615.703,"hwdec_current":null,"video_codec":null,"audio_codec":"Vorbis","vo":null,"ao":"pipewire","rss_bytes":351174656}
+KONGROO_PERF_NATIVE {"nominal_fps":null,"decoded_fps":null,"vo_drops":null,"decoder_drops":null,"avsync_seconds":null,"cache_seconds":614.682,"hwdec_current":null,"video_codec":null,"audio_codec":"Vorbis","vo":null,"ao":"pipewire","rss_bytes":351621120}
+00:37 +20 -1: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/player_quality_test.dart
+00:39 +20 -1: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/player_quality_test.dart: quality menu shows only real tracks and retains media context
+00:41 +21 -1: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/player_quality_test.dart: real libmpv selects second video stream without reopening media
+KONGROO_CODEC system linux
+media_kit: NativeReferenceHolder: Allocated 94598813830352
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+Shell:
+Shell: Fontconfig error: No writable cache directories
+Shell: 	/var/cache/fontconfig
+00:42 +22 -1: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/player_quality_test.dart: Morevna reports its single source resolution as fixed quality
+  Skip: Set KONGROO_TEST_REAL_DEMO=1 after preparing the local Morevna DEMO.
+00:42 +22 ~1 -1: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/player_test_fixture_test.dart
+00:43 +22 ~1 -1: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/player_test_fixture_test.dart: rejects a symlink at every fixture directory level
+00:43 +23 ~1 -1: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/player_window_controller_test.dart
+00:44 +23 ~1 -1: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/player_window_controller_test.dart: GTK request is not treated as effective until state event arrives
+00:44 +24 ~1 -1: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/player_window_controller_test.dart: late immediate method reply cannot overwrite GTK transition event
+00:44 +25 ~1 -1: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/player_window_controller_test.dart: missing GTK transition expires without claiming fullscreen
+00:44 +26 ~1 -1: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/player_window_controller_test.dart: late GTK state cannot settle an opposite request after timeout
+00:44 +27 ~1 -1: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/player_window_controller_test.dart: GTK channel failure is observable and rethrown
+00:44 +28 ~1 -1: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/spike_player_coordinator_test.dart
+lib/application/player/providers/playback_provider_manager.dart:293:5: Error: Expected a class member, but got 'return'.
+    return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+    ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:293:36: Error: Expected '>' after this.
+    return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+                                   ^^^^
+lib/application/player/providers/playback_provider_manager.dart:296:3: Error: Can't have modifier 'static' here.
+Try removing 'static'.
+  static int _qualityScore(String? quality) {
+  ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:817:3: Error: Can't have modifier 'static' here.
+Try removing 'static'.
+  static final RegExp _semanticVersionPattern = RegExp(
+  ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:824:3: Error: Can't have modifier 'static' here.
+Try removing 'static'.
+  static bool _isSemanticVersion(String version) =>
+  ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:826:1: Error: Expected a declaration, but got '}'.
+}
+^
+lib/application/player/providers/playback_provider_manager.dart:79:13: Error: The non-abstract class 'PlaybackProviderManager' is missing implementations for these members:
+ - PlaybackProviderManager.PlaybackProviderSuccess
+Try to either
+ - provide an implementation,
+ - inherit an implementation from a superclass or mixin,
+ - mark the class as abstract, or
+ - provide a 'noSuchMethod' implementation.
+final class PlaybackProviderManager {
+            ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:293:12: Context: 'PlaybackProviderManager.PlaybackProviderSuccess' is defined here.
+    return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+           ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:206:9: Error: 'PlaybackProviderSuccess' isn't a type.
+        PlaybackProviderSuccess<List<ResolvedPlaybackStream>>(:final value)
+        ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:209:9: Error: 'PlaybackProviderSuccess' isn't a type.
+        PlaybackProviderSuccess<List<ResolvedPlaybackStream>>() ||
+        ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:259:14: Error: 'PlaybackProviderSuccess' isn't a type.
+        case PlaybackProviderSuccess<List<PlaybackSource>>(:final value):
+             ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:283:36: Error: This expression is not supported as a constant pattern.
+Try wrapping the expression in 'const ( ... )'.
+        case PlaybackProviderFailed<List<PlaybackSource>>:
+                                   ^
+lib/application/player/providers/playback_provider_manager.dart:287:5: Error: 'default' can't be used as an identifier because it's a keyword.
+Try renaming this to be an identifier that isn't a keyword.
+    default:
+    ^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:287:5: Error: Expected ';' after this.
+    default:
+    ^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:287:12: Error: Expected an identifier, but got ':'.
+Try inserting an identifier before ':'.
+    default:
+           ^
+lib/application/player/providers/playback_provider_manager.dart:287:12: Error: Unexpected token ';'.
+    default:
+           ^
+lib/application/player/providers/playback_provider_manager.dart:287:5: Error: The getter 'default' isn't defined for the type 'PlaybackProviderManager'.
+ - 'PlaybackProviderManager' is from 'package:anime_app/application/player/providers/playback_provider_manager.dart' ('lib/application/player/providers/playback_provider_manager.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'default'.
+    default:
+    ^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:235:56: Error: A non-null value must be returned since the return type 'PlaybackProviderResult<List<PlaybackSource>>' doesn't allow null.
+ - 'PlaybackProviderResult' is from 'package:anime_app/domain/player/providers/playback_provider_contract.dart' ('lib/domain/player/providers/playback_provider_contract.dart').
+ - 'List' is from 'dart:core'.
+ - 'PlaybackSource' is from 'package:anime_app/domain/player/providers/playback_source.dart' ('lib/domain/player/providers/playback_source.dart').
+  Future<PlaybackProviderResult<List<PlaybackSource>>> _findSources(
+                                                       ^
+lib/application/player/providers/playback_provider_manager.dart:291:41: Error: Undefined name 'deduped'.
+    final List<PlaybackSource> result = deduped.values.toList()
+                                        ^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:329:61: Error: Undefined name '_ordered'.
+    for (final PlaybackProviderRegistration registration in _ordered) {
+                                                            ^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:369:38: Error: Method not found: '_clock'.
+                when !expiry.isAfter(_clock())) {
+                                     ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:431:41: Error: Method not found: '_clock'.
+                  if (value.isExpiredAt(_clock())) {
+                                        ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:503:12: Error: Undefined name '_videoHostResolvers'.
+        in _videoHostResolvers) {
+           ^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:510:46: Error: Undefined name '_hostBreakers'.
+    final ProviderCircuitBreaker? existing = _hostBreakers.remove(hostId);
+                                             ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:512:7: Error: Undefined name '_hostBreakers'.
+      _hostBreakers[hostId] = existing;
+      ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:516:9: Error: Undefined name '_hostBreakers'.
+    if (_hostBreakers.length >= maxHostCircuitBreakers) {
+        ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:516:33: Error: Undefined name 'maxHostCircuitBreakers'.
+    if (_hostBreakers.length >= maxHostCircuitBreakers) {
+                                ^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:519:14: Error: Undefined name '_hostBreakers'.
+          in _hostBreakers.entries) {
+             ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:527:7: Error: Undefined name '_hostBreakers'.
+      _hostBreakers.remove(evictable);
+      ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:531:14: Error: Undefined name '_clock'.
+      clock: _clock,
+             ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:532:25: Error: Undefined name 'circuitFailureThreshold'.
+      failureThreshold: circuitFailureThreshold,
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:533:17: Error: Undefined name 'circuitCooldown'.
+      cooldown: circuitCooldown,
+                ^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:535:5: Error: Undefined name '_hostBreakers'.
+    _hostBreakers[hostId] = created;
+    ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:576:65: Error: Method not found: '_clock'.
+    final List<PlaybackSource>? cached = _sourceCache.read(key, _clock());
+                                                                ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:576:42: Error: Undefined name '_sourceCache'.
+    final List<PlaybackSource>? cached = _sourceCache.read(key, _clock());
+                                         ^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:582:11: Error: Undefined name '_providerRequests'.
+          _providerRequests,
+          ^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:591:11: Error: Undefined name '_registrations'.
+          _registrations[provider.id];
+          ^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:592:28: Error: Method not found: '_clock'.
+      final DateTime now = _clock();
+                           ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:603:7: Error: Undefined name '_sourceCache'.
+      _sourceCache.write(
+      ^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:624:44: Error: Undefined name '_breakers'.
+    final ProviderCircuitBreaker breaker = _breakers[provider.id]!;
+                                           ^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:712:49: Error: Method not found: '_clock'.
+    final Duration remaining = until.difference(_clock());
+                                                ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:730:44: Error: Undefined name '_breakers'.
+    final ProviderCircuitBreaker breaker = _breakers[id]!;
+                                           ^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:733:16: Error: Undefined name '_registrations'.
+      version: _registrations[id]!.version,
+               ^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:743:44: Error: Undefined name '_hostBreakers'.
+    final ProviderCircuitBreaker breaker = _hostBreakers[hostId]!;
+                                           ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:761:23: Error: Undefined name '_inFlight'.
+  ) => _joinShared<T>(_inFlight, key, cancellation, create);
+                      ^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:258:15: Error: The type 'PlaybackProviderResult<List<PlaybackSource>>' is not exhaustively matched by the switch cases since it doesn't match 'PlaybackProviderFailed<List<PlaybackSource>>(value: Object())'.
+ - 'PlaybackProviderResult' is from 'package:anime_app/domain/player/providers/playback_provider_contract.dart' ('lib/domain/player/providers/playback_provider_contract.dart').
+ - 'List' is from 'dart:core'.
+ - 'PlaybackSource' is from 'package:anime_app/domain/player/providers/playback_source.dart' ('lib/domain/player/providers/playback_source.dart').
+Try adding a default case or cases that match 'PlaybackProviderFailed<List<PlaybackSource>>(value: Object())'.
+      switch (result) {
+              ^
+00:44 +28 ~1 -2: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/spike_player_coordinator_test.dart [E]
+  Failed to load "/home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/spike_player_coordinator_test.dart":
+  Compilation failed for testPath=/home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/spike_player_coordinator_test.dart: lib/application/player/providers/playback_provider_manager.dart:293:5: Error: Expected a class member, but got 'return'.
+      return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+      ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:293:36: Error: Expected '>' after this.
+      return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+                                     ^^^^
+  lib/application/player/providers/playback_provider_manager.dart:296:3: Error: Can't have modifier 'static' here.
+  Try removing 'static'.
+    static int _qualityScore(String? quality) {
+    ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:817:3: Error: Can't have modifier 'static' here.
+  Try removing 'static'.
+    static final RegExp _semanticVersionPattern = RegExp(
+    ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:824:3: Error: Can't have modifier 'static' here.
+  Try removing 'static'.
+    static bool _isSemanticVersion(String version) =>
+    ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:826:1: Error: Expected a declaration, but got '}'.
+  }
+  ^
+  lib/application/player/providers/playback_provider_manager.dart:79:13: Error: The non-abstract class 'PlaybackProviderManager' is missing implementations for these members:
+   - PlaybackProviderManager.PlaybackProviderSuccess
+  Try to either
+   - provide an implementation,
+   - inherit an implementation from a superclass or mixin,
+   - mark the class as abstract, or
+   - provide a 'noSuchMethod' implementation.
+  final class PlaybackProviderManager {
+              ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:293:12: Context: 'PlaybackProviderManager.PlaybackProviderSuccess' is defined here.
+      return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:206:9: Error: 'PlaybackProviderSuccess' isn't a type.
+          PlaybackProviderSuccess<List<ResolvedPlaybackStream>>(:final value)
+          ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:209:9: Error: 'PlaybackProviderSuccess' isn't a type.
+          PlaybackProviderSuccess<List<ResolvedPlaybackStream>>() ||
+          ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:259:14: Error: 'PlaybackProviderSuccess' isn't a type.
+          case PlaybackProviderSuccess<List<PlaybackSource>>(:final value):
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:283:36: Error: This expression is not supported as a constant pattern.
+  Try wrapping the expression in 'const ( ... )'.
+          case PlaybackProviderFailed<List<PlaybackSource>>:
+                                     ^
+  lib/application/player/providers/playback_provider_manager.dart:287:5: Error: 'default' can't be used as an identifier because it's a keyword.
+  Try renaming this to be an identifier that isn't a keyword.
+      default:
+      ^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:287:5: Error: Expected ';' after this.
+      default:
+      ^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:287:12: Error: Expected an identifier, but got ':'.
+  Try inserting an identifier before ':'.
+      default:
+             ^
+  lib/application/player/providers/playback_provider_manager.dart:287:12: Error: Unexpected token ';'.
+      default:
+             ^
+  lib/application/player/providers/playback_provider_manager.dart:287:5: Error: The getter 'default' isn't defined for the type 'PlaybackProviderManager'.
+   - 'PlaybackProviderManager' is from 'package:anime_app/application/player/providers/playback_provider_manager.dart' ('lib/application/player/providers/playback_provider_manager.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'default'.
+      default:
+      ^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:235:56: Error: A non-null value must be returned since the return type 'PlaybackProviderResult<List<PlaybackSource>>' doesn't allow null.
+   - 'PlaybackProviderResult' is from 'package:anime_app/domain/player/providers/playback_provider_contract.dart' ('lib/domain/player/providers/playback_provider_contract.dart').
+   - 'List' is from 'dart:core'.
+   - 'PlaybackSource' is from 'package:anime_app/domain/player/providers/playback_source.dart' ('lib/domain/player/providers/playback_source.dart').
+    Future<PlaybackProviderResult<List<PlaybackSource>>> _findSources(
+                                                         ^
+  lib/application/player/providers/playback_provider_manager.dart:291:41: Error: Undefined name 'deduped'.
+      final List<PlaybackSource> result = deduped.values.toList()
+                                          ^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:329:61: Error: Undefined name '_ordered'.
+      for (final PlaybackProviderRegistration registration in _ordered) {
+                                                              ^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:369:38: Error: Method not found: '_clock'.
+                  when !expiry.isAfter(_clock())) {
+                                       ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:431:41: Error: Method not found: '_clock'.
+                    if (value.isExpiredAt(_clock())) {
+                                          ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:503:12: Error: Undefined name '_videoHostResolvers'.
+          in _videoHostResolvers) {
+             ^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:510:46: Error: Undefined name '_hostBreakers'.
+      final ProviderCircuitBreaker? existing = _hostBreakers.remove(hostId);
+                                               ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:512:7: Error: Undefined name '_hostBreakers'.
+        _hostBreakers[hostId] = existing;
+        ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:516:9: Error: Undefined name '_hostBreakers'.
+      if (_hostBreakers.length >= maxHostCircuitBreakers) {
+          ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:516:33: Error: Undefined name 'maxHostCircuitBreakers'.
+      if (_hostBreakers.length >= maxHostCircuitBreakers) {
+                                  ^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:519:14: Error: Undefined name '_hostBreakers'.
+            in _hostBreakers.entries) {
+               ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:527:7: Error: Undefined name '_hostBreakers'.
+        _hostBreakers.remove(evictable);
+        ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:531:14: Error: Undefined name '_clock'.
+        clock: _clock,
+               ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:532:25: Error: Undefined name 'circuitFailureThreshold'.
+        failureThreshold: circuitFailureThreshold,
+                          ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:533:17: Error: Undefined name 'circuitCooldown'.
+        cooldown: circuitCooldown,
+                  ^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:535:5: Error: Undefined name '_hostBreakers'.
+      _hostBreakers[hostId] = created;
+      ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:576:65: Error: Method not found: '_clock'.
+      final List<PlaybackSource>? cached = _sourceCache.read(key, _clock());
+                                                                  ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:576:42: Error: Undefined name '_sourceCache'.
+      final List<PlaybackSource>? cached = _sourceCache.read(key, _clock());
+                                           ^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:582:11: Error: Undefined name '_providerRequests'.
+            _providerRequests,
+            ^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:591:11: Error: Undefined name '_registrations'.
+            _registrations[provider.id];
+            ^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:592:28: Error: Method not found: '_clock'.
+        final DateTime now = _clock();
+                             ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:603:7: Error: Undefined name '_sourceCache'.
+        _sourceCache.write(
+        ^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:624:44: Error: Undefined name '_breakers'.
+      final ProviderCircuitBreaker breaker = _breakers[provider.id]!;
+                                             ^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:712:49: Error: Method not found: '_clock'.
+      final Duration remaining = until.difference(_clock());
+                                                  ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:730:44: Error: Undefined name '_breakers'.
+      final ProviderCircuitBreaker breaker = _breakers[id]!;
+                                             ^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:733:16: Error: Undefined name '_registrations'.
+        version: _registrations[id]!.version,
+                 ^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:743:44: Error: Undefined name '_hostBreakers'.
+      final ProviderCircuitBreaker breaker = _hostBreakers[hostId]!;
+                                             ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:761:23: Error: Undefined name '_inFlight'.
+    ) => _joinShared<T>(_inFlight, key, cancellation, create);
+                        ^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:258:15: Error: The type 'PlaybackProviderResult<List<PlaybackSource>>' is not exhaustively matched by the switch cases since it doesn't match 'PlaybackProviderFailed<List<PlaybackSource>>(value: Object())'.
+   - 'PlaybackProviderResult' is from 'package:anime_app/domain/player/providers/playback_provider_contract.dart' ('lib/domain/player/providers/playback_provider_contract.dart').
+   - 'List' is from 'dart:core'.
+   - 'PlaybackSource' is from 'package:anime_app/domain/player/providers/playback_source.dart' ('lib/domain/player/providers/playback_source.dart').
+  Try adding a default case or cases that match 'PlaybackProviderFailed<List<PlaybackSource>>(value: Object())'.
+        switch (result) {
+                ^
+  .
+00:44 +28 ~1 -2: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/spike_player_page_test.dart
+lib/application/player/providers/playback_provider_manager.dart:293:5: Error: Expected a class member, but got 'return'.
+    return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+    ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:293:36: Error: Expected '>' after this.
+    return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+                                   ^^^^
+lib/application/player/providers/playback_provider_manager.dart:296:3: Error: Can't have modifier 'static' here.
+Try removing 'static'.
+  static int _qualityScore(String? quality) {
+  ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:817:3: Error: Can't have modifier 'static' here.
+Try removing 'static'.
+  static final RegExp _semanticVersionPattern = RegExp(
+  ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:824:3: Error: Can't have modifier 'static' here.
+Try removing 'static'.
+  static bool _isSemanticVersion(String version) =>
+  ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:826:1: Error: Expected a declaration, but got '}'.
+}
+^
+lib/application/player/providers/playback_provider_manager.dart:79:13: Error: The non-abstract class 'PlaybackProviderManager' is missing implementations for these members:
+ - PlaybackProviderManager.PlaybackProviderSuccess
+Try to either
+ - provide an implementation,
+ - inherit an implementation from a superclass or mixin,
+ - mark the class as abstract, or
+ - provide a 'noSuchMethod' implementation.
+final class PlaybackProviderManager {
+            ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:293:12: Context: 'PlaybackProviderManager.PlaybackProviderSuccess' is defined here.
+    return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+           ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:206:9: Error: 'PlaybackProviderSuccess' isn't a type.
+        PlaybackProviderSuccess<List<ResolvedPlaybackStream>>(:final value)
+        ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:209:9: Error: 'PlaybackProviderSuccess' isn't a type.
+        PlaybackProviderSuccess<List<ResolvedPlaybackStream>>() ||
+        ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:259:14: Error: 'PlaybackProviderSuccess' isn't a type.
+        case PlaybackProviderSuccess<List<PlaybackSource>>(:final value):
+             ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:283:36: Error: This expression is not supported as a constant pattern.
+Try wrapping the expression in 'const ( ... )'.
+        case PlaybackProviderFailed<List<PlaybackSource>>:
+                                   ^
+lib/application/player/providers/playback_provider_manager.dart:287:5: Error: 'default' can't be used as an identifier because it's a keyword.
+Try renaming this to be an identifier that isn't a keyword.
+    default:
+    ^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:287:5: Error: Expected ';' after this.
+    default:
+    ^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:287:12: Error: Expected an identifier, but got ':'.
+Try inserting an identifier before ':'.
+    default:
+           ^
+lib/application/player/providers/playback_provider_manager.dart:287:12: Error: Unexpected token ';'.
+    default:
+           ^
+lib/application/player/providers/playback_provider_manager.dart:287:5: Error: The getter 'default' isn't defined for the type 'PlaybackProviderManager'.
+ - 'PlaybackProviderManager' is from 'package:anime_app/application/player/providers/playback_provider_manager.dart' ('lib/application/player/providers/playback_provider_manager.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'default'.
+    default:
+    ^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:235:56: Error: A non-null value must be returned since the return type 'PlaybackProviderResult<List<PlaybackSource>>' doesn't allow null.
+ - 'PlaybackProviderResult' is from 'package:anime_app/domain/player/providers/playback_provider_contract.dart' ('lib/domain/player/providers/playback_provider_contract.dart').
+ - 'List' is from 'dart:core'.
+ - 'PlaybackSource' is from 'package:anime_app/domain/player/providers/playback_source.dart' ('lib/domain/player/providers/playback_source.dart').
+  Future<PlaybackProviderResult<List<PlaybackSource>>> _findSources(
+                                                       ^
+lib/application/player/providers/playback_provider_manager.dart:291:41: Error: Undefined name 'deduped'.
+    final List<PlaybackSource> result = deduped.values.toList()
+                                        ^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:329:61: Error: Undefined name '_ordered'.
+    for (final PlaybackProviderRegistration registration in _ordered) {
+                                                            ^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:369:38: Error: Method not found: '_clock'.
+                when !expiry.isAfter(_clock())) {
+                                     ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:431:41: Error: Method not found: '_clock'.
+                  if (value.isExpiredAt(_clock())) {
+                                        ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:503:12: Error: Undefined name '_videoHostResolvers'.
+        in _videoHostResolvers) {
+           ^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:510:46: Error: Undefined name '_hostBreakers'.
+    final ProviderCircuitBreaker? existing = _hostBreakers.remove(hostId);
+                                             ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:512:7: Error: Undefined name '_hostBreakers'.
+      _hostBreakers[hostId] = existing;
+      ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:516:9: Error: Undefined name '_hostBreakers'.
+    if (_hostBreakers.length >= maxHostCircuitBreakers) {
+        ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:516:33: Error: Undefined name 'maxHostCircuitBreakers'.
+    if (_hostBreakers.length >= maxHostCircuitBreakers) {
+                                ^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:519:14: Error: Undefined name '_hostBreakers'.
+          in _hostBreakers.entries) {
+             ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:527:7: Error: Undefined name '_hostBreakers'.
+      _hostBreakers.remove(evictable);
+      ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:531:14: Error: Undefined name '_clock'.
+      clock: _clock,
+             ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:532:25: Error: Undefined name 'circuitFailureThreshold'.
+      failureThreshold: circuitFailureThreshold,
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:533:17: Error: Undefined name 'circuitCooldown'.
+      cooldown: circuitCooldown,
+                ^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:535:5: Error: Undefined name '_hostBreakers'.
+    _hostBreakers[hostId] = created;
+    ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:576:65: Error: Method not found: '_clock'.
+    final List<PlaybackSource>? cached = _sourceCache.read(key, _clock());
+                                                                ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:576:42: Error: Undefined name '_sourceCache'.
+    final List<PlaybackSource>? cached = _sourceCache.read(key, _clock());
+                                         ^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:582:11: Error: Undefined name '_providerRequests'.
+          _providerRequests,
+          ^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:591:11: Error: Undefined name '_registrations'.
+          _registrations[provider.id];
+          ^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:592:28: Error: Method not found: '_clock'.
+      final DateTime now = _clock();
+                           ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:603:7: Error: Undefined name '_sourceCache'.
+      _sourceCache.write(
+      ^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:624:44: Error: Undefined name '_breakers'.
+    final ProviderCircuitBreaker breaker = _breakers[provider.id]!;
+                                           ^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:712:49: Error: Method not found: '_clock'.
+    final Duration remaining = until.difference(_clock());
+                                                ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:730:44: Error: Undefined name '_breakers'.
+    final ProviderCircuitBreaker breaker = _breakers[id]!;
+                                           ^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:733:16: Error: Undefined name '_registrations'.
+      version: _registrations[id]!.version,
+               ^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:743:44: Error: Undefined name '_hostBreakers'.
+    final ProviderCircuitBreaker breaker = _hostBreakers[hostId]!;
+                                           ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:761:23: Error: Undefined name '_inFlight'.
+  ) => _joinShared<T>(_inFlight, key, cancellation, create);
+                      ^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:258:15: Error: The type 'PlaybackProviderResult<List<PlaybackSource>>' is not exhaustively matched by the switch cases since it doesn't match 'PlaybackProviderFailed<List<PlaybackSource>>(value: Object())'.
+ - 'PlaybackProviderResult' is from 'package:anime_app/domain/player/providers/playback_provider_contract.dart' ('lib/domain/player/providers/playback_provider_contract.dart').
+ - 'List' is from 'dart:core'.
+ - 'PlaybackSource' is from 'package:anime_app/domain/player/providers/playback_source.dart' ('lib/domain/player/providers/playback_source.dart').
+Try adding a default case or cases that match 'PlaybackProviderFailed<List<PlaybackSource>>(value: Object())'.
+      switch (result) {
+              ^
+00:48 +28 ~1 -3: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/spike_player_page_test.dart [E]
+  Failed to load "/home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/spike_player_page_test.dart":
+  Compilation failed for testPath=/home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/spike_player_page_test.dart: lib/application/player/providers/playback_provider_manager.dart:293:5: Error: Expected a class member, but got 'return'.
+      return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+      ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:293:36: Error: Expected '>' after this.
+      return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+                                     ^^^^
+  lib/application/player/providers/playback_provider_manager.dart:296:3: Error: Can't have modifier 'static' here.
+  Try removing 'static'.
+    static int _qualityScore(String? quality) {
+    ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:817:3: Error: Can't have modifier 'static' here.
+  Try removing 'static'.
+    static final RegExp _semanticVersionPattern = RegExp(
+    ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:824:3: Error: Can't have modifier 'static' here.
+  Try removing 'static'.
+    static bool _isSemanticVersion(String version) =>
+    ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:826:1: Error: Expected a declaration, but got '}'.
+  }
+  ^
+  lib/application/player/providers/playback_provider_manager.dart:79:13: Error: The non-abstract class 'PlaybackProviderManager' is missing implementations for these members:
+   - PlaybackProviderManager.PlaybackProviderSuccess
+  Try to either
+   - provide an implementation,
+   - inherit an implementation from a superclass or mixin,
+   - mark the class as abstract, or
+   - provide a 'noSuchMethod' implementation.
+  final class PlaybackProviderManager {
+              ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:293:12: Context: 'PlaybackProviderManager.PlaybackProviderSuccess' is defined here.
+      return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:206:9: Error: 'PlaybackProviderSuccess' isn't a type.
+          PlaybackProviderSuccess<List<ResolvedPlaybackStream>>(:final value)
+          ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:209:9: Error: 'PlaybackProviderSuccess' isn't a type.
+          PlaybackProviderSuccess<List<ResolvedPlaybackStream>>() ||
+          ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:259:14: Error: 'PlaybackProviderSuccess' isn't a type.
+          case PlaybackProviderSuccess<List<PlaybackSource>>(:final value):
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:283:36: Error: This expression is not supported as a constant pattern.
+  Try wrapping the expression in 'const ( ... )'.
+          case PlaybackProviderFailed<List<PlaybackSource>>:
+                                     ^
+  lib/application/player/providers/playback_provider_manager.dart:287:5: Error: 'default' can't be used as an identifier because it's a keyword.
+  Try renaming this to be an identifier that isn't a keyword.
+      default:
+      ^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:287:5: Error: Expected ';' after this.
+      default:
+      ^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:287:12: Error: Expected an identifier, but got ':'.
+  Try inserting an identifier before ':'.
+      default:
+             ^
+  lib/application/player/providers/playback_provider_manager.dart:287:12: Error: Unexpected token ';'.
+      default:
+             ^
+  lib/application/player/providers/playback_provider_manager.dart:287:5: Error: The getter 'default' isn't defined for the type 'PlaybackProviderManager'.
+   - 'PlaybackProviderManager' is from 'package:anime_app/application/player/providers/playback_provider_manager.dart' ('lib/application/player/providers/playback_provider_manager.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'default'.
+      default:
+      ^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:235:56: Error: A non-null value must be returned since the return type 'PlaybackProviderResult<List<PlaybackSource>>' doesn't allow null.
+   - 'PlaybackProviderResult' is from 'package:anime_app/domain/player/providers/playback_provider_contract.dart' ('lib/domain/player/providers/playback_provider_contract.dart').
+   - 'List' is from 'dart:core'.
+   - 'PlaybackSource' is from 'package:anime_app/domain/player/providers/playback_source.dart' ('lib/domain/player/providers/playback_source.dart').
+    Future<PlaybackProviderResult<List<PlaybackSource>>> _findSources(
+                                                         ^
+  lib/application/player/providers/playback_provider_manager.dart:291:41: Error: Undefined name 'deduped'.
+      final List<PlaybackSource> result = deduped.values.toList()
+                                          ^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:329:61: Error: Undefined name '_ordered'.
+      for (final PlaybackProviderRegistration registration in _ordered) {
+                                                              ^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:369:38: Error: Method not found: '_clock'.
+                  when !expiry.isAfter(_clock())) {
+                                       ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:431:41: Error: Method not found: '_clock'.
+                    if (value.isExpiredAt(_clock())) {
+                                          ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:503:12: Error: Undefined name '_videoHostResolvers'.
+          in _videoHostResolvers) {
+             ^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:510:46: Error: Undefined name '_hostBreakers'.
+      final ProviderCircuitBreaker? existing = _hostBreakers.remove(hostId);
+                                               ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:512:7: Error: Undefined name '_hostBreakers'.
+        _hostBreakers[hostId] = existing;
+        ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:516:9: Error: Undefined name '_hostBreakers'.
+      if (_hostBreakers.length >= maxHostCircuitBreakers) {
+          ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:516:33: Error: Undefined name 'maxHostCircuitBreakers'.
+      if (_hostBreakers.length >= maxHostCircuitBreakers) {
+                                  ^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:519:14: Error: Undefined name '_hostBreakers'.
+            in _hostBreakers.entries) {
+               ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:527:7: Error: Undefined name '_hostBreakers'.
+        _hostBreakers.remove(evictable);
+        ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:531:14: Error: Undefined name '_clock'.
+        clock: _clock,
+               ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:532:25: Error: Undefined name 'circuitFailureThreshold'.
+        failureThreshold: circuitFailureThreshold,
+                          ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:533:17: Error: Undefined name 'circuitCooldown'.
+        cooldown: circuitCooldown,
+                  ^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:535:5: Error: Undefined name '_hostBreakers'.
+      _hostBreakers[hostId] = created;
+      ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:576:65: Error: Method not found: '_clock'.
+      final List<PlaybackSource>? cached = _sourceCache.read(key, _clock());
+                                                                  ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:576:42: Error: Undefined name '_sourceCache'.
+      final List<PlaybackSource>? cached = _sourceCache.read(key, _clock());
+                                           ^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:582:11: Error: Undefined name '_providerRequests'.
+            _providerRequests,
+            ^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:591:11: Error: Undefined name '_registrations'.
+            _registrations[provider.id];
+            ^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:592:28: Error: Method not found: '_clock'.
+        final DateTime now = _clock();
+                             ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:603:7: Error: Undefined name '_sourceCache'.
+        _sourceCache.write(
+        ^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:624:44: Error: Undefined name '_breakers'.
+      final ProviderCircuitBreaker breaker = _breakers[provider.id]!;
+                                             ^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:712:49: Error: Method not found: '_clock'.
+      final Duration remaining = until.difference(_clock());
+                                                  ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:730:44: Error: Undefined name '_breakers'.
+      final ProviderCircuitBreaker breaker = _breakers[id]!;
+                                             ^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:733:16: Error: Undefined name '_registrations'.
+        version: _registrations[id]!.version,
+                 ^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:743:44: Error: Undefined name '_hostBreakers'.
+      final ProviderCircuitBreaker breaker = _hostBreakers[hostId]!;
+                                             ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:761:23: Error: Undefined name '_inFlight'.
+    ) => _joinShared<T>(_inFlight, key, cancellation, create);
+                        ^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:258:15: Error: The type 'PlaybackProviderResult<List<PlaybackSource>>' is not exhaustively matched by the switch cases since it doesn't match 'PlaybackProviderFailed<List<PlaybackSource>>(value: Object())'.
+   - 'PlaybackProviderResult' is from 'package:anime_app/domain/player/providers/playback_provider_contract.dart' ('lib/domain/player/providers/playback_provider_contract.dart').
+   - 'List' is from 'dart:core'.
+   - 'PlaybackSource' is from 'package:anime_app/domain/player/providers/playback_source.dart' ('lib/domain/player/providers/playback_source.dart').
+  Try adding a default case or cases that match 'PlaybackProviderFailed<List<PlaybackSource>>(value: Object())'.
+        switch (result) {
+                ^
+  .
+00:48 +28 ~1 -3: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/spike_window_close_gate_test.dart
+00:51 +28 ~1 -3: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/spike_window_close_gate_test.dart: window close waits for playback cleanup and coalesces callers
+00:51 +29 ~1 -3: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/spike_window_close_gate_test.dart: failed native cleanup keeps the window open and reports failure
+00:51 +30 ~1 -3: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/spike_window_close_gate_test.dart: startup cleanup can allow close after module open fails
+00:51 +31 ~1 -3: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/spike_window_close_gate_test.dart: watchdog keeps window open without cancelling or duplicating cleanup
+00:51 +32 ~1 -3: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/video_surface_status_label_test.dart
+00:52 +32 ~1 -3: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/video_surface_status_label_test.dart: platform readiness does not imply a registered texture
+00:52 +33 ~1 -3: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/video_surface_status_label_test.dart: a texture ID and processed first frame have distinct labels
+00:52 +34 ~1 -3: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/video_surface_status_label_test.dart: controller initialization failure is separate from frame failure
+00:52 +35 ~1 -3: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/provider_playback_route_test.dart
+lib/application/player/providers/playback_provider_manager.dart:293:5: Error: Expected a class member, but got 'return'.
+    return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+    ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:293:36: Error: Expected '>' after this.
+    return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+                                   ^^^^
+lib/application/player/providers/playback_provider_manager.dart:296:3: Error: Can't have modifier 'static' here.
+Try removing 'static'.
+  static int _qualityScore(String? quality) {
+  ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:817:3: Error: Can't have modifier 'static' here.
+Try removing 'static'.
+  static final RegExp _semanticVersionPattern = RegExp(
+  ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:824:3: Error: Can't have modifier 'static' here.
+Try removing 'static'.
+  static bool _isSemanticVersion(String version) =>
+  ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:826:1: Error: Expected a declaration, but got '}'.
+}
+^
+lib/application/player/providers/playback_provider_manager.dart:79:13: Error: The non-abstract class 'PlaybackProviderManager' is missing implementations for these members:
+ - PlaybackProviderManager.PlaybackProviderSuccess
+Try to either
+ - provide an implementation,
+ - inherit an implementation from a superclass or mixin,
+ - mark the class as abstract, or
+ - provide a 'noSuchMethod' implementation.
+final class PlaybackProviderManager {
+            ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:293:12: Context: 'PlaybackProviderManager.PlaybackProviderSuccess' is defined here.
+    return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+           ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:206:9: Error: 'PlaybackProviderSuccess' isn't a type.
+        PlaybackProviderSuccess<List<ResolvedPlaybackStream>>(:final value)
+        ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:209:9: Error: 'PlaybackProviderSuccess' isn't a type.
+        PlaybackProviderSuccess<List<ResolvedPlaybackStream>>() ||
+        ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:259:14: Error: 'PlaybackProviderSuccess' isn't a type.
+        case PlaybackProviderSuccess<List<PlaybackSource>>(:final value):
+             ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:283:36: Error: This expression is not supported as a constant pattern.
+Try wrapping the expression in 'const ( ... )'.
+        case PlaybackProviderFailed<List<PlaybackSource>>:
+                                   ^
+lib/application/player/providers/playback_provider_manager.dart:287:5: Error: 'default' can't be used as an identifier because it's a keyword.
+Try renaming this to be an identifier that isn't a keyword.
+    default:
+    ^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:287:5: Error: Expected ';' after this.
+    default:
+    ^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:287:12: Error: Expected an identifier, but got ':'.
+Try inserting an identifier before ':'.
+    default:
+           ^
+lib/application/player/providers/playback_provider_manager.dart:287:12: Error: Unexpected token ';'.
+    default:
+           ^
+lib/application/player/providers/playback_provider_manager.dart:287:5: Error: The getter 'default' isn't defined for the type 'PlaybackProviderManager'.
+ - 'PlaybackProviderManager' is from 'package:anime_app/application/player/providers/playback_provider_manager.dart' ('lib/application/player/providers/playback_provider_manager.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'default'.
+    default:
+    ^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:235:56: Error: A non-null value must be returned since the return type 'PlaybackProviderResult<List<PlaybackSource>>' doesn't allow null.
+ - 'PlaybackProviderResult' is from 'package:anime_app/domain/player/providers/playback_provider_contract.dart' ('lib/domain/player/providers/playback_provider_contract.dart').
+ - 'List' is from 'dart:core'.
+ - 'PlaybackSource' is from 'package:anime_app/domain/player/providers/playback_source.dart' ('lib/domain/player/providers/playback_source.dart').
+  Future<PlaybackProviderResult<List<PlaybackSource>>> _findSources(
+                                                       ^
+lib/application/player/providers/playback_provider_manager.dart:291:41: Error: Undefined name 'deduped'.
+    final List<PlaybackSource> result = deduped.values.toList()
+                                        ^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:329:61: Error: Undefined name '_ordered'.
+    for (final PlaybackProviderRegistration registration in _ordered) {
+                                                            ^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:369:38: Error: Method not found: '_clock'.
+                when !expiry.isAfter(_clock())) {
+                                     ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:431:41: Error: Method not found: '_clock'.
+                  if (value.isExpiredAt(_clock())) {
+                                        ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:503:12: Error: Undefined name '_videoHostResolvers'.
+        in _videoHostResolvers) {
+           ^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:510:46: Error: Undefined name '_hostBreakers'.
+    final ProviderCircuitBreaker? existing = _hostBreakers.remove(hostId);
+                                             ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:512:7: Error: Undefined name '_hostBreakers'.
+      _hostBreakers[hostId] = existing;
+      ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:516:9: Error: Undefined name '_hostBreakers'.
+    if (_hostBreakers.length >= maxHostCircuitBreakers) {
+        ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:516:33: Error: Undefined name 'maxHostCircuitBreakers'.
+    if (_hostBreakers.length >= maxHostCircuitBreakers) {
+                                ^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:519:14: Error: Undefined name '_hostBreakers'.
+          in _hostBreakers.entries) {
+             ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:527:7: Error: Undefined name '_hostBreakers'.
+      _hostBreakers.remove(evictable);
+      ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:531:14: Error: Undefined name '_clock'.
+      clock: _clock,
+             ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:532:25: Error: Undefined name 'circuitFailureThreshold'.
+      failureThreshold: circuitFailureThreshold,
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:533:17: Error: Undefined name 'circuitCooldown'.
+      cooldown: circuitCooldown,
+                ^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:535:5: Error: Undefined name '_hostBreakers'.
+    _hostBreakers[hostId] = created;
+    ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:576:65: Error: Method not found: '_clock'.
+    final List<PlaybackSource>? cached = _sourceCache.read(key, _clock());
+                                                                ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:576:42: Error: Undefined name '_sourceCache'.
+    final List<PlaybackSource>? cached = _sourceCache.read(key, _clock());
+                                         ^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:582:11: Error: Undefined name '_providerRequests'.
+          _providerRequests,
+          ^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:591:11: Error: Undefined name '_registrations'.
+          _registrations[provider.id];
+          ^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:592:28: Error: Method not found: '_clock'.
+      final DateTime now = _clock();
+                           ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:603:7: Error: Undefined name '_sourceCache'.
+      _sourceCache.write(
+      ^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:624:44: Error: Undefined name '_breakers'.
+    final ProviderCircuitBreaker breaker = _breakers[provider.id]!;
+                                           ^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:712:49: Error: Method not found: '_clock'.
+    final Duration remaining = until.difference(_clock());
+                                                ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:730:44: Error: Undefined name '_breakers'.
+    final ProviderCircuitBreaker breaker = _breakers[id]!;
+                                           ^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:733:16: Error: Undefined name '_registrations'.
+      version: _registrations[id]!.version,
+               ^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:743:44: Error: Undefined name '_hostBreakers'.
+    final ProviderCircuitBreaker breaker = _hostBreakers[hostId]!;
+                                           ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:761:23: Error: Undefined name '_inFlight'.
+  ) => _joinShared<T>(_inFlight, key, cancellation, create);
+                      ^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:258:15: Error: The type 'PlaybackProviderResult<List<PlaybackSource>>' is not exhaustively matched by the switch cases since it doesn't match 'PlaybackProviderFailed<List<PlaybackSource>>(value: Object())'.
+ - 'PlaybackProviderResult' is from 'package:anime_app/domain/player/providers/playback_provider_contract.dart' ('lib/domain/player/providers/playback_provider_contract.dart').
+ - 'List' is from 'dart:core'.
+ - 'PlaybackSource' is from 'package:anime_app/domain/player/providers/playback_source.dart' ('lib/domain/player/providers/playback_source.dart').
+Try adding a default case or cases that match 'PlaybackProviderFailed<List<PlaybackSource>>(value: Object())'.
+      switch (result) {
+              ^
+00:53 +35 ~1 -4: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/provider_playback_route_test.dart [E]
+  Failed to load "/home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/provider_playback_route_test.dart":
+  Compilation failed for testPath=/home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/provider_playback_route_test.dart: lib/application/player/providers/playback_provider_manager.dart:293:5: Error: Expected a class member, but got 'return'.
+      return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+      ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:293:36: Error: Expected '>' after this.
+      return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+                                     ^^^^
+  lib/application/player/providers/playback_provider_manager.dart:296:3: Error: Can't have modifier 'static' here.
+  Try removing 'static'.
+    static int _qualityScore(String? quality) {
+    ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:817:3: Error: Can't have modifier 'static' here.
+  Try removing 'static'.
+    static final RegExp _semanticVersionPattern = RegExp(
+    ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:824:3: Error: Can't have modifier 'static' here.
+  Try removing 'static'.
+    static bool _isSemanticVersion(String version) =>
+    ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:826:1: Error: Expected a declaration, but got '}'.
+  }
+  ^
+  lib/application/player/providers/playback_provider_manager.dart:79:13: Error: The non-abstract class 'PlaybackProviderManager' is missing implementations for these members:
+   - PlaybackProviderManager.PlaybackProviderSuccess
+  Try to either
+   - provide an implementation,
+   - inherit an implementation from a superclass or mixin,
+   - mark the class as abstract, or
+   - provide a 'noSuchMethod' implementation.
+  final class PlaybackProviderManager {
+              ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:293:12: Context: 'PlaybackProviderManager.PlaybackProviderSuccess' is defined here.
+      return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:206:9: Error: 'PlaybackProviderSuccess' isn't a type.
+          PlaybackProviderSuccess<List<ResolvedPlaybackStream>>(:final value)
+          ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:209:9: Error: 'PlaybackProviderSuccess' isn't a type.
+          PlaybackProviderSuccess<List<ResolvedPlaybackStream>>() ||
+          ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:259:14: Error: 'PlaybackProviderSuccess' isn't a type.
+          case PlaybackProviderSuccess<List<PlaybackSource>>(:final value):
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:283:36: Error: This expression is not supported as a constant pattern.
+  Try wrapping the expression in 'const ( ... )'.
+          case PlaybackProviderFailed<List<PlaybackSource>>:
+                                     ^
+  lib/application/player/providers/playback_provider_manager.dart:287:5: Error: 'default' can't be used as an identifier because it's a keyword.
+  Try renaming this to be an identifier that isn't a keyword.
+      default:
+      ^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:287:5: Error: Expected ';' after this.
+      default:
+      ^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:287:12: Error: Expected an identifier, but got ':'.
+  Try inserting an identifier before ':'.
+      default:
+             ^
+  lib/application/player/providers/playback_provider_manager.dart:287:12: Error: Unexpected token ';'.
+      default:
+             ^
+  lib/application/player/providers/playback_provider_manager.dart:287:5: Error: The getter 'default' isn't defined for the type 'PlaybackProviderManager'.
+   - 'PlaybackProviderManager' is from 'package:anime_app/application/player/providers/playback_provider_manager.dart' ('lib/application/player/providers/playback_provider_manager.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'default'.
+      default:
+      ^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:235:56: Error: A non-null value must be returned since the return type 'PlaybackProviderResult<List<PlaybackSource>>' doesn't allow null.
+   - 'PlaybackProviderResult' is from 'package:anime_app/domain/player/providers/playback_provider_contract.dart' ('lib/domain/player/providers/playback_provider_contract.dart').
+   - 'List' is from 'dart:core'.
+   - 'PlaybackSource' is from 'package:anime_app/domain/player/providers/playback_source.dart' ('lib/domain/player/providers/playback_source.dart').
+    Future<PlaybackProviderResult<List<PlaybackSource>>> _findSources(
+                                                         ^
+  lib/application/player/providers/playback_provider_manager.dart:291:41: Error: Undefined name 'deduped'.
+      final List<PlaybackSource> result = deduped.values.toList()
+                                          ^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:329:61: Error: Undefined name '_ordered'.
+      for (final PlaybackProviderRegistration registration in _ordered) {
+                                                              ^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:369:38: Error: Method not found: '_clock'.
+                  when !expiry.isAfter(_clock())) {
+                                       ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:431:41: Error: Method not found: '_clock'.
+                    if (value.isExpiredAt(_clock())) {
+                                          ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:503:12: Error: Undefined name '_videoHostResolvers'.
+          in _videoHostResolvers) {
+             ^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:510:46: Error: Undefined name '_hostBreakers'.
+      final ProviderCircuitBreaker? existing = _hostBreakers.remove(hostId);
+                                               ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:512:7: Error: Undefined name '_hostBreakers'.
+        _hostBreakers[hostId] = existing;
+        ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:516:9: Error: Undefined name '_hostBreakers'.
+      if (_hostBreakers.length >= maxHostCircuitBreakers) {
+          ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:516:33: Error: Undefined name 'maxHostCircuitBreakers'.
+      if (_hostBreakers.length >= maxHostCircuitBreakers) {
+                                  ^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:519:14: Error: Undefined name '_hostBreakers'.
+            in _hostBreakers.entries) {
+               ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:527:7: Error: Undefined name '_hostBreakers'.
+        _hostBreakers.remove(evictable);
+        ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:531:14: Error: Undefined name '_clock'.
+        clock: _clock,
+               ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:532:25: Error: Undefined name 'circuitFailureThreshold'.
+        failureThreshold: circuitFailureThreshold,
+                          ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:533:17: Error: Undefined name 'circuitCooldown'.
+        cooldown: circuitCooldown,
+                  ^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:535:5: Error: Undefined name '_hostBreakers'.
+      _hostBreakers[hostId] = created;
+      ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:576:65: Error: Method not found: '_clock'.
+      final List<PlaybackSource>? cached = _sourceCache.read(key, _clock());
+                                                                  ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:576:42: Error: Undefined name '_sourceCache'.
+      final List<PlaybackSource>? cached = _sourceCache.read(key, _clock());
+                                           ^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:582:11: Error: Undefined name '_providerRequests'.
+            _providerRequests,
+            ^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:591:11: Error: Undefined name '_registrations'.
+            _registrations[provider.id];
+            ^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:592:28: Error: Method not found: '_clock'.
+        final DateTime now = _clock();
+                             ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:603:7: Error: Undefined name '_sourceCache'.
+        _sourceCache.write(
+        ^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:624:44: Error: Undefined name '_breakers'.
+      final ProviderCircuitBreaker breaker = _breakers[provider.id]!;
+                                             ^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:712:49: Error: Method not found: '_clock'.
+      final Duration remaining = until.difference(_clock());
+                                                  ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:730:44: Error: Undefined name '_breakers'.
+      final ProviderCircuitBreaker breaker = _breakers[id]!;
+                                             ^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:733:16: Error: Undefined name '_registrations'.
+        version: _registrations[id]!.version,
+                 ^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:743:44: Error: Undefined name '_hostBreakers'.
+      final ProviderCircuitBreaker breaker = _hostBreakers[hostId]!;
+                                             ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:761:23: Error: Undefined name '_inFlight'.
+    ) => _joinShared<T>(_inFlight, key, cancellation, create);
+                        ^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:258:15: Error: The type 'PlaybackProviderResult<List<PlaybackSource>>' is not exhaustively matched by the switch cases since it doesn't match 'PlaybackProviderFailed<List<PlaybackSource>>(value: Object())'.
+   - 'PlaybackProviderResult' is from 'package:anime_app/domain/player/providers/playback_provider_contract.dart' ('lib/domain/player/providers/playback_provider_contract.dart').
+   - 'List' is from 'dart:core'.
+   - 'PlaybackSource' is from 'package:anime_app/domain/player/providers/playback_source.dart' ('lib/domain/player/providers/playback_source.dart').
+  Try adding a default case or cases that match 'PlaybackProviderFailed<List<PlaybackSource>>(value: Object())'.
+        switch (result) {
+                ^
+  .
+00:53 +35 ~1 -4: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/spike_player_module_test.dart
+lib/application/player/providers/playback_provider_manager.dart:293:5: Error: Expected a class member, but got 'return'.
+    return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+    ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:293:36: Error: Expected '>' after this.
+    return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+                                   ^^^^
+lib/application/player/providers/playback_provider_manager.dart:296:3: Error: Can't have modifier 'static' here.
+Try removing 'static'.
+  static int _qualityScore(String? quality) {
+  ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:817:3: Error: Can't have modifier 'static' here.
+Try removing 'static'.
+  static final RegExp _semanticVersionPattern = RegExp(
+  ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:824:3: Error: Can't have modifier 'static' here.
+Try removing 'static'.
+  static bool _isSemanticVersion(String version) =>
+  ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:826:1: Error: Expected a declaration, but got '}'.
+}
+^
+lib/application/player/providers/playback_provider_manager.dart:79:13: Error: The non-abstract class 'PlaybackProviderManager' is missing implementations for these members:
+ - PlaybackProviderManager.PlaybackProviderSuccess
+Try to either
+ - provide an implementation,
+ - inherit an implementation from a superclass or mixin,
+ - mark the class as abstract, or
+ - provide a 'noSuchMethod' implementation.
+final class PlaybackProviderManager {
+            ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:293:12: Context: 'PlaybackProviderManager.PlaybackProviderSuccess' is defined here.
+    return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+           ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:206:9: Error: 'PlaybackProviderSuccess' isn't a type.
+        PlaybackProviderSuccess<List<ResolvedPlaybackStream>>(:final value)
+        ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:209:9: Error: 'PlaybackProviderSuccess' isn't a type.
+        PlaybackProviderSuccess<List<ResolvedPlaybackStream>>() ||
+        ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:259:14: Error: 'PlaybackProviderSuccess' isn't a type.
+        case PlaybackProviderSuccess<List<PlaybackSource>>(:final value):
+             ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:283:36: Error: This expression is not supported as a constant pattern.
+Try wrapping the expression in 'const ( ... )'.
+        case PlaybackProviderFailed<List<PlaybackSource>>:
+                                   ^
+lib/application/player/providers/playback_provider_manager.dart:287:5: Error: 'default' can't be used as an identifier because it's a keyword.
+Try renaming this to be an identifier that isn't a keyword.
+    default:
+    ^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:287:5: Error: Expected ';' after this.
+    default:
+    ^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:287:12: Error: Expected an identifier, but got ':'.
+Try inserting an identifier before ':'.
+    default:
+           ^
+lib/application/player/providers/playback_provider_manager.dart:287:12: Error: Unexpected token ';'.
+    default:
+           ^
+lib/application/player/providers/playback_provider_manager.dart:287:5: Error: The getter 'default' isn't defined for the type 'PlaybackProviderManager'.
+ - 'PlaybackProviderManager' is from 'package:anime_app/application/player/providers/playback_provider_manager.dart' ('lib/application/player/providers/playback_provider_manager.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'default'.
+    default:
+    ^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:235:56: Error: A non-null value must be returned since the return type 'PlaybackProviderResult<List<PlaybackSource>>' doesn't allow null.
+ - 'PlaybackProviderResult' is from 'package:anime_app/domain/player/providers/playback_provider_contract.dart' ('lib/domain/player/providers/playback_provider_contract.dart').
+ - 'List' is from 'dart:core'.
+ - 'PlaybackSource' is from 'package:anime_app/domain/player/providers/playback_source.dart' ('lib/domain/player/providers/playback_source.dart').
+  Future<PlaybackProviderResult<List<PlaybackSource>>> _findSources(
+                                                       ^
+lib/application/player/providers/playback_provider_manager.dart:291:41: Error: Undefined name 'deduped'.
+    final List<PlaybackSource> result = deduped.values.toList()
+                                        ^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:329:61: Error: Undefined name '_ordered'.
+    for (final PlaybackProviderRegistration registration in _ordered) {
+                                                            ^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:369:38: Error: Method not found: '_clock'.
+                when !expiry.isAfter(_clock())) {
+                                     ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:431:41: Error: Method not found: '_clock'.
+                  if (value.isExpiredAt(_clock())) {
+                                        ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:503:12: Error: Undefined name '_videoHostResolvers'.
+        in _videoHostResolvers) {
+           ^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:510:46: Error: Undefined name '_hostBreakers'.
+    final ProviderCircuitBreaker? existing = _hostBreakers.remove(hostId);
+                                             ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:512:7: Error: Undefined name '_hostBreakers'.
+      _hostBreakers[hostId] = existing;
+      ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:516:9: Error: Undefined name '_hostBreakers'.
+    if (_hostBreakers.length >= maxHostCircuitBreakers) {
+        ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:516:33: Error: Undefined name 'maxHostCircuitBreakers'.
+    if (_hostBreakers.length >= maxHostCircuitBreakers) {
+                                ^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:519:14: Error: Undefined name '_hostBreakers'.
+          in _hostBreakers.entries) {
+             ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:527:7: Error: Undefined name '_hostBreakers'.
+      _hostBreakers.remove(evictable);
+      ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:531:14: Error: Undefined name '_clock'.
+      clock: _clock,
+             ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:532:25: Error: Undefined name 'circuitFailureThreshold'.
+      failureThreshold: circuitFailureThreshold,
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:533:17: Error: Undefined name 'circuitCooldown'.
+      cooldown: circuitCooldown,
+                ^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:535:5: Error: Undefined name '_hostBreakers'.
+    _hostBreakers[hostId] = created;
+    ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:576:65: Error: Method not found: '_clock'.
+    final List<PlaybackSource>? cached = _sourceCache.read(key, _clock());
+                                                                ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:576:42: Error: Undefined name '_sourceCache'.
+    final List<PlaybackSource>? cached = _sourceCache.read(key, _clock());
+                                         ^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:582:11: Error: Undefined name '_providerRequests'.
+          _providerRequests,
+          ^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:591:11: Error: Undefined name '_registrations'.
+          _registrations[provider.id];
+          ^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:592:28: Error: Method not found: '_clock'.
+      final DateTime now = _clock();
+                           ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:603:7: Error: Undefined name '_sourceCache'.
+      _sourceCache.write(
+      ^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:624:44: Error: Undefined name '_breakers'.
+    final ProviderCircuitBreaker breaker = _breakers[provider.id]!;
+                                           ^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:712:49: Error: Method not found: '_clock'.
+    final Duration remaining = until.difference(_clock());
+                                                ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:730:44: Error: Undefined name '_breakers'.
+    final ProviderCircuitBreaker breaker = _breakers[id]!;
+                                           ^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:733:16: Error: Undefined name '_registrations'.
+      version: _registrations[id]!.version,
+               ^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:743:44: Error: Undefined name '_hostBreakers'.
+    final ProviderCircuitBreaker breaker = _hostBreakers[hostId]!;
+                                           ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:761:23: Error: Undefined name '_inFlight'.
+  ) => _joinShared<T>(_inFlight, key, cancellation, create);
+                      ^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:258:15: Error: The type 'PlaybackProviderResult<List<PlaybackSource>>' is not exhaustively matched by the switch cases since it doesn't match 'PlaybackProviderFailed<List<PlaybackSource>>(value: Object())'.
+ - 'PlaybackProviderResult' is from 'package:anime_app/domain/player/providers/playback_provider_contract.dart' ('lib/domain/player/providers/playback_provider_contract.dart').
+ - 'List' is from 'dart:core'.
+ - 'PlaybackSource' is from 'package:anime_app/domain/player/providers/playback_source.dart' ('lib/domain/player/providers/playback_source.dart').
+Try adding a default case or cases that match 'PlaybackProviderFailed<List<PlaybackSource>>(value: Object())'.
+      switch (result) {
+              ^
+01:08 +35 ~1 -5: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/spike_player_module_test.dart [E]
+  Failed to load "/home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/spike_player_module_test.dart":
+  Compilation failed for testPath=/home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/spike_player_module_test.dart: lib/application/player/providers/playback_provider_manager.dart:293:5: Error: Expected a class member, but got 'return'.
+      return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+      ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:293:36: Error: Expected '>' after this.
+      return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+                                     ^^^^
+  lib/application/player/providers/playback_provider_manager.dart:296:3: Error: Can't have modifier 'static' here.
+  Try removing 'static'.
+    static int _qualityScore(String? quality) {
+    ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:817:3: Error: Can't have modifier 'static' here.
+  Try removing 'static'.
+    static final RegExp _semanticVersionPattern = RegExp(
+    ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:824:3: Error: Can't have modifier 'static' here.
+  Try removing 'static'.
+    static bool _isSemanticVersion(String version) =>
+    ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:826:1: Error: Expected a declaration, but got '}'.
+  }
+  ^
+  lib/application/player/providers/playback_provider_manager.dart:79:13: Error: The non-abstract class 'PlaybackProviderManager' is missing implementations for these members:
+   - PlaybackProviderManager.PlaybackProviderSuccess
+  Try to either
+   - provide an implementation,
+   - inherit an implementation from a superclass or mixin,
+   - mark the class as abstract, or
+   - provide a 'noSuchMethod' implementation.
+  final class PlaybackProviderManager {
+              ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:293:12: Context: 'PlaybackProviderManager.PlaybackProviderSuccess' is defined here.
+      return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:206:9: Error: 'PlaybackProviderSuccess' isn't a type.
+          PlaybackProviderSuccess<List<ResolvedPlaybackStream>>(:final value)
+          ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:209:9: Error: 'PlaybackProviderSuccess' isn't a type.
+          PlaybackProviderSuccess<List<ResolvedPlaybackStream>>() ||
+          ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:259:14: Error: 'PlaybackProviderSuccess' isn't a type.
+          case PlaybackProviderSuccess<List<PlaybackSource>>(:final value):
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:283:36: Error: This expression is not supported as a constant pattern.
+  Try wrapping the expression in 'const ( ... )'.
+          case PlaybackProviderFailed<List<PlaybackSource>>:
+                                     ^
+  lib/application/player/providers/playback_provider_manager.dart:287:5: Error: 'default' can't be used as an identifier because it's a keyword.
+  Try renaming this to be an identifier that isn't a keyword.
+      default:
+      ^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:287:5: Error: Expected ';' after this.
+      default:
+      ^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:287:12: Error: Expected an identifier, but got ':'.
+  Try inserting an identifier before ':'.
+      default:
+             ^
+  lib/application/player/providers/playback_provider_manager.dart:287:12: Error: Unexpected token ';'.
+      default:
+             ^
+  lib/application/player/providers/playback_provider_manager.dart:287:5: Error: The getter 'default' isn't defined for the type 'PlaybackProviderManager'.
+   - 'PlaybackProviderManager' is from 'package:anime_app/application/player/providers/playback_provider_manager.dart' ('lib/application/player/providers/playback_provider_manager.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'default'.
+      default:
+      ^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:235:56: Error: A non-null value must be returned since the return type 'PlaybackProviderResult<List<PlaybackSource>>' doesn't allow null.
+   - 'PlaybackProviderResult' is from 'package:anime_app/domain/player/providers/playback_provider_contract.dart' ('lib/domain/player/providers/playback_provider_contract.dart').
+   - 'List' is from 'dart:core'.
+   - 'PlaybackSource' is from 'package:anime_app/domain/player/providers/playback_source.dart' ('lib/domain/player/providers/playback_source.dart').
+    Future<PlaybackProviderResult<List<PlaybackSource>>> _findSources(
+                                                         ^
+  lib/application/player/providers/playback_provider_manager.dart:291:41: Error: Undefined name 'deduped'.
+      final List<PlaybackSource> result = deduped.values.toList()
+                                          ^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:329:61: Error: Undefined name '_ordered'.
+      for (final PlaybackProviderRegistration registration in _ordered) {
+                                                              ^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:369:38: Error: Method not found: '_clock'.
+                  when !expiry.isAfter(_clock())) {
+                                       ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:431:41: Error: Method not found: '_clock'.
+                    if (value.isExpiredAt(_clock())) {
+                                          ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:503:12: Error: Undefined name '_videoHostResolvers'.
+          in _videoHostResolvers) {
+             ^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:510:46: Error: Undefined name '_hostBreakers'.
+      final ProviderCircuitBreaker? existing = _hostBreakers.remove(hostId);
+                                               ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:512:7: Error: Undefined name '_hostBreakers'.
+        _hostBreakers[hostId] = existing;
+        ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:516:9: Error: Undefined name '_hostBreakers'.
+      if (_hostBreakers.length >= maxHostCircuitBreakers) {
+          ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:516:33: Error: Undefined name 'maxHostCircuitBreakers'.
+      if (_hostBreakers.length >= maxHostCircuitBreakers) {
+                                  ^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:519:14: Error: Undefined name '_hostBreakers'.
+            in _hostBreakers.entries) {
+               ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:527:7: Error: Undefined name '_hostBreakers'.
+        _hostBreakers.remove(evictable);
+        ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:531:14: Error: Undefined name '_clock'.
+        clock: _clock,
+               ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:532:25: Error: Undefined name 'circuitFailureThreshold'.
+        failureThreshold: circuitFailureThreshold,
+                          ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:533:17: Error: Undefined name 'circuitCooldown'.
+        cooldown: circuitCooldown,
+                  ^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:535:5: Error: Undefined name '_hostBreakers'.
+      _hostBreakers[hostId] = created;
+      ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:576:65: Error: Method not found: '_clock'.
+      final List<PlaybackSource>? cached = _sourceCache.read(key, _clock());
+                                                                  ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:576:42: Error: Undefined name '_sourceCache'.
+      final List<PlaybackSource>? cached = _sourceCache.read(key, _clock());
+                                           ^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:582:11: Error: Undefined name '_providerRequests'.
+            _providerRequests,
+            ^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:591:11: Error: Undefined name '_registrations'.
+            _registrations[provider.id];
+            ^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:592:28: Error: Method not found: '_clock'.
+        final DateTime now = _clock();
+                             ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:603:7: Error: Undefined name '_sourceCache'.
+        _sourceCache.write(
+        ^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:624:44: Error: Undefined name '_breakers'.
+      final ProviderCircuitBreaker breaker = _breakers[provider.id]!;
+                                             ^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:712:49: Error: Method not found: '_clock'.
+      final Duration remaining = until.difference(_clock());
+                                                  ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:730:44: Error: Undefined name '_breakers'.
+      final ProviderCircuitBreaker breaker = _breakers[id]!;
+                                             ^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:733:16: Error: Undefined name '_registrations'.
+        version: _registrations[id]!.version,
+                 ^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:743:44: Error: Undefined name '_hostBreakers'.
+      final ProviderCircuitBreaker breaker = _hostBreakers[hostId]!;
+                                             ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:761:23: Error: Undefined name '_inFlight'.
+    ) => _joinShared<T>(_inFlight, key, cancellation, create);
+                        ^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:258:15: Error: The type 'PlaybackProviderResult<List<PlaybackSource>>' is not exhaustively matched by the switch cases since it doesn't match 'PlaybackProviderFailed<List<PlaybackSource>>(value: Object())'.
+   - 'PlaybackProviderResult' is from 'package:anime_app/domain/player/providers/playback_provider_contract.dart' ('lib/domain/player/providers/playback_provider_contract.dart').
+   - 'List' is from 'dart:core'.
+   - 'PlaybackSource' is from 'package:anime_app/domain/player/providers/playback_source.dart' ('lib/domain/player/providers/playback_source.dart').
+  Try adding a default case or cases that match 'PlaybackProviderFailed<List<PlaybackSource>>(value: Object())'.
+        switch (result) {
+                ^
+  .
+01:08 +35 ~1 -5: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/public_hls_host_integration_test.dart
+lib/application/player/providers/playback_provider_manager.dart:293:5: Error: Expected a class member, but got 'return'.
+    return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+    ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:293:36: Error: Expected '>' after this.
+    return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+                                   ^^^^
+lib/application/player/providers/playback_provider_manager.dart:296:3: Error: Can't have modifier 'static' here.
+Try removing 'static'.
+  static int _qualityScore(String? quality) {
+  ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:817:3: Error: Can't have modifier 'static' here.
+Try removing 'static'.
+  static final RegExp _semanticVersionPattern = RegExp(
+  ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:824:3: Error: Can't have modifier 'static' here.
+Try removing 'static'.
+  static bool _isSemanticVersion(String version) =>
+  ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:826:1: Error: Expected a declaration, but got '}'.
+}
+^
+lib/application/player/providers/playback_provider_manager.dart:79:13: Error: The non-abstract class 'PlaybackProviderManager' is missing implementations for these members:
+ - PlaybackProviderManager.PlaybackProviderSuccess
+Try to either
+ - provide an implementation,
+ - inherit an implementation from a superclass or mixin,
+ - mark the class as abstract, or
+ - provide a 'noSuchMethod' implementation.
+final class PlaybackProviderManager {
+            ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:293:12: Context: 'PlaybackProviderManager.PlaybackProviderSuccess' is defined here.
+    return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+           ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:206:9: Error: 'PlaybackProviderSuccess' isn't a type.
+        PlaybackProviderSuccess<List<ResolvedPlaybackStream>>(:final value)
+        ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:209:9: Error: 'PlaybackProviderSuccess' isn't a type.
+        PlaybackProviderSuccess<List<ResolvedPlaybackStream>>() ||
+        ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:259:14: Error: 'PlaybackProviderSuccess' isn't a type.
+        case PlaybackProviderSuccess<List<PlaybackSource>>(:final value):
+             ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:283:36: Error: This expression is not supported as a constant pattern.
+Try wrapping the expression in 'const ( ... )'.
+        case PlaybackProviderFailed<List<PlaybackSource>>:
+                                   ^
+lib/application/player/providers/playback_provider_manager.dart:287:5: Error: 'default' can't be used as an identifier because it's a keyword.
+Try renaming this to be an identifier that isn't a keyword.
+    default:
+    ^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:287:5: Error: Expected ';' after this.
+    default:
+    ^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:287:12: Error: Expected an identifier, but got ':'.
+Try inserting an identifier before ':'.
+    default:
+           ^
+lib/application/player/providers/playback_provider_manager.dart:287:12: Error: Unexpected token ';'.
+    default:
+           ^
+lib/application/player/providers/playback_provider_manager.dart:287:5: Error: The getter 'default' isn't defined for the type 'PlaybackProviderManager'.
+ - 'PlaybackProviderManager' is from 'package:anime_app/application/player/providers/playback_provider_manager.dart' ('lib/application/player/providers/playback_provider_manager.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'default'.
+    default:
+    ^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:235:56: Error: A non-null value must be returned since the return type 'PlaybackProviderResult<List<PlaybackSource>>' doesn't allow null.
+ - 'PlaybackProviderResult' is from 'package:anime_app/domain/player/providers/playback_provider_contract.dart' ('lib/domain/player/providers/playback_provider_contract.dart').
+ - 'List' is from 'dart:core'.
+ - 'PlaybackSource' is from 'package:anime_app/domain/player/providers/playback_source.dart' ('lib/domain/player/providers/playback_source.dart').
+  Future<PlaybackProviderResult<List<PlaybackSource>>> _findSources(
+                                                       ^
+lib/application/player/providers/playback_provider_manager.dart:291:41: Error: Undefined name 'deduped'.
+    final List<PlaybackSource> result = deduped.values.toList()
+                                        ^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:329:61: Error: Undefined name '_ordered'.
+    for (final PlaybackProviderRegistration registration in _ordered) {
+                                                            ^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:369:38: Error: Method not found: '_clock'.
+                when !expiry.isAfter(_clock())) {
+                                     ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:431:41: Error: Method not found: '_clock'.
+                  if (value.isExpiredAt(_clock())) {
+                                        ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:503:12: Error: Undefined name '_videoHostResolvers'.
+        in _videoHostResolvers) {
+           ^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:510:46: Error: Undefined name '_hostBreakers'.
+    final ProviderCircuitBreaker? existing = _hostBreakers.remove(hostId);
+                                             ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:512:7: Error: Undefined name '_hostBreakers'.
+      _hostBreakers[hostId] = existing;
+      ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:516:9: Error: Undefined name '_hostBreakers'.
+    if (_hostBreakers.length >= maxHostCircuitBreakers) {
+        ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:516:33: Error: Undefined name 'maxHostCircuitBreakers'.
+    if (_hostBreakers.length >= maxHostCircuitBreakers) {
+                                ^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:519:14: Error: Undefined name '_hostBreakers'.
+          in _hostBreakers.entries) {
+             ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:527:7: Error: Undefined name '_hostBreakers'.
+      _hostBreakers.remove(evictable);
+      ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:531:14: Error: Undefined name '_clock'.
+      clock: _clock,
+             ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:532:25: Error: Undefined name 'circuitFailureThreshold'.
+      failureThreshold: circuitFailureThreshold,
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:533:17: Error: Undefined name 'circuitCooldown'.
+      cooldown: circuitCooldown,
+                ^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:535:5: Error: Undefined name '_hostBreakers'.
+    _hostBreakers[hostId] = created;
+    ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:576:65: Error: Method not found: '_clock'.
+    final List<PlaybackSource>? cached = _sourceCache.read(key, _clock());
+                                                                ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:576:42: Error: Undefined name '_sourceCache'.
+    final List<PlaybackSource>? cached = _sourceCache.read(key, _clock());
+                                         ^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:582:11: Error: Undefined name '_providerRequests'.
+          _providerRequests,
+          ^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:591:11: Error: Undefined name '_registrations'.
+          _registrations[provider.id];
+          ^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:592:28: Error: Method not found: '_clock'.
+      final DateTime now = _clock();
+                           ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:603:7: Error: Undefined name '_sourceCache'.
+      _sourceCache.write(
+      ^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:624:44: Error: Undefined name '_breakers'.
+    final ProviderCircuitBreaker breaker = _breakers[provider.id]!;
+                                           ^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:712:49: Error: Method not found: '_clock'.
+    final Duration remaining = until.difference(_clock());
+                                                ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:730:44: Error: Undefined name '_breakers'.
+    final ProviderCircuitBreaker breaker = _breakers[id]!;
+                                           ^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:733:16: Error: Undefined name '_registrations'.
+      version: _registrations[id]!.version,
+               ^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:743:44: Error: Undefined name '_hostBreakers'.
+    final ProviderCircuitBreaker breaker = _hostBreakers[hostId]!;
+                                           ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:761:23: Error: Undefined name '_inFlight'.
+  ) => _joinShared<T>(_inFlight, key, cancellation, create);
+                      ^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:258:15: Error: The type 'PlaybackProviderResult<List<PlaybackSource>>' is not exhaustively matched by the switch cases since it doesn't match 'PlaybackProviderFailed<List<PlaybackSource>>(value: Object())'.
+ - 'PlaybackProviderResult' is from 'package:anime_app/domain/player/providers/playback_provider_contract.dart' ('lib/domain/player/providers/playback_provider_contract.dart').
+ - 'List' is from 'dart:core'.
+ - 'PlaybackSource' is from 'package:anime_app/domain/player/providers/playback_source.dart' ('lib/domain/player/providers/playback_source.dart').
+Try adding a default case or cases that match 'PlaybackProviderFailed<List<PlaybackSource>>(value: Object())'.
+      switch (result) {
+              ^
+01:11 +35 ~1 -6: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/public_hls_host_integration_test.dart [E]
+  Failed to load "/home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/public_hls_host_integration_test.dart":
+  Compilation failed for testPath=/home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/public_hls_host_integration_test.dart: lib/application/player/providers/playback_provider_manager.dart:293:5: Error: Expected a class member, but got 'return'.
+      return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+      ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:293:36: Error: Expected '>' after this.
+      return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+                                     ^^^^
+  lib/application/player/providers/playback_provider_manager.dart:296:3: Error: Can't have modifier 'static' here.
+  Try removing 'static'.
+    static int _qualityScore(String? quality) {
+    ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:817:3: Error: Can't have modifier 'static' here.
+  Try removing 'static'.
+    static final RegExp _semanticVersionPattern = RegExp(
+    ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:824:3: Error: Can't have modifier 'static' here.
+  Try removing 'static'.
+    static bool _isSemanticVersion(String version) =>
+    ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:826:1: Error: Expected a declaration, but got '}'.
+  }
+  ^
+  lib/application/player/providers/playback_provider_manager.dart:79:13: Error: The non-abstract class 'PlaybackProviderManager' is missing implementations for these members:
+   - PlaybackProviderManager.PlaybackProviderSuccess
+  Try to either
+   - provide an implementation,
+   - inherit an implementation from a superclass or mixin,
+   - mark the class as abstract, or
+   - provide a 'noSuchMethod' implementation.
+  final class PlaybackProviderManager {
+              ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:293:12: Context: 'PlaybackProviderManager.PlaybackProviderSuccess' is defined here.
+      return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:206:9: Error: 'PlaybackProviderSuccess' isn't a type.
+          PlaybackProviderSuccess<List<ResolvedPlaybackStream>>(:final value)
+          ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:209:9: Error: 'PlaybackProviderSuccess' isn't a type.
+          PlaybackProviderSuccess<List<ResolvedPlaybackStream>>() ||
+          ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:259:14: Error: 'PlaybackProviderSuccess' isn't a type.
+          case PlaybackProviderSuccess<List<PlaybackSource>>(:final value):
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:283:36: Error: This expression is not supported as a constant pattern.
+  Try wrapping the expression in 'const ( ... )'.
+          case PlaybackProviderFailed<List<PlaybackSource>>:
+                                     ^
+  lib/application/player/providers/playback_provider_manager.dart:287:5: Error: 'default' can't be used as an identifier because it's a keyword.
+  Try renaming this to be an identifier that isn't a keyword.
+      default:
+      ^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:287:5: Error: Expected ';' after this.
+      default:
+      ^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:287:12: Error: Expected an identifier, but got ':'.
+  Try inserting an identifier before ':'.
+      default:
+             ^
+  lib/application/player/providers/playback_provider_manager.dart:287:12: Error: Unexpected token ';'.
+      default:
+             ^
+  lib/application/player/providers/playback_provider_manager.dart:287:5: Error: The getter 'default' isn't defined for the type 'PlaybackProviderManager'.
+   - 'PlaybackProviderManager' is from 'package:anime_app/application/player/providers/playback_provider_manager.dart' ('lib/application/player/providers/playback_provider_manager.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'default'.
+      default:
+      ^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:235:56: Error: A non-null value must be returned since the return type 'PlaybackProviderResult<List<PlaybackSource>>' doesn't allow null.
+   - 'PlaybackProviderResult' is from 'package:anime_app/domain/player/providers/playback_provider_contract.dart' ('lib/domain/player/providers/playback_provider_contract.dart').
+   - 'List' is from 'dart:core'.
+   - 'PlaybackSource' is from 'package:anime_app/domain/player/providers/playback_source.dart' ('lib/domain/player/providers/playback_source.dart').
+    Future<PlaybackProviderResult<List<PlaybackSource>>> _findSources(
+                                                         ^
+  lib/application/player/providers/playback_provider_manager.dart:291:41: Error: Undefined name 'deduped'.
+      final List<PlaybackSource> result = deduped.values.toList()
+                                          ^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:329:61: Error: Undefined name '_ordered'.
+      for (final PlaybackProviderRegistration registration in _ordered) {
+                                                              ^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:369:38: Error: Method not found: '_clock'.
+                  when !expiry.isAfter(_clock())) {
+                                       ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:431:41: Error: Method not found: '_clock'.
+                    if (value.isExpiredAt(_clock())) {
+                                          ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:503:12: Error: Undefined name '_videoHostResolvers'.
+          in _videoHostResolvers) {
+             ^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:510:46: Error: Undefined name '_hostBreakers'.
+      final ProviderCircuitBreaker? existing = _hostBreakers.remove(hostId);
+                                               ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:512:7: Error: Undefined name '_hostBreakers'.
+        _hostBreakers[hostId] = existing;
+        ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:516:9: Error: Undefined name '_hostBreakers'.
+      if (_hostBreakers.length >= maxHostCircuitBreakers) {
+          ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:516:33: Error: Undefined name 'maxHostCircuitBreakers'.
+      if (_hostBreakers.length >= maxHostCircuitBreakers) {
+                                  ^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:519:14: Error: Undefined name '_hostBreakers'.
+            in _hostBreakers.entries) {
+               ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:527:7: Error: Undefined name '_hostBreakers'.
+        _hostBreakers.remove(evictable);
+        ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:531:14: Error: Undefined name '_clock'.
+        clock: _clock,
+               ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:532:25: Error: Undefined name 'circuitFailureThreshold'.
+        failureThreshold: circuitFailureThreshold,
+                          ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:533:17: Error: Undefined name 'circuitCooldown'.
+        cooldown: circuitCooldown,
+                  ^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:535:5: Error: Undefined name '_hostBreakers'.
+      _hostBreakers[hostId] = created;
+      ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:576:65: Error: Method not found: '_clock'.
+      final List<PlaybackSource>? cached = _sourceCache.read(key, _clock());
+                                                                  ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:576:42: Error: Undefined name '_sourceCache'.
+      final List<PlaybackSource>? cached = _sourceCache.read(key, _clock());
+                                           ^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:582:11: Error: Undefined name '_providerRequests'.
+            _providerRequests,
+            ^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:591:11: Error: Undefined name '_registrations'.
+            _registrations[provider.id];
+            ^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:592:28: Error: Method not found: '_clock'.
+        final DateTime now = _clock();
+                             ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:603:7: Error: Undefined name '_sourceCache'.
+        _sourceCache.write(
+        ^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:624:44: Error: Undefined name '_breakers'.
+      final ProviderCircuitBreaker breaker = _breakers[provider.id]!;
+                                             ^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:712:49: Error: Method not found: '_clock'.
+      final Duration remaining = until.difference(_clock());
+                                                  ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:730:44: Error: Undefined name '_breakers'.
+      final ProviderCircuitBreaker breaker = _breakers[id]!;
+                                             ^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:733:16: Error: Undefined name '_registrations'.
+        version: _registrations[id]!.version,
+                 ^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:743:44: Error: Undefined name '_hostBreakers'.
+      final ProviderCircuitBreaker breaker = _hostBreakers[hostId]!;
+                                             ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:761:23: Error: Undefined name '_inFlight'.
+    ) => _joinShared<T>(_inFlight, key, cancellation, create);
+                        ^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:258:15: Error: The type 'PlaybackProviderResult<List<PlaybackSource>>' is not exhaustively matched by the switch cases since it doesn't match 'PlaybackProviderFailed<List<PlaybackSource>>(value: Object())'.
+   - 'PlaybackProviderResult' is from 'package:anime_app/domain/player/providers/playback_provider_contract.dart' ('lib/domain/player/providers/playback_provider_contract.dart').
+   - 'List' is from 'dart:core'.
+   - 'PlaybackSource' is from 'package:anime_app/domain/player/providers/playback_source.dart' ('lib/domain/player/providers/playback_source.dart').
+  Try adding a default case or cases that match 'PlaybackProviderFailed<List<PlaybackSource>>(value: Object())'.
+        switch (result) {
+                ^
+  .
+01:11 +35 ~1 -6: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/resume_start_position_integration_test.dart
+01:16 +35 ~1 -6: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/resume_start_position_integration_test.dart: local fixture seeks to a resume point in the real engine before advancing
+  Skip: set KONGROO_TEST_LOCAL_MEDIA=1 to run
+01:16 +35 ~2 -6: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/local_hls_transport_test.dart
+01:18 +35 ~2 -6: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/local_hls_transport_test.dart: libmpv opens relative HLS and observes failure when its segment is denied
+01:18 +35 ~3 -6: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/oc07_miruro_live_playback_test.dart
+01:20 +35 ~3 -6: /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/oc07_miruro_live_playback_test.dart: Miruro backend plays Tokyo Ghoul:re 9 in libmpv with seek
+  Skip: set KONGROO_TEST_REAL_MIRURO=1 to run
+01:20 +35 ~4 -6: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/oc07_miruro_proxy_playback_test.dart
+test/player/oc07_miruro_proxy_playback_test.dart:48:41: Error: No named parameter with the name 'proxy'.
+            parser: MiruroCatalogParser(proxy: proxy),
+                                        ^^^^^
+lib/data/player/providers/miruro/miruro_catalog_parser.dart:57:9: Context: Found this candidate, but the arguments don't match.
+  const MiruroCatalogParser();
+        ^^^^^^^^^^^^^^^^^^^
+01:20 +35 ~4 -7: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/oc07_miruro_proxy_playback_test.dart [E]
+  Failed to load "/home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/oc07_miruro_proxy_playback_test.dart":
+  Compilation failed for testPath=/home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/oc07_miruro_proxy_playback_test.dart: test/player/oc07_miruro_proxy_playback_test.dart:48:41: Error: No named parameter with the name 'proxy'.
+              parser: MiruroCatalogParser(proxy: proxy),
+                                          ^^^^^
+  lib/data/player/providers/miruro/miruro_catalog_parser.dart:57:9: Context: Found this candidate, but the arguments don't match.
+    const MiruroCatalogParser();
+          ^^^^^^^^^^^^^^^^^^^
+  .
+01:20 +35 ~4 -7: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/oc07_miruro_failover_test.dart
+lib/application/player/providers/playback_provider_manager.dart:293:5: Error: Expected a class member, but got 'return'.
+    return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+    ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:293:36: Error: Expected '>' after this.
+    return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+                                   ^^^^
+lib/application/player/providers/playback_provider_manager.dart:296:3: Error: Can't have modifier 'static' here.
+Try removing 'static'.
+  static int _qualityScore(String? quality) {
+  ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:817:3: Error: Can't have modifier 'static' here.
+Try removing 'static'.
+  static final RegExp _semanticVersionPattern = RegExp(
+  ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:824:3: Error: Can't have modifier 'static' here.
+Try removing 'static'.
+  static bool _isSemanticVersion(String version) =>
+  ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:826:1: Error: Expected a declaration, but got '}'.
+}
+^
+lib/application/player/providers/playback_provider_manager.dart:79:13: Error: The non-abstract class 'PlaybackProviderManager' is missing implementations for these members:
+ - PlaybackProviderManager.PlaybackProviderSuccess
+Try to either
+ - provide an implementation,
+ - inherit an implementation from a superclass or mixin,
+ - mark the class as abstract, or
+ - provide a 'noSuchMethod' implementation.
+final class PlaybackProviderManager {
+            ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:293:12: Context: 'PlaybackProviderManager.PlaybackProviderSuccess' is defined here.
+    return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+           ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:206:9: Error: 'PlaybackProviderSuccess' isn't a type.
+        PlaybackProviderSuccess<List<ResolvedPlaybackStream>>(:final value)
+        ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:209:9: Error: 'PlaybackProviderSuccess' isn't a type.
+        PlaybackProviderSuccess<List<ResolvedPlaybackStream>>() ||
+        ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:259:14: Error: 'PlaybackProviderSuccess' isn't a type.
+        case PlaybackProviderSuccess<List<PlaybackSource>>(:final value):
+             ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:283:36: Error: This expression is not supported as a constant pattern.
+Try wrapping the expression in 'const ( ... )'.
+        case PlaybackProviderFailed<List<PlaybackSource>>:
+                                   ^
+lib/application/player/providers/playback_provider_manager.dart:287:5: Error: 'default' can't be used as an identifier because it's a keyword.
+Try renaming this to be an identifier that isn't a keyword.
+    default:
+    ^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:287:5: Error: Expected ';' after this.
+    default:
+    ^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:287:12: Error: Expected an identifier, but got ':'.
+Try inserting an identifier before ':'.
+    default:
+           ^
+lib/application/player/providers/playback_provider_manager.dart:287:12: Error: Unexpected token ';'.
+    default:
+           ^
+lib/application/player/providers/playback_provider_manager.dart:287:5: Error: The getter 'default' isn't defined for the type 'PlaybackProviderManager'.
+ - 'PlaybackProviderManager' is from 'package:anime_app/application/player/providers/playback_provider_manager.dart' ('lib/application/player/providers/playback_provider_manager.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'default'.
+    default:
+    ^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:235:56: Error: A non-null value must be returned since the return type 'PlaybackProviderResult<List<PlaybackSource>>' doesn't allow null.
+ - 'PlaybackProviderResult' is from 'package:anime_app/domain/player/providers/playback_provider_contract.dart' ('lib/domain/player/providers/playback_provider_contract.dart').
+ - 'List' is from 'dart:core'.
+ - 'PlaybackSource' is from 'package:anime_app/domain/player/providers/playback_source.dart' ('lib/domain/player/providers/playback_source.dart').
+  Future<PlaybackProviderResult<List<PlaybackSource>>> _findSources(
+                                                       ^
+lib/application/player/providers/playback_provider_manager.dart:291:41: Error: Undefined name 'deduped'.
+    final List<PlaybackSource> result = deduped.values.toList()
+                                        ^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:329:61: Error: Undefined name '_ordered'.
+    for (final PlaybackProviderRegistration registration in _ordered) {
+                                                            ^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:369:38: Error: Method not found: '_clock'.
+                when !expiry.isAfter(_clock())) {
+                                     ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:431:41: Error: Method not found: '_clock'.
+                  if (value.isExpiredAt(_clock())) {
+                                        ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:503:12: Error: Undefined name '_videoHostResolvers'.
+        in _videoHostResolvers) {
+           ^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:510:46: Error: Undefined name '_hostBreakers'.
+    final ProviderCircuitBreaker? existing = _hostBreakers.remove(hostId);
+                                             ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:512:7: Error: Undefined name '_hostBreakers'.
+      _hostBreakers[hostId] = existing;
+      ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:516:9: Error: Undefined name '_hostBreakers'.
+    if (_hostBreakers.length >= maxHostCircuitBreakers) {
+        ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:516:33: Error: Undefined name 'maxHostCircuitBreakers'.
+    if (_hostBreakers.length >= maxHostCircuitBreakers) {
+                                ^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:519:14: Error: Undefined name '_hostBreakers'.
+          in _hostBreakers.entries) {
+             ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:527:7: Error: Undefined name '_hostBreakers'.
+      _hostBreakers.remove(evictable);
+      ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:531:14: Error: Undefined name '_clock'.
+      clock: _clock,
+             ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:532:25: Error: Undefined name 'circuitFailureThreshold'.
+      failureThreshold: circuitFailureThreshold,
+                        ^^^^^^^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:533:17: Error: Undefined name 'circuitCooldown'.
+      cooldown: circuitCooldown,
+                ^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:535:5: Error: Undefined name '_hostBreakers'.
+    _hostBreakers[hostId] = created;
+    ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:576:65: Error: Method not found: '_clock'.
+    final List<PlaybackSource>? cached = _sourceCache.read(key, _clock());
+                                                                ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:576:42: Error: Undefined name '_sourceCache'.
+    final List<PlaybackSource>? cached = _sourceCache.read(key, _clock());
+                                         ^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:582:11: Error: Undefined name '_providerRequests'.
+          _providerRequests,
+          ^^^^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:591:11: Error: Undefined name '_registrations'.
+          _registrations[provider.id];
+          ^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:592:28: Error: Method not found: '_clock'.
+      final DateTime now = _clock();
+                           ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:603:7: Error: Undefined name '_sourceCache'.
+      _sourceCache.write(
+      ^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:624:44: Error: Undefined name '_breakers'.
+    final ProviderCircuitBreaker breaker = _breakers[provider.id]!;
+                                           ^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:712:49: Error: Method not found: '_clock'.
+    final Duration remaining = until.difference(_clock());
+                                                ^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:730:44: Error: Undefined name '_breakers'.
+    final ProviderCircuitBreaker breaker = _breakers[id]!;
+                                           ^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:733:16: Error: Undefined name '_registrations'.
+      version: _registrations[id]!.version,
+               ^^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:743:44: Error: Undefined name '_hostBreakers'.
+    final ProviderCircuitBreaker breaker = _hostBreakers[hostId]!;
+                                           ^^^^^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:761:23: Error: Undefined name '_inFlight'.
+  ) => _joinShared<T>(_inFlight, key, cancellation, create);
+                      ^^^^^^^^^
+lib/application/player/providers/playback_provider_manager.dart:258:15: Error: The type 'PlaybackProviderResult<List<PlaybackSource>>' is not exhaustively matched by the switch cases since it doesn't match 'PlaybackProviderFailed<List<PlaybackSource>>(value: Object())'.
+ - 'PlaybackProviderResult' is from 'package:anime_app/domain/player/providers/playback_provider_contract.dart' ('lib/domain/player/providers/playback_provider_contract.dart').
+ - 'List' is from 'dart:core'.
+ - 'PlaybackSource' is from 'package:anime_app/domain/player/providers/playback_source.dart' ('lib/domain/player/providers/playback_source.dart').
+Try adding a default case or cases that match 'PlaybackProviderFailed<List<PlaybackSource>>(value: Object())'.
+      switch (result) {
+              ^
+01:24 +35 ~4 -8: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/oc07_miruro_failover_test.dart [E]
+  Failed to load "/home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/oc07_miruro_failover_test.dart":
+  Compilation failed for testPath=/home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/oc07_miruro_failover_test.dart: lib/application/player/providers/playback_provider_manager.dart:293:5: Error: Expected a class member, but got 'return'.
+      return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+      ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:293:36: Error: Expected '>' after this.
+      return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+                                     ^^^^
+  lib/application/player/providers/playback_provider_manager.dart:296:3: Error: Can't have modifier 'static' here.
+  Try removing 'static'.
+    static int _qualityScore(String? quality) {
+    ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:817:3: Error: Can't have modifier 'static' here.
+  Try removing 'static'.
+    static final RegExp _semanticVersionPattern = RegExp(
+    ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:824:3: Error: Can't have modifier 'static' here.
+  Try removing 'static'.
+    static bool _isSemanticVersion(String version) =>
+    ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:826:1: Error: Expected a declaration, but got '}'.
+  }
+  ^
+  lib/application/player/providers/playback_provider_manager.dart:79:13: Error: The non-abstract class 'PlaybackProviderManager' is missing implementations for these members:
+   - PlaybackProviderManager.PlaybackProviderSuccess
+  Try to either
+   - provide an implementation,
+   - inherit an implementation from a superclass or mixin,
+   - mark the class as abstract, or
+   - provide a 'noSuchMethod' implementation.
+  final class PlaybackProviderManager {
+              ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:293:12: Context: 'PlaybackProviderManager.PlaybackProviderSuccess' is defined here.
+      return PlaybackProviderSuccess<List<PlaybackSource>>(result);
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:206:9: Error: 'PlaybackProviderSuccess' isn't a type.
+          PlaybackProviderSuccess<List<ResolvedPlaybackStream>>(:final value)
+          ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:209:9: Error: 'PlaybackProviderSuccess' isn't a type.
+          PlaybackProviderSuccess<List<ResolvedPlaybackStream>>() ||
+          ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:259:14: Error: 'PlaybackProviderSuccess' isn't a type.
+          case PlaybackProviderSuccess<List<PlaybackSource>>(:final value):
+               ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:283:36: Error: This expression is not supported as a constant pattern.
+  Try wrapping the expression in 'const ( ... )'.
+          case PlaybackProviderFailed<List<PlaybackSource>>:
+                                     ^
+  lib/application/player/providers/playback_provider_manager.dart:287:5: Error: 'default' can't be used as an identifier because it's a keyword.
+  Try renaming this to be an identifier that isn't a keyword.
+      default:
+      ^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:287:5: Error: Expected ';' after this.
+      default:
+      ^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:287:12: Error: Expected an identifier, but got ':'.
+  Try inserting an identifier before ':'.
+      default:
+             ^
+  lib/application/player/providers/playback_provider_manager.dart:287:12: Error: Unexpected token ';'.
+      default:
+             ^
+  lib/application/player/providers/playback_provider_manager.dart:287:5: Error: The getter 'default' isn't defined for the type 'PlaybackProviderManager'.
+   - 'PlaybackProviderManager' is from 'package:anime_app/application/player/providers/playback_provider_manager.dart' ('lib/application/player/providers/playback_provider_manager.dart').
+  Try correcting the name to the name of an existing getter, or defining a getter or field named 'default'.
+      default:
+      ^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:235:56: Error: A non-null value must be returned since the return type 'PlaybackProviderResult<List<PlaybackSource>>' doesn't allow null.
+   - 'PlaybackProviderResult' is from 'package:anime_app/domain/player/providers/playback_provider_contract.dart' ('lib/domain/player/providers/playback_provider_contract.dart').
+   - 'List' is from 'dart:core'.
+   - 'PlaybackSource' is from 'package:anime_app/domain/player/providers/playback_source.dart' ('lib/domain/player/providers/playback_source.dart').
+    Future<PlaybackProviderResult<List<PlaybackSource>>> _findSources(
+                                                         ^
+  lib/application/player/providers/playback_provider_manager.dart:291:41: Error: Undefined name 'deduped'.
+      final List<PlaybackSource> result = deduped.values.toList()
+                                          ^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:329:61: Error: Undefined name '_ordered'.
+      for (final PlaybackProviderRegistration registration in _ordered) {
+                                                              ^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:369:38: Error: Method not found: '_clock'.
+                  when !expiry.isAfter(_clock())) {
+                                       ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:431:41: Error: Method not found: '_clock'.
+                    if (value.isExpiredAt(_clock())) {
+                                          ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:503:12: Error: Undefined name '_videoHostResolvers'.
+          in _videoHostResolvers) {
+             ^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:510:46: Error: Undefined name '_hostBreakers'.
+      final ProviderCircuitBreaker? existing = _hostBreakers.remove(hostId);
+                                               ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:512:7: Error: Undefined name '_hostBreakers'.
+        _hostBreakers[hostId] = existing;
+        ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:516:9: Error: Undefined name '_hostBreakers'.
+      if (_hostBreakers.length >= maxHostCircuitBreakers) {
+          ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:516:33: Error: Undefined name 'maxHostCircuitBreakers'.
+      if (_hostBreakers.length >= maxHostCircuitBreakers) {
+                                  ^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:519:14: Error: Undefined name '_hostBreakers'.
+            in _hostBreakers.entries) {
+               ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:527:7: Error: Undefined name '_hostBreakers'.
+        _hostBreakers.remove(evictable);
+        ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:531:14: Error: Undefined name '_clock'.
+        clock: _clock,
+               ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:532:25: Error: Undefined name 'circuitFailureThreshold'.
+        failureThreshold: circuitFailureThreshold,
+                          ^^^^^^^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:533:17: Error: Undefined name 'circuitCooldown'.
+        cooldown: circuitCooldown,
+                  ^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:535:5: Error: Undefined name '_hostBreakers'.
+      _hostBreakers[hostId] = created;
+      ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:576:65: Error: Method not found: '_clock'.
+      final List<PlaybackSource>? cached = _sourceCache.read(key, _clock());
+                                                                  ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:576:42: Error: Undefined name '_sourceCache'.
+      final List<PlaybackSource>? cached = _sourceCache.read(key, _clock());
+                                           ^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:582:11: Error: Undefined name '_providerRequests'.
+            _providerRequests,
+            ^^^^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:591:11: Error: Undefined name '_registrations'.
+            _registrations[provider.id];
+            ^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:592:28: Error: Method not found: '_clock'.
+        final DateTime now = _clock();
+                             ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:603:7: Error: Undefined name '_sourceCache'.
+        _sourceCache.write(
+        ^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:624:44: Error: Undefined name '_breakers'.
+      final ProviderCircuitBreaker breaker = _breakers[provider.id]!;
+                                             ^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:712:49: Error: Method not found: '_clock'.
+      final Duration remaining = until.difference(_clock());
+                                                  ^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:730:44: Error: Undefined name '_breakers'.
+      final ProviderCircuitBreaker breaker = _breakers[id]!;
+                                             ^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:733:16: Error: Undefined name '_registrations'.
+        version: _registrations[id]!.version,
+                 ^^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:743:44: Error: Undefined name '_hostBreakers'.
+      final ProviderCircuitBreaker breaker = _hostBreakers[hostId]!;
+                                             ^^^^^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:761:23: Error: Undefined name '_inFlight'.
+    ) => _joinShared<T>(_inFlight, key, cancellation, create);
+                        ^^^^^^^^^
+  lib/application/player/providers/playback_provider_manager.dart:258:15: Error: The type 'PlaybackProviderResult<List<PlaybackSource>>' is not exhaustively matched by the switch cases since it doesn't match 'PlaybackProviderFailed<List<PlaybackSource>>(value: Object())'.
+   - 'PlaybackProviderResult' is from 'package:anime_app/domain/player/providers/playback_provider_contract.dart' ('lib/domain/player/providers/playback_provider_contract.dart').
+   - 'List' is from 'dart:core'.
+   - 'PlaybackSource' is from 'package:anime_app/domain/player/providers/playback_source.dart' ('lib/domain/player/providers/playback_source.dart').
+  Try adding a default case or cases that match 'PlaybackProviderFailed<List<PlaybackSource>>(value: Object())'.
+        switch (result) {
+                ^
+  .
+01:24 +35 ~4 -8: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/media_kit_spike_integration_test.dart
+01:25 +35 ~4 -8: Some tests failed.
+
+Failing tests:
+  /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/main_player_spike_test.dart: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/main_player_spike_test.dart
+  /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/oc07_miruro_failover_test.dart: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/oc07_miruro_failover_test.dart
+  /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/oc07_miruro_proxy_playback_test.dart: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/oc07_miruro_proxy_playback_test.dart
+  /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/provider_playback_route_test.dart: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/player/provider_playback_route_test.dart
+  ... and 4 more

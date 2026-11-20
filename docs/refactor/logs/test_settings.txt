@@ -1,0 +1,8 @@
+00:00 +0: loading /home/kyouma/Vídeos/PROYECTO ANIME/app/test/settings/settings_store_test.dart
+00:00 +0: returns the typed default without a stored row
+00:00 +1: sets, reads and watches a persisted value across database reopen
+00:00 +2: does not emit a setting when a different key changes
+00:00 +3: rejects invalid values, corrupt persisted types and unregistered keys
+00:00 +4: rejects duplicate registry keys and invalid defaults
+00:00 +5: returns typed storage failure when the watched database cannot open
+00:00 +6: All tests passed!

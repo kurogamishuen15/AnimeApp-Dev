@@ -1,0 +1,544 @@
+app/lib/app/anime_app.dart:40: data: ThemeData(
+app/lib/app/catalog/anime_detail_page.dart:18: final class AnimeDetailPage extends StatefulWidget {
+app/lib/app/catalog/anime_detail_page.dart:110: /// The index is separate from AniList metadata: it lists episodes only and
+app/lib/app/catalog/anime_detail_page.dart:354: body: Column(
+app/lib/app/catalog/anime_detail_page.dart:359: metadata: metadata,
+app/lib/app/catalog/anime_detail_page.dart:402: metadata: metadata,
+app/lib/app/catalog/catalog_home_page.dart:34: final class CatalogHomePage extends StatefulWidget {
+app/lib/app/catalog/catalog_home_page.dart:95: initialMetadata: anime.metadata,
+app/lib/app/catalog/catalog_home_page.dart:103: initialMetadata: metadata,
+app/lib/app/catalog/catalog_home_page.dart:112: initialMetadata: item.metadata,
+app/lib/app/catalog/catalog_home_page.dart:204: await Navigator.of(context).push<void>(
+app/lib/app/catalog/catalog_home_page.dart:205: MaterialPageRoute<void>(
+app/lib/app/catalog/catalog_home_page.dart:330: body: Row(
+app/lib/app/catalog/catalog_home_page.dart:374: key: ValueKey('anime-detail-$index'),
+app/lib/app/catalog/catalog_home_page.dart:380: initialMetadata:
+app/lib/app/catalog/catalog_home_page.dart:451: key: ValueKey<String>(
+app/lib/app/catalog/catalog_home_page.dart:457: onTap: () => Navigator.of(context).pop(stream),
+app/lib/app/catalog/catalog_home_page.dart:465: onPressed: () => Navigator.of(context).pop(),
+app/lib/app/catalog/catalog_home_page.dart:620: key: const ValueKey('home-search-field'),
+app/lib/app/catalog/catalog_home_page.dart:687: final String? key = Platform.environment['OPENSUBTITLES_API_KEY']?.trim();
+app/lib/app/catalog/catalog_home_page.dart:687: final String? key = Platform.environment['OPENSUBTITLES_API_KEY']?.trim();
+app/lib/app/catalog/catalog_home_page.dart:688: if (key == null || key.isEmpty) return null;
+app/lib/app/catalog/catalog_search_page.dart:6: final class CatalogSearchPage extends StatefulWidget {
+app/lib/app/catalog/catalog_search_page.dart:67: key: const ValueKey('catalog-search-field'),
+app/lib/app/catalog/catalog_search_page.dart:73: key: const ValueKey('catalog-search-button'),
+app/lib/app/catalog/catalog_search_page.dart:110: key: ValueKey(
+app/lib/app/catalog/confirm_completed_status.dart:16: onPressed: () => Navigator.pop(dialogContext, false),
+app/lib/app/catalog/confirm_completed_status.dart:20: onPressed: () => Navigator.pop(dialogContext, true),
+app/lib/app/catalog/detail/anime_detail_header.dart:32: key: const ValueKey('detail-cinematic-header'),
+app/lib/app/catalog/detail/anime_detail_header.dart:84: key: const ValueKey('detail-back'),
+app/lib/app/catalog/detail/anime_detail_header.dart:94: metadata: metadata,
+app/lib/app/catalog/detail/anime_detail_header.dart:103: metadata: metadata,
+app/lib/app/catalog/detail/anime_detail_header.dart:142: key: const ValueKey('detail-poster'),
+app/lib/app/catalog/detail/anime_detail_header.dart:152: key: const ValueKey('detail-header-info'),
+app/lib/app/catalog/detail/anime_detail_header.dart:154: metadata: metadata,
+app/lib/app/catalog/detail/anime_detail_header.dart:195: key: const ValueKey('detail-more-actions'),
+app/lib/app/catalog/detail/anime_detail_header.dart:208: key: const ValueKey('detail-poster'),
+app/lib/app/catalog/detail/anime_detail_header.dart:225: key: const ValueKey('detail-header-info'),
+app/lib/app/catalog/detail/anime_detail_header.dart:227: metadata: metadata,
+app/lib/app/catalog/detail/anime_detail_header.dart:246: key: const ValueKey('detail-header-synopsis'),
+app/lib/app/catalog/detail/anime_detail_header.dart:378: key: const ValueKey('detail-play-disabled'),
+app/lib/app/catalog/detail/anime_detail_header.dart:388: key: const ValueKey('add-to-library'),
+app/lib/app/catalog/detail/anime_detail_header.dart:414: key: const ValueKey('detail-more-actions'),
+app/lib/app/catalog/detail/anime_detail_header.dart:429: key: const ValueKey('detail-header-synopsis'),
+app/lib/app/catalog/detail/anime_detail_header.dart:565: key: const ValueKey('detail-library-status'),
+app/lib/app/catalog/detail/anime_detail_tab_content.dart:46: metadata: metadata,
+app/lib/app/catalog/detail/anime_detail_tab_content.dart:60: AnimeDetailTab.information => _InformationTab(metadata: metadata),
+app/lib/app/catalog/detail/anime_detail_tab_content.dart:62: storageKey: 'detail-cast',
+app/lib/app/catalog/detail/anime_detail_tab_content.dart:73: AnimeDetailTab.gallery => _GalleryTab(metadata: metadata),
+app/lib/app/catalog/detail/anime_detail_tab_content.dart:74: AnimeDetailTab.titles => _AlternativeTitlesTab(metadata: metadata),
+app/lib/app/catalog/detail/anime_detail_tab_content.dart:76: storageKey: 'detail-relations',
+app/lib/app/catalog/detail/anime_detail_tab_content.dart:89: required this.storageKey,
+app/lib/app/catalog/detail/anime_detail_tab_content.dart:94: final String storageKey;
+app/lib/app/catalog/detail/anime_detail_tab_content.dart:102: key: PageStorageKey<String>(storageKey),
+app/lib/app/catalog/detail/anime_detail_tab_content.dart:167: key: const PageStorageKey<String>('detail-episodes-scroll'),
+app/lib/app/catalog/detail/anime_detail_tab_content.dart:331: key: ValueKey<String>('external-streaming-link-$index'),
+app/lib/app/catalog/detail/anime_detail_tab_content.dart:336: key: ValueKey<String>('copy-external-streaming-link-$index'),
+app/lib/app/catalog/detail/anime_detail_tab_content.dart:393: key: ValueKey<String>('episode-card-$number'),
+app/lib/app/catalog/detail/anime_detail_tab_content.dart:515: key: const ValueKey('progress-seconds'),
+app/lib/app/catalog/detail/anime_detail_tab_content.dart:525: key: const ValueKey('save-progress'),
+app/lib/app/catalog/detail/anime_detail_tab_content.dart:534: key: const ValueKey('saved-progress-summary'),
+app/lib/app/catalog/detail/anime_detail_tab_content.dart:568: key: const PageStorageKey<String>('detail-information-scroll'),
+app/lib/app/catalog/detail/anime_detail_tab_content.dart:646: key: ValueKey('detail-gallery-empty'),
+app/lib/app/catalog/detail/anime_detail_tab_content.dart:654: key: const PageStorageKey<String>('detail-gallery-grid'),
+app/lib/app/catalog/detail/anime_detail_tab_content.dart:691: key: ValueKey('detail-titles-empty'),
+app/lib/app/catalog/detail/anime_detail_tab_content.dart:696: key: const PageStorageKey<String>('detail-titles-scroll'),
+app/lib/app/catalog/detail/anime_detail_tabs.dart:42: key: ValueKey('detail-tab-${tab.name}'),
+app/lib/app/catalog/local_library_page.dart:8: final class LocalLibraryPage extends StatefulWidget {
+app/lib/app/catalog/local_library_page.dart:108: key: ValueKey('library-item-${item.entry.animeId.value}'),
+app/lib/app/catalog/local_library_page.dart:118: key: ValueKey('library-status-${item.entry.animeId.value}'),
+app/lib/app/home/README.md:42: - `HomeArtwork` registra fallos de imagen sin URL ni query: solo tipo (`http_403`, `socket`, `decode`…) y host (`HomeArtworkDiagnostics`).
+app/lib/app/home/home_artwork_diagnostics.dart:24: final String key = '$kind@$host';
+app/lib/app/home/home_card_actions.dart:82: return Uri.https('anilist.co', '/anime/${id.value}');
+app/lib/app/home/home_card_actions.dart:210: Navigator.of(dialogContext).pop(),
+app/lib/app/home/home_card_actions.dart:364: onTap: () => Navigator.of(context).pop(command),
+app/lib/app/home/home_card_actions.dart:452: onTap: () => Navigator.pop(context, command),
+app/lib/app/home/home_data.dart:271: metadata: item,
+app/lib/app/home/home_hero.dart:159: key: ValueKey(anime.externalId ?? anime.title),
+app/lib/app/home/home_hero.dart:245: key: ValueKey(anime.externalId ?? anime.title),
+app/lib/app/home/home_screen.dart:11: final class HomeScreen extends StatefulWidget {
+app/lib/app/home/home_screen.dart:149: key: const PageStorageKey('home-scroll'),
+app/lib/app/home/home_screen.dart:177: key: _heroVisibilityKey,
+app/lib/app/home/home_sections.dart:215: key: PageStorageKey(widget.id),
+app/lib/app/home/home_sections.dart:503: key: ValueKey(
+app/lib/app/home/home_sections.dart:609: key: anchorKey,
+app/lib/app/player/audio_track_selector.dart:37: key: const ValueKey('player-audio'),
+app/lib/app/player/audio_track_selector.dart:44: key: ValueKey('audio-track-${track.id}'),
+app/lib/app/player/external_subtitle_search_panel.dart:54: ExternalSubtitleQuery(query: query, languages: const ['en']),
+app/lib/app/player/external_subtitle_search_panel.dart:128: key: const ValueKey<String>('external-subtitle-query'),
+app/lib/app/player/external_subtitle_search_panel.dart:140: key: const ValueKey<String>('external-subtitle-search'),
+app/lib/app/player/external_subtitle_search_panel.dart:151: key: const ValueKey<String>('external-subtitle-status'),
+app/lib/app/player/external_subtitle_search_panel.dart:162: key: ValueKey<String>(
+app/lib/app/player/player_demo_panel.dart:54: key: ValueKey('demo-server-$index'),
+app/lib/app/player/player_demo_panel.dart:70: onTap: () => Navigator.pop(dialog, index),
+app/lib/app/player/player_demo_panel.dart:75: key: ValueKey('demo-episode-$slot'),
+app/lib/app/player/player_demo_panel.dart:82: onTap: () => Navigator.pop(dialog, slot),
+app/lib/app/player/player_demo_panel.dart:89: onPressed: () => Navigator.pop(dialog),
+app/lib/app/player/player_demo_panel.dart:109: key: const ValueKey('episode-previous'),
+app/lib/app/player/player_demo_panel.dart:117: key: const ValueKey('episode-next'),
+app/lib/app/player/player_demo_panel.dart:125: key: const ValueKey('player-episodes'),
+app/lib/app/player/player_demo_panel.dart:133: key: const ValueKey('player-servers'),
+app/lib/app/player/player_demo_panel.dart:147: Text(message, key: const ValueKey('demo-result')),
+app/lib/app/player/player_nerd_panel.dart:23: key: const ValueKey('player-nerd-overlay'),
+app/lib/app/player/player_quality_panel.dart:28: key: ValueKey('player-quality'),
+app/lib/app/player/player_quality_panel.dart:40: key: const ValueKey('player-quality'),
+app/lib/app/player/player_quality_panel.dart:54: key: const ValueKey('video-track-auto'),
+app/lib/app/player/player_quality_panel.dart:61: key: ValueKey('video-track-${track.id}'),
+app/lib/app/player/player_subtitle_panel.dart:14: /// Session preferences survive dismissing the subtitle dialog.
+app/lib/app/player/player_subtitle_panel.dart:23: required this.preferences,
+app/lib/app/player/player_subtitle_panel.dart:29: final PlayerSubtitlePreferences preferences;
+app/lib/app/player/player_subtitle_panel.dart:37: SubtitleStyle get _subtitleStyle => widget.preferences.style;
+app/lib/app/player/player_subtitle_panel.dart:38: set _subtitleStyle(SubtitleStyle value) => widget.preferences.style = value;
+app/lib/app/player/player_subtitle_panel.dart:39: Duration get _subtitleDelay => widget.preferences.delay;
+app/lib/app/player/player_subtitle_panel.dart:40: set _subtitleDelay(Duration value) => widget.preferences.delay = value;
+app/lib/app/player/player_subtitle_panel.dart:83: onPressed: () => Navigator.of(context).pop(),
+app/lib/app/player/player_subtitle_panel.dart:137: key: const ValueKey<String>('subtitle-track-selector'),
+app/lib/app/player/player_subtitle_panel.dart:165: key: const ValueKey<String>('subtitle-size-selector'),
+app/lib/app/player/player_subtitle_panel.dart:182: key: const ValueKey<String>('subtitle-font-selector'),
+app/lib/app/player/player_subtitle_panel.dart:197: key: const ValueKey<String>('subtitle-color-selector'),
+app/lib/app/player/player_subtitle_panel.dart:219: key: const ValueKey<String>('subtitle-outline-selector'),
+app/lib/app/player/player_subtitle_panel.dart:238: key: const ValueKey<String>('subtitle-outline-color-selector'),
+app/lib/app/player/player_subtitle_panel.dart:261: key: const ValueKey<String>('subtitle-position-selector'),
+app/lib/app/player/player_subtitle_panel.dart:280: key: const ValueKey<String>('subtitle-bold-toggle'),
+app/lib/app/player/player_subtitle_panel.dart:287: key: const ValueKey<String>('subtitle-ass-override-toggle'),
+app/lib/app/player/player_subtitle_panel.dart:295: key: const ValueKey<String>('subtitle-delay-decrease'),
+app/lib/app/player/player_subtitle_panel.dart:302: key: const ValueKey<String>('subtitle-delay-increase'),
+app/lib/app/player/player_video_display_panel.dart:15: key: const ValueKey('player-display-settings'),
+app/lib/app/player/player_video_display_panel.dart:40: key: ValueKey('video-fit-${fit.name}'),
+app/lib/app/player/player_video_display_panel.dart:56: key: ValueKey('video-aspect-${aspect.name}'),
+app/lib/app/player/player_video_display_panel.dart:86: onPressed: () => Navigator.pop(context),
+app/lib/app/player/provider_playback_route.dart:21: final class ProviderPlaybackRoute extends StatefulWidget {
+app/lib/app/player/provider_playback_route.dart:118: if (mounted && !_disposed) Navigator.of(context).pop();
+app/lib/app/player/provider_playback_route.dart:132: if (mounted && !_disposed) Navigator.of(context).pop();
+app/lib/app/player/provider_playback_route.dart:178: body: Center(
+app/lib/app/player/provider_playback_route.dart:212: onPressed: () => Navigator.of(context).pop(),
+app/lib/app/player/provider_playback_route.dart:269: ? () => Navigator.of(context).pop()
+app/lib/app/player/skip_segment_panel.dart:43: key: const ValueKey<String>('skip-segment-panel'),
+app/lib/app/player/skip_segment_panel.dart:59: key: const ValueKey<String>('skip-current-segment'),
+app/lib/app/player/skip_segment_panel.dart:69: key: const ValueKey<String>('skip-segment-status'),
+app/lib/app/player/skip_segment_panel.dart:74: key: ValueKey<String>('skip-confirmed'),
+app/lib/app/player/source_switch_panel.dart:40: key: const ValueKey<String>('source-switch-panel'),
+app/lib/app/player/source_switch_panel.dart:57: Text(error, key: const ValueKey<String>('source-switch-error')),
+app/lib/app/player/source_switch_panel.dart:66: key: const ValueKey<String>('switch-source-button'),
+app/lib/app/player/spike_player_module.dart:266: SpikePlayerPageOptions.fromEnvironment(Platform.environment),
+app/lib/app/player/spike_player_page.dart:30: final class SpikePlayerPage extends StatefulWidget {
+app/lib/app/player/spike_player_page.dart:424: onPressed: () => Navigator.of(context).pop(),
+app/lib/app/player/spike_player_page.dart:438: preferences: _subtitlePreferences,
+app/lib/app/player/spike_player_page.dart:467: data: ThemeData.dark(useMaterial3: true).copyWith(
+app/lib/app/player/spike_player_page.dart:485: body: PlayerVideoLayout(
+app/lib/app/player/spike_player_page.dart:592: key: const ValueKey('rewind-10'),
+app/lib/app/player/spike_player_page.dart:602: key: const ValueKey<String>('playback-toggle'),
+app/lib/app/player/spike_player_page.dart:621: key: const ValueKey('forward-10'),
+app/lib/app/player/spike_player_page.dart:631: key: const ValueKey('player-stop'),
+app/lib/app/player/spike_player_page.dart:639: key: const ValueKey('player-mute'),
+app/lib/app/player/spike_player_page.dart:732: key: const ValueKey('player-subtitles'),
+app/lib/app/player/spike_player_page.dart:738: key: const ValueKey('player-nerd'),
+app/lib/app/player/spike_player_page.dart:751: key: const ValueKey<String>('fullscreen-toggle'),
+app/lib/application/catalog/catalog_service.dart:189: metadata: metadata,
+app/lib/application/catalog/catalog_service.dart:281: key: _progressKey(animeId),
+app/lib/application/catalog/catalog_service.dart:303: ProviderFailureKind.credentialsMissing ||
+app/lib/application/player/playback_progress_session.dart:78: key: _key,
+app/lib/application/player/player_demo_session.dart:25: : Uri.http('127.0.0.1:${ports[server - 1]}', '/episode-$episode.mkv');
+app/lib/application/player/providers/playback_provider_manager.dart:261: // Dedup key: provider identifier + host id + track language
+app/lib/application/player/providers/playback_provider_manager.dart:575: final String key = '${provider.id.value}:${episode.requestKey}';
+app/lib/application/player/skips/automatic_skip_controller.dart:96: final String key = '${snapshot.sourceGeneration}:${segment.stableKey}';
+app/lib/core/logger/safe_logger.dart:106: 'credential',
+app/lib/core/logger/safe_logger.dart:121: final key = entry.key;
+app/lib/data/anilist/README.md:14: subsequent `X-RateLimit-Limit` headers adjust spacing across client
+app/lib/data/anilist/README.md:39: during outages ([rate limiting](https://docs.anilist.co/guide/rate-limiting),
+app/lib/data/anilist/README.md:40: [API considerations](https://docs.anilist.co/guide/considerations)). The API
+app/lib/data/anilist/README.md:43: ([terms](https://docs.anilist.co/guide/terms-of-use)). AnimeApp's exact
+app/lib/data/anilist/anilist_client.dart:12: const _graphqlEndpoint = 'https://graphql.anilist.co';
+app/lib/data/anilist/anilist_client.dart:139: data: {
+app/lib/data/anilist/anilist_client.dart:149: _rateLimiter.updateRateLimit(response.headers);
+app/lib/data/anilist/anilist_client.dart:178: data: {
+app/lib/data/anilist/anilist_client.dart:192: _rateLimiter.updateRateLimit(response.headers);
+app/lib/data/anilist/anilist_client.dart:221: data: {
+app/lib/data/anilist/anilist_client.dart:239: _rateLimiter.updateRateLimit(response.headers);
+app/lib/data/anilist/anilist_client.dart:260: headers: const {'Accept': 'application/json'},
+app/lib/data/anilist/anilist_client.dart:272: return Failure(_rateLimiter.rateLimitError(response.headers));
+app/lib/data/anilist/anilist_client.dart:303: return Failure(_rateLimiter.rateLimitError(response.headers));
+app/lib/data/anilist/anilist_client.dart:499: static Duration? _retryAfter(Headers headers) {
+app/lib/data/anilist/anilist_client.dart:500: final String? retryAfter = headers.value('retry-after');
+app/lib/data/anilist/anilist_client.dart:550: void updateRateLimit(Headers headers) {
+app/lib/data/anilist/anilist_client.dart:551: final String? limitHeader = headers.value('x-ratelimit-limit');
+app/lib/data/anilist/anilist_client.dart:562: final Duration? retryAfter = AniListClient._retryAfter(headers);
+app/lib/data/anilist/anilist_client.dart:568: RateLimitError rateLimitError(Headers headers) {
+app/lib/data/anilist/anilist_client.dart:570: AniListClient._retryAfter(headers) ?? const Duration(minutes: 1);
+app/lib/data/anilist/drift_anilist_browse_cache.dart:18: 'SELECT payload, fetched_at FROM anilist_browse_cache WHERE feed_key = ?',
+app/lib/data/aniskip/README.md:3: El adaptador traduce respuestas de [AniSkip v1](https://api.aniskip.com/api-docs) a rangos del dominio. Se compone con un ID MAL comprobado para el episodio. El identificador local de anime y el de AniList no se usan como sustituto.
+app/lib/data/aniskip/aniskip_client.dart:26: static const String _baseUrl = 'https://api.aniskip.com/v1';
+app/lib/data/aniskip/aniskip_client.dart:41: headers: const {'User-Agent': 'Kongroo/0.1'},
+app/lib/data/aniskip/aniskip_client.dart:49: String cacheKey(MyAnimeListAnimeId id, PlaybackEpisode episode) =>
+app/lib/data/aniskip/aniskip_client.dart:57: final String key = cacheKey(malAnimeId, episode);
+app/lib/data/aniskip/aniskip_client.dart:100: body: body,
+app/lib/data/aniskip/aniskip_response_cache.dart:77: body: decoded['body']! as String,
+app/lib/data/kitsu/README.md:12: - Miniaturas `http://` se descartan; entradas sin número válido (<1) se omiten sin invalidar la página.
+app/lib/data/kitsu/kitsu_episode_index.dart:23: baseUrl: 'https://kitsu.io/api/edge',
+app/lib/data/kitsu/kitsu_episode_index.dart:26: headers: const {'Accept': 'application/vnd.api+json'},
+app/lib/data/kitsu/kitsu_episode_index.dart:68: queryParameters: {
+app/lib/data/kitsu/kitsu_episode_index.dart:95: queryParameters: {
+app/lib/data/kitsu/kitsu_episode_index.dart:176: thumbnailUrl: thumbnail is String && thumbnail.startsWith('https://')
+app/lib/data/local_db/app_database.dart:40: int get schemaVersion => 9;
+app/lib/data/local_db/app_database.dart:43: CREATE TABLE anilist_detail_cache (
+app/lib/data/local_db/app_database.dart:44: media_id INTEGER PRIMARY KEY,
+app/lib/data/local_db/app_database.dart:51: CREATE TABLE anilist_browse_cache (
+app/lib/data/local_db/app_database.dart:52: feed_key TEXT PRIMARY KEY,
+app/lib/data/local_db/app_database.dart:90: CREATE TABLE library_entries_new (
+app/lib/data/local_db/app_database.dart:91: anime_id TEXT NOT NULL PRIMARY KEY
+app/lib/data/local_db/drift_playback_progress_repository.dart:59: key: ProgressKey(
+app/lib/data/local_db/drift_playback_progress_repository.dart:95: key: ProgressKey(
+app/lib/data/local_db/tables/anime_identity_entries.dart:5: TextColumn get animeId => text().named('anime_id')();
+app/lib/data/local_db/tables/anime_identity_entries.dart:7: DateTimeColumn get createdAtUtc => dateTime().named('created_at_utc')();
+app/lib/data/local_db/tables/anime_identity_relationships.dart:9: TextColumn get sourceAnimeId => text()
+app/lib/data/local_db/tables/anime_identity_relationships.dart:18: TextColumn get targetAnimeId => text()
+app/lib/data/local_db/tables/anime_identity_relationships.dart:26: TextColumn get relationshipKind => text().named('relationship_kind')();
+app/lib/data/local_db/tables/anime_identity_relationships.dart:28: TextColumn get evidence => text().named('evidence')();
+app/lib/data/local_db/tables/anime_identity_relationships.dart:30: DateTimeColumn get linkedAtUtc => dateTime().named('linked_at_utc')();
+app/lib/data/local_db/tables/external_anime_identifiers.dart:8: TextColumn get providerId => text().named('provider_id')();
+app/lib/data/local_db/tables/external_anime_identifiers.dart:10: TextColumn get externalId => text().named('external_id')();
+app/lib/data/local_db/tables/external_anime_identifiers.dart:12: TextColumn get animeId => text()
+app/lib/data/local_db/tables/external_anime_identifiers.dart:20: TextColumn get evidence => text().named('evidence')();
+app/lib/data/local_db/tables/external_anime_identifiers.dart:22: DateTimeColumn get linkedAtUtc => dateTime().named('linked_at_utc')();
+app/lib/data/local_db/tables/latest_anime_search.dart:5: TextColumn get slot => text().named('slot')();
+app/lib/data/local_db/tables/latest_anime_search.dart:7: TextColumn get searchQuery => text().named('search_query')();
+app/lib/data/local_db/tables/latest_anime_search.dart:9: IntColumn get page => integer().named('page')();
+app/lib/data/local_db/tables/latest_anime_search.dart:11: IntColumn get perPage => integer().named('per_page')();
+app/lib/data/local_db/tables/latest_anime_search.dart:13: TextColumn get resultJson => text().named('result_json')();
+app/lib/data/local_db/tables/latest_anime_search.dart:15: DateTimeColumn get cachedAt => dateTime().named('cached_at')();
+app/lib/data/local_db/tables/library_entries.dart:8: TextColumn get animeId => text()
+app/lib/data/local_db/tables/library_entries.dart:16: DateTimeColumn get addedAtUtc => dateTime().named('added_at_utc')();
+app/lib/data/local_db/tables/library_entries.dart:18: TextColumn get status =>
+app/lib/data/local_db/tables/library_entries.dart:25: String get tableName => 'library_entries';
+app/lib/data/local_db/tables/playback_progress_entries.dart:4: TextColumn get contentId => text().named('content_id')();
+app/lib/data/local_db/tables/playback_progress_entries.dart:5: TextColumn get episodeId => text().named('episode_id')();
+app/lib/data/local_db/tables/playback_progress_entries.dart:6: IntColumn get positionMs => integer().named('position_ms')();
+app/lib/data/local_db/tables/playback_progress_entries.dart:7: IntColumn get durationMs => integer().named('duration_ms').nullable()();
+app/lib/data/local_db/tables/playback_progress_entries.dart:8: DateTimeColumn get updatedAtUtc => dateTime().named('updated_at_utc')();
+app/lib/data/local_db/tables/playback_progress_entries.dart:9: TextColumn get completion => text().named('completion')();
+app/lib/data/local_db/tables/playback_progress_entries.dart:10: IntColumn get revision =>
+app/lib/data/local_db/tables/progress_documents.dart:5: TextColumn get documentKey => text().named('document_key')();
+app/lib/data/local_db/tables/progress_documents.dart:7: TextColumn get payloadJson => text().named('payload_json')();
+app/lib/data/local_db/tables/progress_documents.dart:9: DateTimeColumn get updatedAt => dateTime().named('updated_at')();
+app/lib/data/local_db/tables/settings_entries.dart:5: TextColumn get settingKey => text().named('setting_key')();
+app/lib/data/local_db/tables/settings_entries.dart:7: TextColumn get valueJson => text().named('value_json')();
+app/lib/data/local_db/tables/settings_entries.dart:9: DateTimeColumn get updatedAt => dateTime().named('updated_at')();
+app/lib/data/opensubtitles/README.md:31: ninguno de esos headers. Las pruebas usan placeholders que nunca salen del
+app/lib/data/opensubtitles/README.md:44: `search` forma `GET /api/v1/subtitles`, omite filtros vacíos, normaliza texto,
+app/lib/data/opensubtitles/README.md:48: si conservan HTTPS, puerto 443, la ruta `/api/v1/subtitles` y uno de los hosts
+app/lib/data/opensubtitles/README.md:58: `vtt`. Solicita `POST /api/v1/download`; la cuota puede consumirse al solicitar
+app/lib/data/opensubtitles/README.md:112: permitidos/rechazados, multipart, descarga SRT, aislamiento de headers, URL
+app/lib/data/opensubtitles/README.md:130: Consultadas el 2026-11-11: [referencia API OpenSubtitles v1](https://ai.opensubtitles.com/api-docs).
+app/lib/data/opensubtitles/README.md:133: cuota y muestra enlaces `https://www.opensubtitles.com/download/...`. Esto
+app/lib/data/opensubtitles/opensubtitles_client.dart:16: /// validated separately; credentials are sent only to the API origin.
+app/lib/data/opensubtitles/opensubtitles_client.dart:47: static const String _apiBase = 'https://api.opensubtitles.com/api/v1';
+app/lib/data/opensubtitles/opensubtitles_client.dart:78: key = await _readApiKey();
+app/lib/data/opensubtitles/opensubtitles_client.dart:82: if (key == null) {
+app/lib/data/opensubtitles/opensubtitles_client.dart:124: .replace(queryParameters: stringParams);
+app/lib/data/opensubtitles/opensubtitles_client.dart:129: headers: _headers(key),
+app/lib/data/opensubtitles/opensubtitles_client.dart:136: final String? location = response.headers.value(
+app/lib/data/opensubtitles/opensubtitles_client.dart:190: key = await _readApiKey();
+app/lib/data/opensubtitles/opensubtitles_client.dart:194: if (key == null) {
+app/lib/data/opensubtitles/opensubtitles_client.dart:202: data: <String, Object>{
+app/lib/data/opensubtitles/opensubtitles_client.dart:207: headers: await _downloadHeaders(key),
+app/lib/data/opensubtitles/opensubtitles_client.dart:325: final String? location = response.headers.value(
+app/lib/data/opensubtitles/opensubtitles_client.dart:346: retryAfter: _parseRetryAfter(response.headers.value('retry-after')),
+app/lib/data/opensubtitles/opensubtitles_client.dart:436: final String? key = await _apiKey();
+app/lib/data/opensubtitles/opensubtitles_client.dart:442: final Map<String, String> headers = _headers(key);
+app/lib/data/opensubtitles/opensubtitles_client.dart:445: headers['Authorization'] = 'Bearer ${token.trim()}';
+app/lib/data/opensubtitles/opensubtitles_client.dart:447: return headers;
+app/lib/data/opensubtitles/opensubtitles_client.dart:450: Map<String, String> _headers(String key) => <String, String>{
+app/lib/data/opensubtitles/opensubtitles_client.dart:452: 'User-Agent': _userAgent,
+app/lib/data/opensubtitles/opensubtitles_client.dart:461: headers: const {'Accept': 'application/json'},
+app/lib/data/opensubtitles/opensubtitles_client.dart:543: uri.path == '/api/v1/subtitles';
+app/lib/data/opensubtitles/opensubtitles_client.dart:580: final String? retry = response.headers.value('retry-after');
+app/lib/data/player/engine/README.md:30: `play`, `pause`, `seek` y `stop` traducen operaciones nativas. `stop` descarga el medio y deja reusable el Player; el adaptador conserva la URI que se abrió correctamente y marca el snapshot `stopped`, sin destruir Player ni VideoController. El siguiente `play` revalida el archivo y lo abre de nuevo en el mismo Player con reproducción desde el inicio. Si la validación/reapertura falla, la operación propaga el error y mantiene la fuente y el estado stopped para permitir reintentar. Play tras Pause solo llama a `Player.play()` y conserva la posición. La prueba libmpv cubre ambos contratos, ciclos Stop→Play repetidos, archivo retenido ausente y recuperación. La reapertura de la misma URI en Linux aún requiere confirmación de imagen en compositor: upstream mantiene abierta la issue [#957](https://github.com/media-kit/media-kit/issues/957), que informa pantalla negra para una secuencia similar; el test nativo comprueba estado/avance, no píxeles presentados. `dispose` hace el engine no utilizable y delega a `ActivePlayerLease`: llamadas concurrentes comparten Future. El lease representa solo la propiedad del Player nativo: se libera cuando `Player.dispose()` termina, aunque luego falle una limpieza auxiliar Dart. El engine reintenta de forma idempotente la cancelación de subscriptions/cierre del stream mediante su propio `dispose()`; no libera un Player nativo incierto. El dispose nativo es un intento único porque media_kit 1.2.6 cambia su indicador `disposed` antes de completar todo el teardown. Si ese Future falla, se conserva el lease y no se repite la operación. El error tipado `MediaKitSpikeEngineDisposeFailure` informa `nativePlayerStillOwned`; los fallos de subscriptions o del stream se marcan como auxiliares y no conservan el lease si el dispose nativo terminó. Un error de `Player.dispose()` también cierra el stream de snapshots; una prueba con fallo inyectado confirma `onDone`, aunque no simula internamente un fallo parcial de libmpv. Esta cuarentena requiere reiniciar el proceso antes de crear otro Player tras fallo nativo. `retryPendingDispose()` atiende exclusivamente un lease nativo huérfano o retenido y propaga su fallo. Si el Player ya se liberó y solo falló una etapa auxiliar, se reintenta llamando `dispose()` sobre el mismo engine mientras siga accesible. No desplaza un engine activo antes de dispose. `Player.stream.error` se publica como texto fijo sin rutas/detalles arbitrarios. Los errores de reproducción persisten a través de cambios no relacionados y solo se limpian en una recuperación de `open` sin un nuevo error.
+app/lib/data/player/engine/README.md:210: Consultadas el 2026-11-10: [media_kit 1.2.6](https://pub.dev/packages/media_kit/versions/1.2.6)
+app/lib/data/player/engine/README.md:213: de estilo. La [referencia oficial de opciones mpv](https://github.com/mpv-player/mpv/blob/master/DOCS/man/options.rst)
+app/lib/data/player/engine/README.md:300: - [`media-kit#1450`](https://github.com/media-kit/media-kit/issues/1450): en HLS,
+app/lib/data/player/engine/README.md:303: - [`mpv#13120`](https://github.com/mpv-player/mpv/issues/13120): un `.vtt`
+app/lib/data/player/engine/media_codec_support_linux.dart:37: }) : _environment = environment ?? Platform.environment,
+app/lib/data/player/engine/media_kit_spike_engine.dart:184: entry.key: List<ProviderSubtitle>.unmodifiable(entry.value),
+app/lib/data/player/providers/README.md:69: | miruro-catalog | 100 | 403 Cloudflare | Frontend actual identificado; `/health` responde, pero catálogo `/api/config` devuelve 403 con UA propio | **N1 externo** | La interfaz de catálogo/playback no entregó respuesta; health no prueba catálogo | Solo `.cx`; hace falta contrato de API externa o habilitación del operador |
+app/lib/data/player/providers/README.md:121: rutas same-origin. `GET /health` devuelve JSON de salud/versionado. La ruta
+app/lib/data/player/providers/README.md:122: conocida `GET /api/config` devuelve 403 incluso con UA propio, por lo que no
+app/lib/data/player/providers/allanime/allanime_playback_provider.dart:30: /// 2. request key = partB XOR mask (32 bytes).
+app/lib/data/player/providers/allanime/allanime_playback_provider.dart:36: ///    `x-aa-boot` headers.
+app/lib/data/player/providers/allanime/allanime_playback_provider.dart:78: }) : apiOrigin = apiOrigin ?? Uri.https('api.mkissa.net'),
+app/lib/data/player/providers/allanime/allanime_playback_provider.dart:123: 'Referer': 'https://mkissa.to/',
+app/lib/data/player/providers/allanime/allanime_playback_provider.dart:124: 'Origin': 'https://mkissa.to',
+app/lib/data/player/providers/allanime/allanime_playback_provider.dart:130: 'Referer': 'https://mkissa.to/',
+app/lib/data/player/providers/allanime/allanime_playback_provider.dart:131: 'User-Agent': _http.userAgent,
+app/lib/data/player/providers/allanime/allanime_playback_provider.dart:241: headers: _apiHeaders,
+app/lib/data/player/providers/allanime/allanime_playback_provider.dart:375: /// Bootstraps the per-epoch key: HMAC boot token over the current epoch
+app/lib/data/player/providers/allanime/allanime_playback_provider.dart:393: queryParameters: {
+app/lib/data/player/providers/allanime/allanime_playback_provider.dart:400: headers: PlaybackRequestHeaders({
+app/lib/data/player/providers/allanime/allanime_playback_provider.dart:401: 'Referer': 'https://mkissa.to/',
+app/lib/data/player/providers/allanime/allanime_playback_provider.dart:402: 'Origin': 'https://mkissa.to',
+app/lib/data/player/providers/allanime/allanime_playback_provider.dart:438: final Uint8List key = Uint8List(32);
+app/lib/data/player/providers/allanime/allanime_playback_provider.dart:442: return (epoch: epochValue, key: key);
+app/lib/data/player/providers/allanime/allanime_playback_provider.dart:478: queryParameters: {'variables': variables, 'extensions': extensions},
+app/lib/data/player/providers/allanime/allanime_playback_provider.dart:484: headers: PlaybackRequestHeaders({
+app/lib/data/player/providers/allanime/allanime_playback_provider.dart:485: 'Referer': 'https://mkissa.to/',
+app/lib/data/player/providers/allanime/allanime_playback_provider.dart:486: 'Origin': 'https://mkissa.to',
+app/lib/data/player/providers/animeav1/README.md:6: [fuente](https://github.com/sanilili/Anilili/blob/d7b80f1f5b6c3d014317af471a8565749947397d/app/src/main/java/com/anilili/data/remote/AnimeAv1Provider.kt),
+app/lib/data/player/providers/animeav1/README.md:7: [licencia](https://github.com/sanilili/Anilili/blob/d7b80f1f5b6c3d014317af471a8565749947397d/LICENSE).
+app/lib/data/player/providers/animeav1/animeav1_playback_provider.dart:18: : origin = origin ?? Uri.https('animeav1.com') {
+app/lib/data/player/providers/animeav1/animeav1_playback_provider.dart:77: .replace(queryParameters: search == null ? null : {'search': search});
+app/lib/data/player/providers/animeav1/animeav1_playback_provider.dart:82: headers: PlaybackRequestHeaders({
+app/lib/data/player/providers/animeav1/animeav1_playback_provider.dart:83: 'Referer': origin.resolve('/').toString(),
+app/lib/data/player/providers/animeav1/animeav1_playback_provider.dart:321: 'Referer': origin.resolve('/').toString(),
+app/lib/data/player/providers/animegg/animegg_playback_provider.dart:26: }) : origin = origin ?? Uri.https('www.animegg.org') {
+app/lib/data/player/providers/animegg/animegg_playback_provider.dart:81: PlaybackRequestHeaders({'Referer': origin.resolve('/').toString()});
+app/lib/data/player/providers/animegg/animegg_playback_provider.dart:86: 'Referer': origin.resolve('/').toString(),
+app/lib/data/player/providers/animegg/animegg_playback_provider.dart:87: 'User-Agent': _http.userAgent,
+app/lib/data/player/providers/animegg/animegg_playback_provider.dart:122: origin.resolve('/search/').replace(queryParameters: {'q': title}),
+app/lib/data/player/providers/animegg/animegg_playback_provider.dart:200: headers: _referer,
+app/lib/data/player/providers/animegg/animegg_playback_provider.dart:214: headers: _referer,
+app/lib/data/player/providers/animegg/animegg_playback_provider.dart:271: headers: _referer,
+app/lib/data/player/providers/anizone/anizone_playback_provider.dart:23: }) : origin = origin ?? Uri.https('anizone.to') {
+app/lib/data/player/providers/anizone/anizone_playback_provider.dart:41: r'"src":"(https://[^"\\]+?\.m3u8[^"\\]*)"',
+app/lib/data/player/providers/anizone/anizone_playback_provider.dart:50: r'"language":"([a-z-]{2,8})"[^{}]*?"file":"(https://[^"\\]+?\.vtt)"',
+app/lib/data/player/providers/anizone/anizone_playback_provider.dart:54: r'"file":"(https://[^"\\]+?\.vtt)"',
+app/lib/data/player/providers/anizone/anizone_playback_provider.dart:96: origin.resolve('/anime').replace(queryParameters: {'search': title}),
+app/lib/data/player/providers/anizone/anizone_playback_provider.dart:168: headers: PlaybackRequestHeaders({
+app/lib/data/player/providers/anizone/anizone_playback_provider.dart:169: 'Referer': origin.resolve('/anime/${episode.sourceAnimeId}').toString(),
+app/lib/data/player/providers/anizone/anizone_playback_provider.dart:214: 'Referer': origin.resolve('/').toString(),
+app/lib/data/player/providers/hosts/voe_video_host_resolver.dart:25: if (_http.allowedHosts.contains(uri.host)) return _http;
+app/lib/data/player/providers/hosts/voe_video_host_resolver.dart:67: final headers = candidate.requestHeaders;
+app/lib/data/player/providers/hosts/voe_video_host_resolver.dart:71: headers: headers,
+app/lib/data/player/providers/hosts/voe_video_host_resolver.dart:89: headers: headers,
+app/lib/data/player/providers/hosts/voe_video_host_resolver.dart:105: 'User-Agent': _http.userAgent,
+app/lib/data/player/providers/hosts/voe_video_host_resolver.dart:110: headers: mediaHeaders,
+app/lib/data/player/providers/hosts/voe_video_host_resolver.dart:143: r'''window\.location\.href\s*=\s*["'](https://[^"'<>]{1,2048})["']''',
+app/lib/data/player/providers/html_playback_parsers.dart:91: if (value.startsWith('http://') || value.startsWith('https://')) {
+app/lib/data/player/providers/jkanime/jkanime_playback_provider.dart:230: scheme: 'https', host: hostKey, path: '/placeholder'),
+app/lib/data/player/providers/jkanime/jkanime_playback_provider.dart:364: // Per OC-07.8: https://jkanime.net/<slug>/<n>/
+app/lib/data/player/providers/jkanime/jkanime_playback_provider.dart:370: 'https://jkanime.net/$slug/$episodeNumber';
+app/lib/data/player/providers/jkanime/jkanime_playback_provider.dart:378: headers: {
+app/lib/data/player/providers/jkanime/jkanime_playback_provider.dart:379: 'User-Agent':
+app/lib/data/player/providers/megaplay/README.md:33: [sanilili/desktoprepo1](https://github.com/sanilili/desktoprepo1), commit
+app/lib/data/player/providers/megaplay/megaplay_playback_provider.dart:36: static final Uri defaultOrigin = Uri.https('megaplay.buzz');
+app/lib/data/player/providers/megaplay/megaplay_playback_provider.dart:240: final headers = PlaybackRequestHeaders({'Referer': 'https://hianimes.re/'});
+app/lib/data/player/providers/megaplay/megaplay_playback_provider.dart:244: headers: headers,
+app/lib/data/player/providers/megaplay/megaplay_playback_provider.dart:268: headers: headers,
+app/lib/data/player/providers/megaplay/megaplay_playback_provider.dart:283: headers: PlaybackRequestHeaders({'Referer': embed.toString()}),
+app/lib/data/player/providers/megaplay/megaplay_playback_provider.dart:329: final key = List<int>.filled(32, 0);
+app/lib/data/player/providers/megaplay/megaplay_playback_provider.dart:405: final headers = PlaybackRequestHeaders({
+app/lib/data/player/providers/megaplay/megaplay_playback_provider.dart:406: 'Referer': origin.resolve('/').toString(),
+app/lib/data/player/providers/megaplay/megaplay_playback_provider.dart:407: 'Origin': origin.origin,
+app/lib/data/player/providers/megaplay/megaplay_playback_provider.dart:408: 'User-Agent': _http.userAgent,
+app/lib/data/player/providers/megaplay/megaplay_playback_provider.dart:415: origin.resolve('/$route').replace(query: 'id=$fileId&id=$fileId'),
+app/lib/data/player/providers/megaplay/megaplay_playback_provider.dart:417: headers: PlaybackRequestHeaders({
+app/lib/data/player/providers/megaplay/megaplay_playback_provider.dart:418: 'Referer': origin.resolve('/').toString(),
+app/lib/data/player/providers/megaplay/megaplay_playback_provider.dart:468: requestHeaders: headers,
+app/lib/data/player/providers/miruro/README.md:12: | `/api/config` | `200 application/json`, 6.798 B |
+app/lib/data/player/providers/miruro/README.md:18: | Proxy loopback | `http://127.0.0.1:<port>/media/<id>`; libmpv `0:24:09.629955`, `PLAYING`, `SEEK 0:00:40.166171` |
+app/lib/data/player/providers/miruro/README.md:31: ella, `/api/config` responde `403` con block page de Cloudflare; `same-site`
+app/lib/data/player/providers/miruro/README.md:36: (`.to`, `.bz`, `.cx`, `.tv`). Por HTTP/1.1 devuelve `403`; `/health` responde
+app/lib/data/player/providers/miruro/README.md:42: [`stepbrobd/miruro`](https://github.com/stepbrobd/miruro/tree/408259661cc7335bafc99ef6e9b7f4a588192a04)
+app/lib/data/player/providers/miruro/README.md:61: | `miruro_catalog_api.dart` | Rutas `/api/…`, cabeceras de contexto, mapeo de estado a `PlaybackProviderFailureKind`, `probeHealth()` por `/health` (HTTP/1.1 basta). |
+app/lib/data/player/providers/miruro/README.md:63: | `miruro_media_proxy.dart` | Proxy loopback: publica cada fuente como `http://127.0.0.1:<port>/media/<id>`, aplica cabeceras, reenvía `Range`, preserva `206`/`Content-Range` y reescribe playlists HLS. |
+app/lib/data/player/providers/miruro/README.md:82: | `GET /health` | 200 | JSON, `version` 1.15.9 |
+app/lib/data/player/providers/miruro/README.md:84: | `GET /api/config` | 200 | JSON |
+app/lib/data/player/providers/miruro/README.md:85: | `GET /api/v1/anime?q=…&limit=…&sort=-popularity` | 200 | XOR+gzip |
+app/lib/data/player/providers/miruro/README.md:86: | `GET /api/v1/anime/<title-id>/episodes?limit=10000` | 200 | XOR+gzip |
+app/lib/data/player/providers/miruro/README.md:87: | `GET /api/v1/anime/<title-id>/episodes/<n>/play` | 200 | XOR+gzip |
+app/lib/data/player/providers/miruro/README.md:165: - 2026-11-19: investigación del frontend/backend; `/api/config` devolvía 403 y
+app/lib/data/player/providers/miruro/miruro_catalog_api.dart:17: /// because the backend serves it only over HTTP/2, and `/health` through
+app/lib/data/player/providers/miruro/miruro_catalog_api.dart:60: final Uri uri = Uri.https(host, '/api/$path', query);
+app/lib/data/player/providers/miruro/miruro_catalog_api.dart:68: headers: <String, String>{
+app/lib/data/player/providers/miruro/miruro_catalog_api.dart:72: 'referer': 'https://$host/',
+app/lib/data/player/providers/miruro/miruro_catalog_api.dart:73: 'origin': 'https://$host',
+app/lib/data/player/providers/miruro/miruro_catalog_api.dart:116: contentType: response.headers['content-type'],
+app/lib/data/player/providers/miruro/miruro_catalog_api.dart:124: /// `/health` is served by the same host over HTTP/1.1, so it exercises the
+app/lib/data/player/providers/miruro/miruro_catalog_api.dart:139: Uri.https(host, '/health'),
+app/lib/data/player/providers/miruro/miruro_catalog_parser.dart:83: key: entry.key,
+app/lib/data/player/providers/miruro/miruro_catalog_parser.dart:180: provider.key: provider,
+app/lib/data/player/providers/miruro/miruro_catalog_parser.dart:193: final String? key = _text(provider?['provider']);
+app/lib/data/player/providers/miruro/miruro_catalog_parser.dart:194: if (provider == null || key == null || !_validKey(key)) continue;
+app/lib/data/player/providers/miruro/miruro_catalog_parser.dart:216: id: 'miruro:$titleId:${episode.episodeNumber}:$key:$trackName',
+app/lib/data/player/providers/miruro/miruro_catalog_parser.dart:294: final String? referer = _safeReferer(server['headers']);
+app/lib/data/player/providers/miruro/miruro_catalog_parser.dart:311: : PlaybackRequestHeaders({'Referer': referer}),
+app/lib/data/player/providers/miruro/miruro_catalog_parser.dart:320: final Map<String, dynamic>? headers = _object(rawHeaders);
+app/lib/data/player/providers/miruro/miruro_catalog_parser.dart:321: if (headers == null) return null;
+app/lib/data/player/providers/miruro/miruro_catalog_parser.dart:322: for (final MapEntry<String, dynamic> entry in headers.entries) {
+app/lib/data/player/providers/miruro/miruro_catalog_playback_provider.dart:94: 'flag=${Platform.environment['KONGROO_ENABLE_MIRURO_BACKEND'] ?? 'not-set'}');
+app/lib/data/player/providers/miruro/miruro_catalog_playback_provider.dart:194: body: body,
+app/lib/data/player/providers/miruro/miruro_catalog_playback_provider.dart:266: query: <String, String>{'anilist_id_in': '$anilistId', 'limit': '100'},
+app/lib/data/player/providers/miruro/miruro_catalog_playback_provider.dart:323: query: <String, String>{
+app/lib/data/player/providers/miruro/miruro_http2_client.dart:12: required this.headers,
+app/lib/data/player/providers/miruro/miruro_http2_client.dart:17: final Map<String, String> headers;
+app/lib/data/player/providers/miruro/miruro_http2_client.dart:25: required Map<String, String> headers,
+app/lib/data/player/providers/miruro/miruro_http2_client.dart:34: /// The same host answers `/health` over HTTP/1.1, so this is not a network,
+app/lib/data/player/providers/miruro/miruro_http2_client.dart:60: required Map<String, String> headers,
+app/lib/data/player/providers/miruro/miruro_http2_client.dart:71: headers: headers,
+app/lib/data/player/providers/miruro/miruro_http2_client.dart:144: required Map<String, String> headers,
+app/lib/data/player/providers/miruro/miruro_http2_client.dart:157: for (final MapEntry<String, String> entry in headers.entries)
+app/lib/data/player/providers/miruro/miruro_http2_client.dart:183: case HeadersStreamMessage(:final List<Header> headers):
+app/lib/data/player/providers/miruro/miruro_http2_client.dart:184: for (final Header header in headers) {
+app/lib/data/player/providers/miruro/miruro_http2_client.dart:217: headers: Map<String, String>.unmodifiable(responseHeaders),
+app/lib/data/player/providers/miruro/miruro_http2_client.dart:218: body: body.takeBytes(),
+app/lib/data/player/providers/miruro/miruro_media_proxy.dart:11: /// Every resolved stream is published as `http://127.0.0.1:<port>/media/<id>`,
+app/lib/data/player/providers/miruro/miruro_media_proxy.dart:45: /// Origin the engine must allowlist, e.g. `http://127.0.0.1:45123`.
+app/lib/data/player/providers/miruro/miruro_media_proxy.dart:46: String get origin => 'http://127.0.0.1:${_server.port}';
+app/lib/data/player/providers/miruro/miruro_media_proxy.dart:49: Uri expose(Uri upstream, {PlaybackRequestHeaders? headers}) {
+app/lib/data/player/providers/miruro/miruro_media_proxy.dart:51: _entries[id] = _MiruroMediaEntry(upstream, headers);
+app/lib/data/player/providers/miruro/miruro_media_proxy.dart:102: final Map<String, String> headers =
+app/lib/data/player/providers/miruro/miruro_media_proxy.dart:103: entry.headers?.values ?? const <String, String>{};
+app/lib/data/player/providers/miruro/miruro_media_proxy.dart:104: headers.forEach(upstream.headers.set);
+app/lib/data/player/providers/miruro/miruro_media_proxy.dart:105: upstream.headers.set(HttpHeaders.acceptEncodingHeader, 'identity');
+app/lib/data/player/providers/miruro/miruro_media_proxy.dart:106: final String? range = request.headers.value(HttpHeaders.rangeHeader);
+app/lib/data/player/providers/miruro/miruro_media_proxy.dart:107: if (range != null) upstream.headers.set(HttpHeaders.rangeHeader, range);
+app/lib/data/player/providers/miruro/miruro_media_proxy.dart:112: final String? contentType = response.headers.value(
+app/lib/data/player/providers/miruro/miruro_media_proxy.dart:126: final String? value = response.headers.value(name);
+app/lib/data/player/providers/miruro/miruro_media_proxy.dart:127: if (value != null) request.response.headers.set(name, value);
+app/lib/data/player/providers/miruro/miruro_media_proxy.dart:131: request.response.headers.set(HttpHeaders.contentTypeHeader, contentType);
+app/lib/data/player/providers/miruro/miruro_media_proxy.dart:133: request.response.headers.set(
+app/lib/data/player/providers/miruro/miruro_media_proxy.dart:150: request.response.headers.contentType = ContentType(
+app/lib/data/player/providers/miruro/miruro_media_proxy.dart:175: // `#EXT-X-KEY:...URI="https://..."` and `#EXT-X-MAP:URI="..."`
+app/lib/data/player/providers/miruro/miruro_media_proxy.dart:216: request.response.headers.contentType = ContentType.text;
+app/lib/data/player/providers/miruro/miruro_media_proxy.dart:222: _MiruroMediaEntry(this.upstream, this.headers)
+app/lib/data/player/providers/miruro/miruro_media_proxy.dart:226: final PlaybackRequestHeaders? headers;
+app/lib/data/player/providers/mock/mock_playback_provider.dart:232: Uri.https('${id.value}.mock.invalid', '/stream/$serverId'),
+app/lib/data/player/providers/public_episode_provider.dart:35: for (final MapEntry(key: slug, value: title) in titlesBySlug.entries)
+app/lib/data/player/providers/public_playback_http.dart:24: this.allowedHosts, {
+app/lib/data/player/providers/public_playback_http.dart:31: final Set<String> allowedHosts;
+app/lib/data/player/providers/public_playback_http.dart:38: /// Cloudflare's `cf-ray` is a diagnostic identifier (not a credential) that
+app/lib/data/player/providers/public_playback_http.dart:70: PlaybackRequestHeaders headers = const PlaybackRequestHeaders.empty(),
+app/lib/data/player/providers/public_playback_http.dart:77: headers: headers,
+app/lib/data/player/providers/public_playback_http.dart:80: target.port == 443 && allowedHosts.contains(target.host),
+app/lib/data/player/providers/public_playback_http.dart:92: PlaybackRequestHeaders headers = const PlaybackRequestHeaders.empty(),
+app/lib/data/player/providers/public_playback_http.dart:102: headers: headers,
+app/lib/data/player/providers/public_playback_http.dart:105: target.port == 443 && allowedHosts.contains(target.host),
+app/lib/data/player/providers/public_playback_http.dart:117: PlaybackRequestHeaders headers = const PlaybackRequestHeaders.empty(),
+app/lib/data/player/providers/public_playback_http.dart:123: headers: headers,
+app/lib/data/player/providers/public_playback_http.dart:126: target.port == 443 && allowedHosts.contains(target.host),
+app/lib/data/player/providers/public_playback_http.dart:129: /// Verifies the selected host's public response headers before offering it.
+app/lib/data/player/providers/public_playback_http.dart:135: required PlaybackRequestHeaders headers,
+app/lib/data/player/providers/public_playback_http.dart:142: headers: headers,
+app/lib/data/player/providers/public_playback_http.dart:151: PlaybackRequestHeaders headers = const PlaybackRequestHeaders.empty(),
+app/lib/data/player/providers/public_playback_http.dart:216: data: jsonBody,
+app/lib/data/player/providers/public_playback_http.dart:222: headers: {
+app/lib/data/player/providers/public_playback_http.dart:228: 'User-Agent': userAgent,
+app/lib/data/player/providers/public_playback_http.dart:230: ...headers.values,
+app/lib/data/player/providers/public_playback_http.dart:236: final String? location = response.headers['location']?.firstOrNull;
+app/lib/data/player/providers/public_playback_http.dart:240: response.headers['cf-mitigated']?.firstOrNull != 'challenge') {
+app/lib/data/player/providers/public_playback_http.dart:258: final String? declaredServer = response.headers['server']?.firstOrNull;
+app/lib/data/player/providers/public_playback_http.dart:264: final String? mime = response.headers['content-type']?.firstOrNull
+app/lib/data/player/providers/public_playback_http.dart:277: response.headers['cf-mitigated']?.firstOrNull == 'challenge';
+app/lib/data/player/providers/public_playback_http.dart:281: ? _retryAfter(response.headers['retry-after']?.firstOrNull, now) ??
+app/lib/data/player/providers/public_playback_http.dart:387: 'cf_ray=${_cloudflareRayId(response.headers['cf-ray']?.firstOrNull) ?? "unknown"}',
+app/lib/data/player/providers/registry/provider_spec.dart:70: _specs.firstWhere((spec) => spec.key == k, orElse: () => null);
+app/lib/data/player/providers/user_sources/README.md:13: {"anime":"anilist:21","episode":1,"url":"https://ejemplo.org/video.m3u8","language":"ja","quality":"720p"}
+app/lib/data/player/providers/wikimedia/README.md:14: Fuentes [AniList](https://anilist.co/anime/6654),
+app/lib/data/player/providers/wikimedia/README.md:15: [Wikidata](https://www.wikidata.org/wiki/Q2054133),
+app/lib/data/player/providers/wikimedia/README.md:16: [archivo y licencia](https://commons.wikimedia.org/wiki/File:Kouichi_Jun%27ichi_-_Namakura_Gatana_%281917%29_-_4-minute_restored_version.webm)
+app/lib/data/player/providers/wikimedia/README.md:17: y [MediaWiki Action API](https://www.mediawiki.org/wiki/API:Query).
+app/lib/data/player/providers/wikimedia/wikimedia_anime_provider.dart:97: final Uri request = Uri.https('commons.wikimedia.org', '/w/api.php', {
+app/lib/data/player/providers/wikimedia/wikimedia_anime_provider.dart:151: 'User-Agent': wikimediaUserAgent,
+app/lib/data/player/providers/wikimedia/wikimedia_identity.dart:3: 'Kongroo/1.0.0 (https://github.com/kurogamishuen15/AnimeApp-Dev/issues)';
+app/lib/data/secure_storage/README.md:1: # Secure credential storage
+app/lib/data/secure_storage/README.md:7: database are not used for credentials.
+app/lib/data/secure_storage/README.md:19: platform validation items. No credentials, OAuth callback flow, account
+app/lib/data/secure_storage/flutter_secure_credential_store.dart:3: import '../../domain/auth/secure_credential_store.dart';
+app/lib/data/secure_storage/flutter_secure_credential_store.dart:22: return Success(await _storage.read(key: _accessTokenKey));
+app/lib/data/secure_storage/flutter_secure_credential_store.dart:34: await _storage.write(key: _accessTokenKey, value: accessToken);
+app/lib/data/secure_storage/flutter_secure_credential_store.dart:44: await _storage.delete(key: _accessTokenKey);
+app/lib/data/secure_storage/flutter_secure_storage_api.dart:12: Future<String?> read({required String key}) => _storage.read(key: key);
+app/lib/data/secure_storage/flutter_secure_storage_api.dart:16: _storage.write(key: key, value: value);
+app/lib/data/secure_storage/flutter_secure_storage_api.dart:19: Future<void> delete({required String key}) => _storage.delete(key: key);
+app/lib/data/secure_storage/secure_storage_api.dart:4: /// failure behavior to be exercised without accessing user credentials.
+app/lib/domain/README.md:20: | `auth/secure_credential_store.dart` | Puerto para CRUD de credenciales; adaptador concreto en `data/secure_storage`. |
+app/lib/domain/auth/README.md:8: The contract supports the local credential lifecycle required by FR-06, but
+app/lib/domain/auth/secure_credential_store.dart:6: /// fall back to ordinary preferences, files, or the settings database.
+app/lib/domain/catalog/episode_index_provider.dart:9: final class EpisodeIndexPage {
+app/lib/domain/catalog/provider_result.dart:5: credentialsMissing,
+app/lib/domain/catalog/provider_result.dart:46: ProviderFailureKind.credentialsMissing ||
+app/lib/domain/player/providers/anime_identity.dart:30: /// Deterministic key for bounded caches; contains no credentials or URLs.
+app/lib/domain/player/providers/anime_identity.dart:31: String get cacheKey {
+app/lib/domain/player/providers/episode_source.dart:84: String get cacheKey =>
+app/lib/domain/player/providers/playback_source.dart:295: /// no credential content), and two non-secret protocol headers used by public
+app/lib/domain/player/providers/playback_source.dart:295: /// no credential content), and two non-secret protocol headers used by public
+app/lib/domain/player/providers/playback_source.dart:296: /// catalog APIs (values are strictly validated; they never carry credentials or
+app/lib/domain/player/providers/playback_source.dart:297: /// cookies). Cookies, authorization credentials, and arbitrary caller-supplied
+app/lib/domain/player/providers/playback_source.dart:298: /// headers are rejected.
+app/lib/domain/player/providers/playback_source.dart:304: 'referer' => 'Referer',
+app/lib/domain/player/providers/playback_source.dart:305: 'origin' => 'Origin',
+app/lib/domain/player/providers/playback_source.dart:306: 'user-agent' => 'User-Agent',
+app/lib/domain/player/providers/playback_source.dart:307: 'sec-fetch-site' => 'Sec-Fetch-Site',
+app/lib/domain/player/providers/playback_source.dart:319: if (name == 'User-Agent') {
+app/lib/domain/player/providers/playback_source.dart:326: if (name == 'Sec-Fetch-Site') {
+app/lib/domain/player/providers/playback_source.dart:365: if (name == 'Origin' && uri.path.isNotEmpty && uri.path != '/') {
+app/lib/domain/player/providers/playback_source.dart:368: validated[name] = name == 'Origin' ? uri.origin : uri.toString();
+app/lib/domain/progress/checkpoint_coordinator.dart:54: key: key,
+app/lib/domain/progress/content_identity.dart:24: String get storageKey =>
+app/lib/main.dart:29: Platform.environment['KONGROO_ENABLE_MIRURO_BACKEND'] != '0';
+app/lib/main.dart:37: enableMegaPlay: Platform.environment['KONGROO_ENABLE_MEGAPLAY'] != '0',
+app/lib/main.dart:38: enableAnimeAv1: Platform.environment['KONGROO_ENABLE_ANIMEAV1'] != '0',
+app/lib/main.dart:39: enableAllAnime: Platform.environment['KONGROO_ENABLE_ALLANIME'] != '0',
+app/lib/main.dart:40: enableAniZone: Platform.environment['KONGROO_ENABLE_ANIZONE'] != '0',
+app/lib/main.dart:41: enableAnimeGg: Platform.environment['KONGROO_ENABLE_ANIMEGG'] != '0',
+app/lib/main.dart:42: enableWikimedia: Platform.environment['KONGROO_ENABLE_WIKIMEDIA'] == '1',
+app/lib/main.dart:61: final markerPath = Platform.environment['ANIMEAPP_FIRST_FRAME_MARKER'];
+app/lib/main.dart:109: /// Entrypoint for the health-probe isolate. Each iteration probes /health
+app/lib/main.dart:131: final String? path = Platform.environment['KONGROO_USER_SOURCES'];
+app/lib/main.dart:150: final String? requestedPath = Platform.environment['KONGROO_DATABASE_PATH'];
+app/lib/main.dart.bak:21: Platform.environment['KONGROO_ENABLE_MIRURO'] != '0' &&
+app/lib/main.dart.bak:22: Platform.environment['KONGROO_ENABLE_MIRURO_BACKEND'] != '0';
+app/lib/main.dart.bak:30: enableMegaPlay: Platform.environment['KONGROO_ENABLE_MEGAPLAY'] != '0',
+app/lib/main.dart.bak:31: enableAnimeAv1: Platform.environment['KONGROO_ENABLE_ANIMEAV1'] != '0',
+app/lib/main.dart.bak:32: enableAllAnime: Platform.environment['KONGROO_ENABLE_ALLANIME'] != '0',
+app/lib/main.dart.bak:33: enableAniZone: Platform.environment['KONGROO_ENABLE_ANIZONE'] != '0',
+app/lib/main.dart.bak:34: enableAnimeGg: Platform.environment['KONGROO_ENABLE_ANIMEGG'] != '0',
+app/lib/main.dart.bak:35: enableWikimedia: Platform.environment['KONGROO_ENABLE_WIKIMEDIA'] == '1',
+app/lib/main.dart.bak:44: final markerPath = Platform.environment['ANIMEAPP_FIRST_FRAME_MARKER'];
+app/lib/main.dart.bak:64: final String? path = Platform.environment['KONGROO_USER_SOURCES'];
+app/lib/main.dart.bak:83: final String? requestedPath = Platform.environment['KONGROO_DATABASE_PATH'];
+app/lib/main_player_spike.dart:18: if (Platform.environment['KONGROO_F2_2_SPIKE'] != '1') {
+app/lib/main_player_spike.dart:23: final String? rootPath = Platform.environment['KONGROO_PROJECT_ROOT'];
+app/lib/main_player_spike.dart:36: Platform.environment['KONGROO_F2_6_SUBTITLE_FIXTURE'] == '1';
+app/lib/main_player_spike.dart:37: final String? demoPorts = Platform.environment['KONGROO_DEMO_PORTS'];
+app/lib/main_player_spike.dart:38: final bool realMedia = Platform.environment['KONGROO_DEMO_REAL_MEDIA'] == '1';
+app/lib/main_player_spike.dart:74: apiKey: () async => Platform.environment['OPENSUBTITLES_API_KEY'],
+app/lib/main_player_spike.dart:90: Platform.environment['KONGROO_DEMO_SUBTITLES'];
+app/lib/main_player_spike.dart:93: Platform.environment['KONGROO_DEMO_START'] ?? '',
+app/lib/main_player_spike.dart:119: if (Platform.environment['KONGROO_DEMO_AUTOPLAY'] == '1') {
+app/lib/main_player_spike.dart:242: Scaffold(body: Center(child: Text(message))),
+app/lib/settings/registry/README.md:4: plugins. Cada `SettingDefinition<T>` declara clave estable, propietario,
+app/lib/settings/registry/setting_definition.dart:8: class SettingDefinition<T> {
+app/lib/settings/registry/setting_definition.dart:9: SettingDefinition({
+app/lib/settings/registry/settings_registry.dart:10: void register<T>(SettingDefinition<T> definition) {
+app/lib/settings/registry/settings_registry.dart:17: Result<SettingDefinition<T>> resolve<T>(SettingDefinition<T> definition) {
+app/lib/settings/registry/settings_registry.dart:19: if (registered is! SettingDefinition<T> ||
+app/lib/settings/store/settings_store.dart:19: Future<Result<T>> get<T>(SettingDefinition<T> definition) async {
+app/lib/settings/store/settings_store.dart:20: final Result<SettingDefinition<T>> resolved = registry.resolve(definition);
+app/lib/settings/store/settings_store.dart:21: if (resolved case Failure<SettingDefinition<T>>(:final error)) {
+app/lib/settings/store/settings_store.dart:39: Future<Result<void>> set<T>(SettingDefinition<T> definition, T value) async {
+app/lib/settings/store/settings_store.dart:40: final Result<SettingDefinition<T>> resolved = registry.resolve(definition);
+app/lib/settings/store/settings_store.dart:41: if (resolved case Failure<SettingDefinition<T>>(:final error)) {
+app/lib/settings/store/settings_store.dart:66: Stream<Result<T>> watch<T>(SettingDefinition<T> definition) {
+app/lib/settings/store/settings_store.dart:67: final Result<SettingDefinition<T>> resolved = registry.resolve(definition);
+app/lib/settings/store/settings_store.dart:68: if (resolved case Failure<SettingDefinition<T>>(:final error)) {
+app/lib/settings/store/settings_store.dart:76: SettingDefinition<T> definition,

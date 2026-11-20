@@ -1,0 +1,58 @@
+{
+  "stream": {
+    "provider": "animeav1",
+    "source": "episode:dub",
+    "server": "voe-dub-0",
+    "uri": "https://cdn.anime.org/master.m3u8",
+    "format": "hls",
+    "sourceLabel": "AnimeAV1 · Latino",
+    "displayName": "VOE",
+    "availability": "transportResponded",
+    "expires": null,
+    "validated": null,
+    "provenance": "VOE published player config; Anilili MIT-0",
+    "headers": {
+      "User-Agent": "Kongroo/0.1 (public anime catalog client)"
+    },
+    "subtitles": [
+      {
+        "id": "voe-0",
+        "uri": "https://cdn.anime.org/sub.vtt",
+        "label": "English",
+        "language": "unknown",
+        "default": true
+      }
+    ]
+  },
+  "requests": [
+    {
+      "method": "GET",
+      "uri": "https://voe.sx/e/File09",
+      "headers": {
+        "Accept": "application/json, application/octet-stream;q=0.9, text/html;q=0.8",
+        "User-Agent": "Kongroo/0.1 (public anime catalog client)",
+        "Referer": "https://animeav1.com/"
+      },
+      "data": null
+    },
+    {
+      "method": "GET",
+      "uri": "https://player.anime.org/e/File09",
+      "headers": {
+        "Accept": "application/json, application/octet-stream;q=0.9, text/html;q=0.8",
+        "User-Agent": "Kongroo/0.1 (public anime catalog client)",
+        "Referer": "https://animeav1.com/"
+      },
+      "data": null
+    },
+    {
+      "method": "GET",
+      "uri": "https://cdn.anime.org/master.m3u8",
+      "headers": {
+        "Accept": "application/json, application/octet-stream;q=0.9, text/html;q=0.8",
+        "User-Agent": "Kongroo/0.1 (public anime catalog client)"
+      },
+      "data": null
+    }
+  ]
+}

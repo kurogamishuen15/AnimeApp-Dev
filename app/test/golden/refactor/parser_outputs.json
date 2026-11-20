@@ -1,0 +1,72 @@
+{
+  "html": {
+    "href": "https://example.test/a?x=1&y=2",
+    "id": "42",
+    "absent": "",
+    "text": "Tokyo  Ghoul :re var x='https://cdn.example.test/a.m3u8?x=1&y=2'; var y='//cdn.example.test/b.m3u8';",
+    "entities": "\"''<>&AB",
+    "normalize": "tkyoghoulre2",
+    "scores": [
+      1.0,
+      0.86,
+      0.86,
+      0.0,
+      0.125
+    ],
+    "absolute": "https://example.test/c",
+    "hls": [
+      "https://cdn.example.test/a.m3u8?x=1&y=2",
+      "https://cdn.example.test/b.m3u8"
+    ],
+    "escapes": "{\"url\":\"https://example.test\"}"
+  },
+  "miruro": {
+    "title": {
+      "id": "title-1",
+      "title": "Tokyo Ghoul:re",
+      "subCount": 12,
+      "dubCount": 12
+    },
+    "episodes": [
+      {
+        "number": 2,
+        "title": "Two",
+        "kind": "regular"
+      },
+      {
+        "number": 1,
+        "title": "One",
+        "kind": null
+      }
+    ],
+    "cursor": "next",
+    "sources": [],
+    "malformed": {
+      "type": "FormatException",
+      "message": "FormatException: Unexpected end of input (at character 2)\n{\n ^\n"
+    },
+    "missingCursor": {
+      "type": "FormatException",
+      "message": "FormatException: Miruro pagination cursor is missing."
+    }
+  },
+  "animeav1": {
+    "decoded": {
+      "title": "Naruto",
+      "episodes": [
+        1,
+        2
+      ]
+    },
+    "invalid": [
+      {
+        "type": "FormatException",
+        "message": "FormatException: Missing page nodes"
+      },
+      {
+        "type": "FormatException",
+        "message": "FormatException: Invalid page reference"
+      }
+    ]
+  }
+}
