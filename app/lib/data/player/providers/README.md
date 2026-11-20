@@ -64,20 +64,21 @@ Opt-in: `wikimedia-commons` (`KONGROO_ENABLE_WIKIMEDIA=1`) y `user-defined`
 
 | Proveedor | Prioridad | Estado inicial | Estado final | Nivel | Problema | Solución |
 |---|---:|---|---|---|---|---|
-| megaplay | 110 | N4 verificado | Revalidado con motor; seek 20 s previo a reproducción | **N5** | — | Conservado; fallback MAL añadido el 17-11 |
-| megaplay-dub | 105 | N4 verificado | Revalidado con motor (variante dub propia) | **N5** | — | Conservado |
-| miruro-catalog | 100 | 403 Cloudflare | Bloqueo externo re-verificado (REST y pipe, 4 orígenes) | **N0 externo** | WAF de Cloudflare en todas las rutas de API | Sin evasión por política; evidencia documentada |
-| animeav1 | 95 | `missingId`; sin cuadros | **Motor verificado vía VOE** | **N4** | `invalidResponse` sistemático en el manager (validación multi-servidor) | Añadida capacidad `sourceAlternatives` + regresión por manager |
-| allanime | 92 | `aaReq` bloqueaba fuentes | **Protocolo client-crypto completo implementado y verificado en vivo** (bootstrap→aaReq→tobeparsed→medio 206) | **N2 protocolo** | `NEED_CAPTCHA` tras la investigación intensiva | Clasificado `challenge` (sin evasión); evidencia previa de descifrado real |
-| allanime-dub | 91 | ídem | Verificado junto a sub (variante dub con su propio MP4) | **N2 protocolo** | ídem | ídem |
+| megaplay | 110 | N4 histórico | **Reparado 19-11: FRAME→ADVANCE→SEEK→REOPEN→LIVE-ENGINE-OK con engine sin auto-carga de captions remotas** | **N5 revalidado** | La auto-selección de una caption externa predeterminada hacía que libmpv reportara Playback failed; no era una falla del video/CDN en este recorrido | Las captions siguen en la lista y se cargan solo cuando se seleccionan desde el menú |
+| megaplay-dub | 105 | N4 histórico | **Reparado 19-11: FRAME→ADVANCE→SEEK→REOPEN→LIVE-ENGINE-OK con captions remotas disponibles para selección manual** | **N5 revalidado** | La misma auto-selección de caption externa detenía el estado del video | Las captions siguen en la lista y se cargan solo cuando se seleccionan desde el menú |
+| miruro-catalog | 100 | 403 Cloudflare | Frontend actual identificado; `/health` responde, pero catálogo `/api/config` devuelve 403 con UA propio | **N1 externo** | La interfaz de catálogo/playback no entregó respuesta; health no prueba catálogo | Solo `.cx`; hace falta contrato de API externa o habilitación del operador |
+| animeav1 | 95 | `missingId`; sin cuadros | **Motor re-verificado vía VOE el 18-11 (OC-05)**: FRAME→ADVANCE→SEEK→REOPEN→LIVE-ENGINE-OK, subtítulo ES incrustado visible | **N5** | `invalidResponse` sistemático en el manager (validación multi-servidor) y 4 peticiones antes del episodio | `sourceAlternatives` + regresión por manager; **una sola pasada catálogo→confirmación MAL→episodio** |
+| allanime | 92 | `aaReq` bloqueaba fuentes | **OC-06:** clasificación `challenge`; el `User-Agent` Chrome heredado se retiró 19-11; acceso con identidad Kongroo no revalidado live | **N2 protocolo histórico** | `NEED_CAPTCHA` es lógica del origen, no challenge de Cloudflare | No enviar token; se requiere vía autorizada del operador |
+| allanime-dub | 91 | ídem | Igual que sub; el `User-Agent` Chrome heredado se retiró 19-11; acceso honesto no revalidado live | **N2 protocolo histórico** | ídem: captcha de aplicación | ídem |
 | anizone | 86 | N4 verificado | Revalidado con motor (HLS 360/720/1080, audio ja/en) | **N5** | — | Conservado |
-| animegg | 84 | N4 verificado | Revalidado con motor (MP4 espejo 227251) | **N5** | Throttling por UA (28 KB/s) | UA de navegador en candidatos (A/B documentado) |
-| animegg-dub | 83 | N4 verificado | Revalidado con motor (MP4 espejo dub 226001) | **N5** | — | Conservado |
+| animegg | 84 | N4 histórico | Reproducción con motor fue probada con UA Chrome heredado; se retiró 19-11 | **N4 histórico; actual sin revalidar** | velocidad del CDN bajo identidad Kongroo desconocida | User-Agent propio; no suplantar navegador |
+| animegg-dub | 83 | N4 histórico | Reproducción con motor fue probada con UA Chrome heredado; se retiró 19-11 | **N4 histórico; actual sin revalidar** | velocidad del CDN bajo identidad Kongroo desconocida | User-Agent propio; no suplantar navegador |
 
-**Operativos con video real hoy:** megaplay, megaplay-dub, animeav1 (VOE),
-anizone, animegg, animegg-dub (6 de 9). **Protocolo verificado sin ventana de
-reproducción:** allanime, allanime-dub. **Bloqueo externo demostrado:**
-miruro-catalog.
+**Historial N5/N4:** MegaPlay se revalidó el 19-11 después de corregir la
+auto-carga de captions remotas. AnimeGG y AllAnime ya no usan los UA de
+navegador con que se obtuvieron sus evidencias históricas y no se han
+revalidado con identidad propia de Kongroo. **Bloqueos observados:** Miruro
+WAF, AllAnime `NEED_CAPTCHA` bajo las consultas registradas.
 
 ---
 
@@ -112,13 +113,32 @@ miruro-catalog.
 ### miruro-catalog — `miruro/`
 
 - **Responsabilidad:** catálogo REST público de Miruro por AniList ID.
-- **Hosts:** `www.miruro.{to,tv,bz,cx,ru}` — **bloqueo Cloudflare en
-  `/api/v1/...` y `/api/secure/pipe`** (verificado 2026-11-18 con
-  `cf-mitigated: challenge` en los cuatro orígenes; la página estática
-  responde 200, la API 403). Anilili resuelve esto con un WebView real y
-  clearance de navegador; la política del proyecto lo prohíbe.
+- **Host vigente:** `www.miruro.cx`, anunciado por Miruro como dominio
+  principal exclusivo. Los dominios `.to`, `.tv`, `.bz` y `.ru` se retiraron
+  del registro de solicitudes para no usar hosts que Miruro ya no recomienda.
+- **Estado OC-07 (2026-11-19):** el HTML y el bundle desplegados responden con
+  UA propio de Kongroo; el bundle actual no incluye `VITE_BACKEND_URL` y usa
+  rutas same-origin. `GET /health` devuelve JSON de salud/versionado. La ruta
+  conocida `GET /api/config` devuelve 403 incluso con UA propio, por lo que no
+  se obtuvieron datos de catálogo. La web actual y el backend histórico son
+  contratos diferentes; no se confirmó endpoint externo actual.
+- **Backend histórico:** un `.env.example` indexado del repositorio web de
+  Miruro describe `VITE_BACKEND_URL` con `public-miruro-consumet-api.vercel.app`
+  como ejemplo. El archivo enlazado ya devuelve 404 y no documenta un contrato
+  estable de consumidor externo. No se trata como API oficial de Kongroo.
+- **Pruebas:** fixtures offline del provider y parser; no prueban disponibilidad
+  actual. El manager conserva fallback a otros registros.
+- **Estado:** N1 externo (interfaz localizada, catálogo sin respuesta). Un
+  cliente Go comunitario describe búsqueda, mapping AniList, episodios,
+  listings y resolución de fuente; su modelo sirve para comparar, pero su
+  transporte documenta impersonación de navegador/HTTP2 para superar el WAF y
+  no se porta. Para reabrir playback se requiere documentación de API externa
+  o habilitación del operador. No usar challenges, clearance ni mirrors
+  retirados. Evidencia y tabla de requests: [OC-07](../../../../../docs/ai-system/missions/OC07-MIRURO-FRONTEND-BACKEND-CONTRACT-2026-11-19.md).
 - **Pruebas:** heredadas (32 de providers al cierre OC-04).
-- **Estado:** N0 externo, pendiente de autorización del operador del origen.
+- **Estado:** N1 externo según OC-07; página y health visibles, catálogo sin
+  respuesta. Véase el informe OC-07 para diferenciar rutas observadas y
+  límites de evidencia.
 
 ### animeav1 — `animeav1/`
 
@@ -219,13 +239,68 @@ miruro-catalog.
 
 ---
 
+5. **AnimeAV1 encadenaba cuatro peticiones por episodio (OC-05).**
+   *Causa medida:* el puente por defecto de `EpisodeSourceAdapter.findSources`
+   ejecuta `searchAnime` (catálogo + media) y luego `findEpisode` (otra vez
+   media) + `findEpisodeSources` (episodio). *Corrección:* `findSources`
+   implementa una sola pasada `catalogo → media (confirmación MAL) → episodio`
+   reutilizando el índice de episodios de la propia página de confirmación
+   (`_ConfirmedMatch`); el puente genérico sigue intacto para los demás.
+   *Prueba:* `animeav1_playback_provider_test.dart` 12/12, incluido «no se
+   inventa un episodio ausente del índice» (no se pide `/9/` si no existe).
+6. **El selector esperaba la suma de todos los proveedores (OC-05).**
+   *Causa medida:* `manager.resolveCandidates` resolvía 9 cadenas en serie
+   (21 918 ms de línea base; 27–40 s en rondas con red degradada).
+   *Corrección:* fan-out acotado a **4 cadenas** con orden de resultados por
+   prioridad, un solo intento por host compartido entre proveedores y cierre
+   único de breakers (`maxConcurrentProviderChains`,
+   `_ProviderCandidates`). `resolveBestStream` conserva el recorrido
+   secuencial para devolver siempre el proveedor de mayor prioridad.
+   *Prueba:* 24/24 del manager, incluidas concurrencia, orden y tope de 4.
+7. **AnimeAV1 no publica pistas suaves; el episodio SUB lleva hardsub.**
+   *Diagnóstico:* el config de VOE trae `captions: []`, el master HLS no
+   declara `EXT-X-MEDIA:TYPE=SUBTITLES`, ffprobe ve solo H264+AAC+timed_id3 y
+   el OCR de fotogramas reales transcribe diálogo español quemado
+   («Esto es…», «Pensé en reportar tu camarada…»). *
+   *Corrección:* `VoeVideoHostResolver.decodePlayer` ahora publica
+   `ProviderSubtitle` **solo** cuando el config declara captions públicas
+   HTTPS `.vtt` válidas y conserva la marca de pista por defecto; el usuario
+   las selecciona desde el menú para aislar errores del recurso externo del
+   estado del video. Si no hay captions no se inventa ninguna.
+   *Prueba:* `voe_video_host_resolver_test.dart` 9/9 (VTT válido, entradas
+   http/.srt/fragmento/loopback descartadas, merge con pistas declaradas).
+   *Evidencia gráfica:* captura del motor con subtítulo incrustado visible.
+
+---
+
+8. **Cloudflare: un bloqueo no es un challenge (OC-06).**
+   *Causa:* `PublicPlaybackHttp` solo reconocía el challenge por
+   `cf-mitigated`; un 403 con la página de bloqueo se reportaba como
+   `forbidden` genérico y un challenge sin cabecera también. Además, el
+   cuerpo de error se recortaba a 200 B, antes del `<title>`.
+   *Corrección:* se leen 4 KiB de denegación y, si `cf-mitigated` falta, el
+   título decide: «Just a moment…» → `challenge`; «Attention Required» /
+   «you have been blocked» → `forbidden`. Se registra
+   `cloudflare page=...` con `cf_ray` validado para la solicitud al operador.
+   *Prueba:* fixtures de challenge HTML sin cabecera y de bloqueo en
+   `public_playback_http_test.dart`.
+9. **`NEED_CAPTCHA` tenía una detección más estrecha que la del sitio.**
+   *Causa:* el detector solo miraba `message == 'NEED_CAPTCHA'` y
+   `extensions.code`; el cliente del propio sitio acepta substring y
+   `extensions.exception.code`. Una variante caía en `noSources`.
+   *Corrección:* `_isCaptchaDemand` replica el detector del sitio. Sigue sin
+   pedir, leer ni reenviar tokens.
+   *Prueba:* caso nuevo en `allanime_playback_provider_test.dart`.
+
+---
+
 ## 5. Matriz de servidores
 
 | Host | Tipo | Usado por | Estado |
 |---|---|---|---|
-| `megaplay.buzz` | Host API+embed | megaplay, megaplay-dub (2Dhive también lo embebe vía ruta MAL) | ✅ operativo |
-| `fetch.nexabloom.top` | CDN HLS | megaplay/-dub | ✅ operativo |
-| `www.miruro.{to,bz,cx,ru,tv}` | Host API | miruro-catalog | ⛔ Cloudflare |
+| `megaplay.buzz` | Host API+embed | megaplay, megaplay-dub (2Dhive también lo embebe vía ruta MAL) | ✅ resolvió embed y fuente el 19-11 |
+| `fetch.nexabloom.top` | CDN HLS | megaplay/-dub | ✅ MegaPlay N5 revalidado tras desactivar auto-carga de captions externas |
+| `www.miruro.{to,bz,cx,ru,tv}` | Host API | miruro-catalog | ⛔ Bloqueo WAF (200 dentro de un navegador) |
 | `animeav1.com` | Proveedor | animeav1 | ✅ catálogo |
 | `voe.sx` | Embed host | animeav1 (resolver VOE) | ✅ HLS real |
 | `cloudwindow-route.com` | CDN HLS | animeav1 vía VOE | ✅ operativo |
@@ -248,13 +323,28 @@ distintos se conservan (p. ej. animegg sub `227251` vs dub `226001`).
   3.50.0-0.4.pre aislado (`.ai-local/toolchains/flutter`,
   `PUB_CACHE=.ai-local/pub-cache`), códec openh264 2.6.0 local
   (`tools/player/run_kongroo_linux.sh --openh264`).
-- **Unitarias/manager:** `flutter test` suite completa — ver el cierre de
-  esta misión para el recuento final (387 aprobadas/10 omitidas antes de
-  añadir las pruebas nuevas de esta fase; todas en verde).
+- **Unitarias/manager (OC-05, 18-11):** `bash scripts/ci.sh` → 12/12 pasos;
+  suite Flutter **420 aprobadas / 10 omitidas**. Manager 24/24, AnimeAV1
+  12/12, VOE 9/9.
+- **OC-06 (18-11):** suite Flutter **422 aprobadas / 10 omitidas** (12/12 pasos
+  de CI, `exit=0`); http+allanime+miruro **33/33**; `dart analyze` limpio.
+  Casos nuevos: challenge HTML sin `cf-mitigated`, página de bloqueo, y
+  `NEED_CAPTCHA` en `extensions.exception.code`.
+- **Rendimiento (OC-05, Tokyo Ghoul:re ep. 9, AniList 100240 / MAL 36511):**
+  AnimeAV1 4 070 ms de línea base (search 948 + findSources 1 156 + VOE
+  1 952); tras la pasada única, `findSources` hace 3 peticiones y el total
+  queda en 3 629–4 167 ms según red. `manager.resolveCandidates`:
+  **21 918 ms → 12 303 / 13 825 / 14 055 ms** (mediana 13 825). La cola
+  restante es `animegg-dub`, con timeouts de 6 s por petición en 2 de 3
+  rondas; no es un coste de AnimeAV1.
 - **Motor real (N4):** `tool/anilili_live_player_app.dart` con
   `KONGROO_LIVE_SEEK=20` — gates RESOLVED → PLAY → SEEK-RESTORE → FRAME →
   ADVANCE → (captura) → REOPEN → LIVE-ENGINE-OK. Ejecutado para megaplay,
   megaplay-dub, anizone, animegg, animegg-dub y animeav1.
+- **OC-05 (18-11):** la re-verificación de animeav1 y anizone usó el seek
+  **dentro** de la reproducción (`SEEK-IN-PLAY 20000 ms`), no
+  `KONGROO_LIVE_SEEK`: en ese HLS, `restoreStartPosition` antes de `play` falla
+  con `PlaybackResumeFailure` porque la duración aún no está disponible.
 - **Sondas N2 sin motor:** `tool/allanime_live_check.dart`,
   `tool/anizone_live_check.dart`, `tool/animeav1_live_check.dart`,
   `tool/voe_resolver_probe.dart`, `tool/animegg_timing_probe.dart`.
@@ -308,11 +398,14 @@ distintos se conservan (p. ej. animegg sub `227251` vs dub `226001`).
 
 | Pendiente | Causa | Evidencia |
 |---|---|---|
-| miruro-catalog sin fuentes | Cloudflare WAF en todas las rutas de API (REST y pipe); Anilili usa WebView real, prohibido por política | curl con `cf-mitigated: challenge`, 4 orígenes, 2026-11-18 |
-| allanime reproducción N4 | La API exigió `NEED_CAPTCHA` (Turnstile) tras la investigación intensiva desde esta IP; el protocolo quedó verificado antes con descifrado real y sonda 206 | `AA_CRYPTO_STALE`/`NEED_CAPTCHA` capturados; token boot aceptado; MP4 370 MB |
+| miruro-catalog sin fuentes | **Bloqueo WAF** (no challenge) en las rutas de API; el sitio y su API responden 200 dentro de un navegador real. Anilili usa WebView + clearance, prohibido por política; `flutter_inappwebview`/`webview_flutter` no soportan Linux | Página «Attention Required», sin `cf-mitigated`, Ray IDs `a5c7f02c7926ca5c-ATL`/`a5c7f051ae3006f2-ATL`, 2026-11-18; API 200 en navegador. Requiere excepción WAF o acceso oficial del operador |
+| allanime reproducción N4 | `NEED_CAPTCHA` es **lógica del origen** (Turnstile del sitio, token de un solo uso/300 s), no un challenge de Cloudflare; el `POST /api` responde JSON normal | Bundle `aa-chunk.js` (build 190) con `turnstile.render`/`_solveCaptcha`/reintento `{token, provider}`; sonda `last=challenge` |
 | Materiales por build de AllAnime | La máscara rota por build del sitio (190 hoy) | `invalid_boot_token` simulado en regresión |
 | Hosts MP4Upload/YourUpload de AnimeAV1 | Sin resolutores activos (históricamente 403/500) | OC-03.2 |
 | Varianza de red AnimeGG | GETs fríos ~5-7 s vs presupuesto de 6 s (IPv6 4,4 s vs v4 1,9 s) | `animegg_timing_probe.dart` 3/3 OK sin motor |
+| Cola de `resolveCandidates` | `animegg-dub` agota el timeout de 6 s por petición en 2 de 3 rondas y domina los ~13 s restantes | probe OC-05: `last=timeout` y streams ausentes en esas rondas |
+| Captions suaves de VOE | El único episodio inspeccionado no publica ninguna; el parser queda probado con fixtures, **NO VERIFICADO contra un caption real** | `captions: []` en el config de ep. 9; sin `EXT-X-MEDIA` en el master |
+| Subtítulos externos en la ruta de proveedor | Cableado (`OPENSUBTITLES_API_KEY` → `ExternalSubtitleService`); sin clave el panel no ofrece búsqueda | `provider_playback_route.dart` + `catalog_home_page.dart`; pruebas del servicio existentes |
 | Android | No validado | — |
 
 La disponibilidad de hosts externos puede cambiar en cualquier momento; las

@@ -122,6 +122,21 @@ final class AnimeAv1PlaybackProvider extends EpisodeSourceAdapter {
     AnimeIdentity identity, {
     required PlaybackCancellationToken cancellation,
   }) => EpisodeSourceSupport.read(() async {
+    final matches = await _searchMatches(identity, cancellation);
+    return matches?.map((match) => match.match).toList(growable: false);
+  });
+
+  /// Catalogue search plus MAL confirmation. Throws on transport or payload
+  /// failures so both [searchAnime] and the single-pass [findSources] reuse
+  /// exactly one implementation.
+  ///
+  /// The confirmation page already carries the whole media record, so the
+  /// episode index travels with the match and `findSources` can reject an
+  /// absent episode without an extra request.
+  Future<List<_ConfirmedMatch>?> _searchMatches(
+    AnimeIdentity identity,
+    PlaybackCancellationToken cancellation,
+  ) async {
     EpisodeSourceSupport.check(cancellation);
     final mal = _mal(identity);
     if (mal == null) {
@@ -156,27 +171,31 @@ final class AnimeAv1PlaybackProvider extends EpisodeSourceAdapter {
         );
         final media = _object(detail['media']);
         if (media['malId'] != mal) continue;
-        _numbers(media); // A title-only record is not an episode catalogue.
+        final episodes = _numbers(media)
+            .toSet(); // A title-only record is not an episode catalogue.
         return [
-          SourceAnimeMatch(
-            providerId: id,
-            sourceAnimeId: slug,
-            title: name,
-            requestedIdentity: identity,
-            evidence: AnimeMatchEvidence.externalId,
-            adapterVersion: adapterVersion,
-            externalIds: [
-              ExternalAnimeId(
-                providerId: MetadataProviderId('myanimelist'),
-                value: '$mal',
-              ),
-            ],
+          _ConfirmedMatch(
+            match: SourceAnimeMatch(
+              providerId: id,
+              sourceAnimeId: slug,
+              title: name,
+              requestedIdentity: identity,
+              evidence: AnimeMatchEvidence.externalId,
+              adapterVersion: adapterVersion,
+              externalIds: [
+                ExternalAnimeId(
+                  providerId: MetadataProviderId('myanimelist'),
+                  value: '$mal',
+                ),
+              ],
+            ),
+            episodeNumbers: episodes,
           ),
         ];
       }
     }
     return null;
-  });
+  }
 
   EpisodeRef _episode(SourceAnimeMatch match, int number) => EpisodeRef(
     anime: match,
@@ -205,11 +224,45 @@ final class AnimeAv1PlaybackProvider extends EpisodeSourceAdapter {
         : numbers.map((n) => _episode(match, n)).toList();
   });
 
+  /// One catalog pass instead of the three-phase default: the episode page
+  /// already carries the media record (MAL id + episode index) and the embeds,
+  /// so listing episodes first and re-fetching the media page would only add
+  /// two round trips before the first frame.
+  @override
+  Future<PlaybackProviderResult<List<PlaybackSource>>> findSources(
+    PlaybackEpisode requested, {
+    required PlaybackCancellationToken cancellation,
+  }) => EpisodeSourceSupport.read(() async {
+    EpisodeSourceSupport.check(cancellation);
+    final matches = await _searchMatches(requested.identity, cancellation);
+    if (matches == null) return null;
+    for (final _ConfirmedMatch confirmed in matches) {
+      final SourceAnimeMatch match = confirmed.match;
+      if (match.providerId != id || !match.isConservativeMatch()) continue;
+      // The confirmed index decides existence; the episode page is only read
+      // for an episode the provider actually publishes.
+      if (!confirmed.episodeNumbers.contains(requested.episodeNumber)) {
+        continue;
+      }
+      final sources = await _sources(
+        _episode(match, requested.episodeNumber),
+        cancellation,
+      );
+      if (sources != null && sources.isNotEmpty) return sources;
+    }
+    return null;
+  });
+
   @override
   Future<PlaybackProviderResult<List<PlaybackSource>>> findEpisodeSources(
     EpisodeRef episode, {
     required PlaybackCancellationToken cancellation,
-  }) => EpisodeSourceSupport.read(() async {
+  }) => EpisodeSourceSupport.read(() => _sources(episode, cancellation));
+
+  Future<List<PlaybackSource>?> _sources(
+    EpisodeRef episode,
+    PlaybackCancellationToken cancellation,
+  ) async {
     EpisodeSourceSupport.check(cancellation);
     if (!_validMatch(episode.anime) ||
         episode.episodeId !=
@@ -221,6 +274,8 @@ final class AnimeAv1PlaybackProvider extends EpisodeSourceAdapter {
       cancellation,
       stage: PlaybackHttpStage.episode,
     );
+    // The episode payload embeds the media record; it is the only request the
+    // resolver needs to confirm the MAL crosswalk and the episode index.
     final media = _media(page, _mal(episode.anime.requestedIdentity)!);
     if (!_numbers(media).contains(episode.episodeNumber)) return null;
     final record = _object(page['episode']);
@@ -297,7 +352,7 @@ final class AnimeAv1PlaybackProvider extends EpisodeSourceAdapter {
       );
     }
     return result.isEmpty ? null : result;
-  });
+  }
 }
 
 /// Bounded adaptation of Anilili's SvelteKit/devalue pageData/hydrate parser.
@@ -354,4 +409,13 @@ abstract final class AnimeAv1PageData {
     }
     return page;
   }
+}
+
+/// A MAL-confirmed title together with the episode numbers its own media page
+/// publishes.
+final class _ConfirmedMatch {
+  const _ConfirmedMatch({required this.match, required this.episodeNumbers});
+
+  final SourceAnimeMatch match;
+  final Set<int> episodeNumbers;
 }

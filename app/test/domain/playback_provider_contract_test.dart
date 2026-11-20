@@ -194,6 +194,22 @@ void main() {
     expect(PlaybackRequestHeaders({'user-agent': 'Kongroo/1.0'}).values, {
       'User-Agent': 'Kongroo/1.0',
     });
+    // Fetch-metadata context: a closed, non-credential set.
+    expect(
+      PlaybackRequestHeaders({'sec-fetch-site': 'same-origin'}).values,
+      {'Sec-Fetch-Site': 'same-origin'},
+    );
+    for (final String invalid in <String>[
+      'same-origin; Bearer x',
+      'unknown',
+      'SAME-ORIGIN',
+      '',
+    ]) {
+      expect(
+        () => PlaybackRequestHeaders({'Sec-Fetch-Site': invalid}),
+        throwsArgumentError,
+      );
+    }
     expect(
       () =>
           PlaybackRequestHeaders({'user-agent': 'Kongroo\r\nCookie: private'}),

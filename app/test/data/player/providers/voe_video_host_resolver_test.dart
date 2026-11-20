@@ -15,8 +15,10 @@ String _rot13(String value) => String.fromCharCodes(
     return c;
   }),
 );
-String _config(String uri) {
-  final first = base64.encode(utf8.encode(jsonEncode({'source': uri})));
+String _config(String uri, {List<Map<String, Object?>> captions = const []}) {
+  final first = base64.encode(
+    utf8.encode(jsonEncode({'source': uri, 'captions': captions})),
+  );
   final second = base64.encode(
     first.codeUnits.reversed.map((c) => c + 3).toList(),
   );
@@ -31,7 +33,10 @@ SourceCandidate _candidate({DateTime? expiry}) => SourceCandidate(
   expiresAt: expiry,
   requestHeaders: PlaybackRequestHeaders({'Referer': 'https://animeav1.com/'}),
 );
-PlaybackSource _source(SourceCandidate candidate) => PlaybackSource(
+PlaybackSource _source(
+  SourceCandidate candidate, {
+  List<ProviderSubtitle> subtitles = const [],
+}) => PlaybackSource(
   id: 'episode:dub',
   providerId: PlaybackProviderId('animeav1'),
   episode: PlaybackEpisode(animeId: AnimeId('test'), episodeNumber: 1),
@@ -39,6 +44,7 @@ PlaybackSource _source(SourceCandidate candidate) => PlaybackSource(
   quality: 'Auto',
   displayName: 'AnimeAV1 · Latino',
   servers: [candidate],
+  subtitles: subtitles,
 );
 
 void main() {
@@ -178,6 +184,93 @@ void main() {
     );
     expect(pages.requests, isEmpty);
   });
+
+  test('a published VTT caption becomes a validated provider track', () async {
+    final pages = _Pages(
+      captions: [
+        {
+          'file': 'https://cdn.anime.org/subs/es.vtt',
+          'label': 'Español',
+          'language': 'es',
+        },
+      ],
+    );
+    final client = Dio()..httpClientAdapter = pages;
+    addTearDown(() => client.close(force: true));
+    final candidate = _candidate();
+    final result = await VoeVideoHostResolver(client).resolve(
+      _source(candidate),
+      candidate,
+      cancellation: PlaybackCancellationToken(),
+    );
+    final stream = (result as PlaybackProviderSuccess<PlayableSource>).value;
+    expect(stream.subtitles, hasLength(1));
+    expect(
+      stream.subtitles.single.uri,
+      Uri.parse('https://cdn.anime.org/subs/es.vtt'),
+    );
+    expect(stream.subtitles.single.language, 'es');
+    expect(stream.subtitles.single.label, 'Español');
+    expect(stream.subtitles.single.id, 'voe-0');
+  });
+
+  test('absent or unusable captions never invent a track', () async {
+    for (final captions in <List<Map<String, Object?>>>[
+      const [],
+      [
+        {'file': 'http://cdn.anime.org/subs/es.vtt', 'language': 'es'},
+        {'file': 'https://cdn.anime.org/subs/es.srt', 'language': 'es'},
+        {'file': 'https://127.0.0.1/subs/es.vtt', 'language': 'es'},
+        {'file': 'https://cdn.anime.org/subs/es.vtt#fragment'},
+      ],
+    ]) {
+      final pages = _Pages(captions: captions);
+      final client = Dio()..httpClientAdapter = pages;
+      addTearDown(() => client.close(force: true));
+      final candidate = _candidate();
+      final result = await VoeVideoHostResolver(client).resolve(
+        _source(candidate),
+        candidate,
+        cancellation: PlaybackCancellationToken(),
+      );
+      final stream = (result as PlaybackProviderSuccess<PlayableSource>).value;
+      expect(stream.subtitles, isEmpty);
+    }
+  });
+
+  test('provider-declared subtitles survive and never duplicate', () async {
+    final declared = ProviderSubtitle(
+      id: 'declared-es',
+      uri: Uri.parse('https://cdn.anime.org/subs/es.vtt'),
+      label: 'Declarado',
+      language: 'es',
+    );
+    final pages = _Pages(
+      captions: [
+        {
+          'file': 'https://cdn.anime.org/subs/es.vtt',
+          'label': 'Español',
+          'language': 'es',
+        },
+        {'file': 'https://cdn.anime.org/subs/en.vtt', 'label': 'English'},
+      ],
+    );
+    final client = Dio()..httpClientAdapter = pages;
+    addTearDown(() => client.close(force: true));
+    final candidate = _candidate();
+    final result = await VoeVideoHostResolver(client).resolve(
+      _source(candidate, subtitles: [declared]),
+      candidate,
+      cancellation: PlaybackCancellationToken(),
+    );
+    final stream = (result as PlaybackProviderSuccess<PlayableSource>).value;
+    expect(stream.subtitles.map((s) => s.uri.path), [
+      '/subs/es.vtt',
+      '/subs/en.vtt',
+    ]);
+    expect(stream.subtitles[1].language, 'unknown');
+    expect(stream.subtitles[1].label, 'English');
+  });
 }
 
 final class _Pages implements HttpClientAdapter {
@@ -186,11 +279,13 @@ final class _Pages implements HttpClientAdapter {
     this.redirectFile = 'File09',
     this.media = 'https://cdn.anime.org/master.m3u8',
     this.manifest = '#EXTM3U\n#EXT-X-ENDLIST',
+    this.captions = const [],
   });
   final int playerStatus;
   final String redirectFile;
   final String media;
   final String manifest;
+  final List<Map<String, Object?>> captions;
   final requests = <RequestOptions>[];
   @override
   Future<ResponseBody> fetch(
@@ -203,7 +298,7 @@ final class _Pages implements HttpClientAdapter {
       switch (options.uri.host) {
         'voe.sx' =>
           "const url = new URL(window.location.href); window.location.href = 'https://player.anime.org/e/$redirectFile';",
-        'player.anime.org' => _config(media),
+        'player.anime.org' => _config(media, captions: captions),
         _ => manifest,
       },
       options.uri.host == 'player.anime.org' ? playerStatus : 200,

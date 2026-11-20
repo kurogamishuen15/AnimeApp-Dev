@@ -128,7 +128,7 @@ void main() {
       );
       expect(
         streams.first.httpHeaders.values['User-Agent'],
-        contains('Chrome/124'),
+        'Kongroo/0.1 (public anime catalog client)',
       );
     },
   );

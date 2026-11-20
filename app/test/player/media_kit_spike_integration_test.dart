@@ -50,6 +50,7 @@ void main() {
               uri: Uri.parse('https://captions.anime.org/es.vtt'),
               label: 'Spanish',
               language: 'es',
+              isDefault: true,
             ),
           ],
         },
@@ -57,6 +58,8 @@ void main() {
       try {
         await engine.initialize();
         await engine.open(fixture.uri);
+        expect(engine.currentSnapshot.error, isNull);
+        expect(engine.currentSnapshot.selectedSubtitleId, 'auto');
         expect(
           engine.currentSnapshot.subtitleTracks.any(
             (t) => t.id.startsWith('provider:') && t.language == 'es',

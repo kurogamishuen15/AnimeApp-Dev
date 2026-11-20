@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:anime_app/application/catalog/catalog_service.dart';
 import 'package:anime_app/application/player/playback_progress_session.dart';
 import 'package:anime_app/application/player/providers/playback_provider_manager.dart';
 import 'package:anime_app/core/result/result.dart';
+import 'package:anime_app/data/opensubtitles/opensubtitles_client.dart';
 import 'package:anime_app/domain/catalog/anime_id.dart';
 import 'package:anime_app/domain/catalog/anime_identity.dart';
 import 'package:anime_app/domain/catalog/external_anime_id.dart';
@@ -9,6 +12,7 @@ import 'package:anime_app/domain/catalog/library_entry.dart';
 import 'package:anime_app/domain/catalog/provider_anime_metadata.dart';
 import 'package:anime_app/domain/player/providers/playback_provider_contract.dart';
 import 'package:anime_app/domain/player/providers/playback_source.dart';
+import 'package:anime_app/domain/player/subtitles/external_subtitle_catalog.dart';
 import 'package:anime_app/domain/progress/checkpoint_coordinator.dart';
 import 'package:anime_app/domain/progress/playback_progress.dart';
 import 'package:flutter/foundation.dart';
@@ -194,6 +198,9 @@ final class _CatalogHomePageState extends State<CatalogHomePage>
         }
       }
       if (!mounted || cancellation.isCancelled) return;
+      // Opt-in external subtitles: no key, no catalog, no broken search UI.
+      final ({ExternalSubtitleCatalog catalog, void Function() dispose})?
+      ownedSubtitles = _openSubtitlesCatalog();
       await Navigator.of(context).push<void>(
         MaterialPageRoute<void>(
           builder: (_) => ProviderPlaybackRoute(
@@ -202,6 +209,8 @@ final class _CatalogHomePageState extends State<CatalogHomePage>
             streams: streams,
             initialStream: selected,
             startPosition: resume ?? Duration.zero,
+            externalSubtitleCatalog: ownedSubtitles?.catalog,
+            disposeExternalSubtitleCatalog: ownedSubtitles?.dispose,
             trackProgress: hasLocalIdentity
                 ? (player) => PlaybackProgressSession(
                     player,
@@ -668,4 +677,17 @@ class _HomeHeader extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Builds the external subtitle catalog only when the operator provided a
+/// key. The resulting client is owned by the player module, which closes it
+/// together with the route resources.
+({ExternalSubtitleCatalog catalog, void Function() dispose})?
+_openSubtitlesCatalog() {
+  final String? key = Platform.environment['OPENSUBTITLES_API_KEY']?.trim();
+  if (key == null || key.isEmpty) return null;
+  final OpenSubtitlesClient client = OpenSubtitlesClient(
+    apiKey: () async => key,
+  );
+  return (catalog: client, dispose: client.close);
 }

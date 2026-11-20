@@ -14,6 +14,7 @@ import '../../../domain/player/subtitles/subtitle_style.dart';
 import '../../../domain/player/subtitles/subtitle_track_info.dart';
 import '../../../domain/player/video_track_info.dart';
 import 'active_player_lease.dart';
+import 'media_codec_support.dart';
 import 'mpv_performance_reader.dart';
 import 'mpv_subtitle_properties.dart';
 
@@ -42,7 +43,11 @@ final class MediaKitSpikeEngine
         StreamController<PlaybackSpikeSnapshot>.broadcast();
     Player? player;
     try {
-      // media_kit must be initialized before constructing Player.
+      // media_kit must be initialized before constructing Player. The codec
+      // module reports the platform H.264 strategy (Linux bundles a verified
+      // decoder; Android/Windows use the platform stack) and is a no-op when
+      // no preparation is required.
+      prepareMediaCodecSupport();
       MediaKit.ensureInitialized();
       player = Player(configuration: const PlayerConfiguration(libass: true));
       // Keep construction minimal: surface/controller creation happens only
@@ -351,6 +356,17 @@ final class MediaKitSpikeEngine
         source.userInfo.isEmpty &&
         !source.hasFragment &&
         _trustedExternalSources.contains(source)) {
+      return;
+    }
+    if (source.scheme == 'http' &&
+        source.host == '127.0.0.1' &&
+        source.hasPort &&
+        source.userInfo.isEmpty &&
+        !source.hasQuery &&
+        !source.hasFragment &&
+        _trustedExternalSources.contains(source)) {
+      // The loopback media proxy. Only the exact URI the manager resolved is
+      // accepted, so the engine never opens an arbitrary local address.
       return;
     }
     if (source.scheme == 'http' &&

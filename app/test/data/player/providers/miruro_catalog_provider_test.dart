@@ -7,6 +7,7 @@ import 'package:anime_app/data/player/providers/hosts/direct_media_host_resolver
 import 'package:anime_app/data/player/providers/miruro/miruro_catalog_api.dart';
 import 'package:anime_app/data/player/providers/miruro/miruro_catalog_parser.dart';
 import 'package:anime_app/data/player/providers/miruro/miruro_catalog_playback_provider.dart';
+import 'package:anime_app/data/player/providers/miruro/miruro_http2_client.dart';
 import 'package:anime_app/data/player/providers/public_playback_http.dart';
 import 'package:anime_app/domain/catalog/anime_id.dart';
 import 'package:anime_app/domain/catalog/external_anime_id.dart';
@@ -159,7 +160,7 @@ void main() {
                 'servers': [
                   {
                     'server': 'primary',
-                    'headers': {'Referer': 'https://www.miruro.to/'},
+                    'headers': {'Referer': 'https://www.miruro.cx/'},
                     'streams': [
                       {
                         'url': 'https://cdn.example.org/720.m3u8?sig=a',
@@ -236,15 +237,15 @@ void main() {
     expect(sub.providerAnnouncedLanguage, 'unknown');
     expect(sub.dubbingType, PlaybackDubbingType.unknown);
     expect(sub.servers, hasLength(2));
-    expect(sub.servers.first.displayName, 'primary');
+    expect(sub.servers.first.displayName, 'primary · 1080p');
     expect(sub.servers.first.quality, '1080p');
     expect(sub.servers.first.mediaFormat, PlaybackMediaFormat.hls);
     expect(sub.servers.first.availability, PlaybackAvailability.listed);
     expect(
       sub.servers.first.requestHeaders.values['Referer'],
-      'https://www.miruro.to/',
+      'https://www.miruro.cx/',
     );
-    expect(sub.servers.last.displayName, 'backup');
+    expect(sub.servers.last.displayName, 'backup · 480p');
     expect(sources.last.language, 'dub');
     expect(sources.last.dubbingType, PlaybackDubbingType.latinSpanish);
     expect(sources.last.priority, lessThan(sub.priority));
@@ -316,6 +317,7 @@ void main() {
                   enforceCooldown: false,
                   maxConcurrent: 2,
                 ),
+                transport: pages,
               ),
             ),
             cacheTtl: Duration.zero,
@@ -347,7 +349,7 @@ void main() {
       expect(stream.uri, Uri.parse('https://media.example.org/master'));
       expect(stream.format, PlaybackMediaFormat.hls);
       expect(stream.sourceLabel, 'bee · sub');
-      expect(stream.displayName, 'master');
+      expect(stream.displayName, 'master · 720p');
       expect(stream.availability, PlaybackAvailability.listed);
       expect(pages.paths, [
         '/api/v1/anime',
@@ -359,7 +361,7 @@ void main() {
         pages.userAgents.any((String? value) => value!.contains('Mozilla')),
         isFalse,
       );
-      expect(pages.referers, everyElement('https://www.miruro.to/'));
+      expect(pages.referers, everyElement('https://www.miruro.cx/'));
     },
   );
 
@@ -370,6 +372,7 @@ void main() {
     final provider = MiruroCatalogPlaybackProvider(
       MiruroCatalogApi(
         PublicPlaybackHttp(client, miruroCatalogOrigins.toSet()),
+        transport: pages,
       ),
     );
     final result = await provider.findSources(
@@ -380,12 +383,13 @@ void main() {
     expect(pages.paths, isEmpty);
   });
 
-  test('a 403 is surfaced and does not retry a different mirror', () async {
+  test('a 403 is surfaced without trying retired Miruro domains', () async {
     final _Pages pages = _Pages(const {'/api/config': (403, 'denied')});
     final Dio client = Dio()..httpClientAdapter = pages;
     addTearDown(() => client.close(force: true));
     final MiruroCatalogApi api = MiruroCatalogApi(
       PublicPlaybackHttp(client, miruroCatalogOrigins.toSet()),
+      transport: pages,
     );
     await expectLater(
       api.get(
@@ -404,40 +408,41 @@ void main() {
       ),
     );
     expect(pages.paths, ['/api/config']);
+    expect(pages.hosts, ['www.miruro.cx']);
   });
 
-  test(
-    'a 5xx retries another catalog origin within the attempt bound',
-    () async {
-      final _Pages pages = _Pages(
-        {'/api/config': (200, '{"streaming":{"anikoto":{"label":"bee"}}}')},
-        statusesByHost: {'www.miruro.to': 503},
-      );
-      final Dio client = Dio()..httpClientAdapter = pages;
-      addTearDown(() => client.close(force: true));
-      final MiruroCatalogApi api = MiruroCatalogApi(
-        PublicPlaybackHttp(
-          client,
-          miruroCatalogOrigins.toSet(),
-          enforceCooldown: false,
+  test('a 5xx does not retry retired Miruro domains', () async {
+    final _Pages pages = _Pages(
+      {'/api/config': (200, '{"streaming":{"anikoto":{"label":"bee"}}}')},
+      statusesByHost: {'www.miruro.cx': 503},
+    );
+    final Dio client = Dio()..httpClientAdapter = pages;
+    addTearDown(() => client.close(force: true));
+    final MiruroCatalogApi api = MiruroCatalogApi(
+      PublicPlaybackHttp(
+        client,
+        miruroCatalogOrigins.toSet(),
+        enforceCooldown: false,
+      ),
+      transport: pages,
+    );
+    await expectLater(
+      api.get(
+        'config',
+        cancellation: PlaybackCancellationToken(),
+        stage: PlaybackHttpStage.catalog,
+      ),
+      throwsA(
+        isA<PublicPlaybackFailure>().having(
+          (failure) => failure.kind,
+          'failure kind',
+          PlaybackProviderFailureKind.unavailable,
         ),
-        maxOriginAttempts: 2,
-      );
-      expect(
-        await api.get(
-          'config',
-          cancellation: PlaybackCancellationToken(),
-          stage: PlaybackHttpStage.catalog,
-        ),
-        contains('anikoto'),
-      );
-      expect(pages.hosts, ['www.miruro.to', 'www.miruro.tv']);
-      expect(pages.referers, [
-        'https://www.miruro.to/',
-        'https://www.miruro.tv/',
-      ]);
-    },
-  );
+      ),
+    );
+    expect(pages.hosts, ['www.miruro.cx']);
+    expect(pages.referers, ['https://www.miruro.cx/']);
+  });
 
   test('cancellation is honored before making a request', () async {
     final _Pages pages = _Pages(const {});
@@ -448,6 +453,7 @@ void main() {
     final result = await MiruroCatalogPlaybackProvider(
       MiruroCatalogApi(
         PublicPlaybackHttp(client, miruroCatalogOrigins.toSet()),
+        transport: pages,
       ),
     ).findSources(_requestedEpisode(), cancellation: cancellation);
     expect(
@@ -514,7 +520,7 @@ EpisodeRef _episodeRef() {
   );
 }
 
-final class _Pages implements HttpClientAdapter {
+final class _Pages implements HttpClientAdapter, MiruroCatalogTransport {
   _Pages(
     this.pages, {
     this.statusesByHost = const <String, int>{},
@@ -564,6 +570,44 @@ final class _Pages implements HttpClientAdapter {
       headers: const <String, List<String>>{
         'content-type': <String>['application/json'],
       },
+    );
+  }
+
+  /// Serves the same fixtures to the HTTP/2 catalog transport, so the adapter
+  /// tests never touch the network and still assert the real header set.
+  @override
+  Future<MiruroHttp2Response> get(
+    Uri uri, {
+    required Map<String, String> headers,
+    required Duration timeout,
+    required int maxBytes,
+  }) async {
+    paths.add(uri.path);
+    hosts.add(uri.host);
+    userAgents.add(headers['user-agent']);
+    referers.add(headers['referer']);
+    expect(headers['sec-fetch-site'], 'same-origin');
+    expect(headers['origin'], 'https://${uri.host}');
+    final (int defaultStatus, String body) = pages[uri.path] ?? (404, '');
+    final int status = statusesByHost[uri.host] ?? defaultStatus;
+    if (encodeCatalog && status == 200) {
+      final List<int> compressed = gzip.encode(utf8.encode(body));
+      final Uint8List masked = Uint8List(compressed.length);
+      for (int i = 0; i < compressed.length; i++) {
+        masked[i] = compressed[i] ^ _catalogKey[i % _catalogKey.length];
+      }
+      return MiruroHttp2Response(
+        statusCode: status,
+        headers: const <String, String>{
+          'content-type': 'application/octet-stream',
+        },
+        body: masked,
+      );
+    }
+    return MiruroHttp2Response(
+      statusCode: status,
+      headers: const <String, String>{'content-type': 'application/json'},
+      body: Uint8List.fromList(utf8.encode(body)),
     );
   }
 

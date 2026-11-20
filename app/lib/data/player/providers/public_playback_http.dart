@@ -15,6 +15,10 @@ final class PublicPlaybackHttp {
   static const int defaultMaxResponseBytes = 2 * 1024 * 1024;
   static const int maxAllowedResponseBytes = 8 * 1024 * 1024;
 
+  /// Denial bodies are read up to this cap so Cloudflare's challenge/block
+  /// pages stay identifiable; they never reach a decoder.
+  static const int maxErrorBodyBytes = 4096;
+
   PublicPlaybackHttp(
     this.client,
     this.allowedHosts, {
@@ -30,6 +34,17 @@ final class PublicPlaybackHttp {
   final int? maxConcurrent;
   int _active = 0;
   final Map<String, DateTime> _retryUntilByOrigin = {};
+
+  /// Cloudflare's `cf-ray` is a diagnostic identifier (not a credential) that
+  /// the site owner needs to locate the block event. Anything unexpected is
+  /// dropped instead of logged.
+  static String? _cloudflareRayId(String? value) {
+    final String? trimmed = value?.trim();
+    return trimmed != null &&
+            RegExp(r'^[0-9a-f]{8,32}-[A-Z]{2,4}$').hasMatch(trimmed)
+        ? trimmed
+        : null;
+  }
 
   static Duration? _retryAfter(String? value, DateTime now) {
     if (value == null) return null;
@@ -321,7 +336,7 @@ final class PublicPlaybackHttp {
       await for (final chunk in body.stream.timeout(
         const Duration(seconds: 6),
       )) {
-        final int limit = success ? maxResponseBytes + 1 : 200;
+        final int limit = success ? maxResponseBytes + 1 : maxErrorBodyBytes;
         bytes.add(
           chunk.length > limit - bytes.length
               ? chunk.sublist(0, limit - bytes.length)
@@ -349,9 +364,34 @@ final class PublicPlaybackHttp {
           : utf8.decode(responseBytes, allowMalformed: !success);
       if (!success) {
         final String prefix = text.toLowerCase();
+        // Cloudflare documents `cf-mitigated: challenge` as the reliable
+        // signal, but intermediaries can strip it. The canonical pages are
+        // also distinguishable by their own title, so a challenge page is
+        // still classified as a challenge instead of a plain 403.
+        final bool html = contentType == 'text/html';
+        final bool challengePage =
+            html &&
+            (prefix.contains('just a moment') ||
+                prefix.contains('cf-challenge') ||
+                prefix.contains('challenge-platform'));
+        final bool blockedPage =
+            html &&
+            !challengePage &&
+            (prefix.contains('attention required') ||
+                prefix.contains('you have been blocked') ||
+                prefix.contains('cf-error-details'));
+        if (challenge || challengePage || blockedPage) {
+          developer.log(
+            'cloudflare page=${challenge || challengePage ? "challenge" : "block"} '
+            'status=$code host=${uri.host} '
+            'cf_ray=${_cloudflareRayId(response.headers['cf-ray']?.firstOrNull) ?? "unknown"}',
+            name: 'kongroo.playback.http',
+          );
+        }
         throw PublicPlaybackFailure(
           switch (code) {
-            _ when challenge => PlaybackProviderFailureKind.challenge,
+            _ when challenge || challengePage =>
+              PlaybackProviderFailureKind.challenge,
             403 when prefix.contains('error code: 1020') =>
               PlaybackProviderFailureKind.policyBlocked,
             403 when prefix.contains('error code: 1006') =>

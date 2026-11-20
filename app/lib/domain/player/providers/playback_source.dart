@@ -290,11 +290,12 @@ typedef PlaybackServer = SourceCandidate;
 
 /// Public, non-authentication HTTP context required by a media endpoint.
 ///
-/// Supports public `Referer`/`Origin`, a per-media `User-Agent`, and two
-/// non-secret protocol headers used by public catalog APIs (values are
-/// strictly validated; they never carry credentials or cookies). Cookies,
-/// authorization credentials, and arbitrary caller-supplied headers are
-/// rejected.
+/// Supports public `Referer`/`Origin`, a per-media `User-Agent`, `Sec-Fetch-Site`
+/// (the standard fetch-metadata header a browser sets on its own requests, with
+/// no credential content), and two non-secret protocol headers used by public
+/// catalog APIs (values are strictly validated; they never carry credentials or
+/// cookies). Cookies, authorization credentials, and arbitrary caller-supplied
+/// headers are rejected.
 final class PlaybackRequestHeaders {
   factory PlaybackRequestHeaders(Map<String, String> values) {
     final Map<String, String> validated = <String, String>{};
@@ -303,6 +304,7 @@ final class PlaybackRequestHeaders {
         'referer' => 'Referer',
         'origin' => 'Origin',
         'user-agent' => 'User-Agent',
+        'sec-fetch-site' => 'Sec-Fetch-Site',
         'x-build-id' => 'x-build-id',
         'x-aa-boot' => 'x-aa-boot',
         _ => null,
@@ -317,6 +319,20 @@ final class PlaybackRequestHeaders {
       if (name == 'User-Agent') {
         if (value.length > 512 || value.contains(RegExp(r'[^\x20-\x7e]'))) {
           throw ArgumentError('The public media User-Agent is invalid.');
+        }
+        validated[name] = value;
+        continue;
+      }
+      if (name == 'Sec-Fetch-Site') {
+        // A closed set: the browser fetch-metadata values. It states the
+        // relationship between initiator and target, never a permission.
+        if (!const <String>{
+          'same-origin',
+          'same-site',
+          'cross-site',
+          'none',
+        }.contains(value)) {
+          throw ArgumentError('The public Sec-Fetch-Site header is invalid.');
         }
         validated[name] = value;
         continue;

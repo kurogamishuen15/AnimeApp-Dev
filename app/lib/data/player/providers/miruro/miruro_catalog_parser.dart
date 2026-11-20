@@ -271,46 +271,47 @@ final class MiruroCatalogParser {
         ));
       }
       if (renditions.isEmpty) continue;
-      var chosen = renditions.first;
-      for (final rendition in renditions.skip(1)) {
-        if (_qualityScore(rendition.quality) > _qualityScore(chosen.quality)) {
-          chosen = rendition;
+      // Sort by quality descending (highest resolution first)
+      renditions.sort((a, b) => _qualityScore(b.quality) - _qualityScore(a.quality));
+      // Emit each rendition as its own SourceCandidate
+      for (int i = 0; i < renditions.length; i++) {
+        final rendition = renditions[i];
+        // Build candidate ID with index suffix for uniqueness
+        final String baseId = '$providerKey-${_slug(serverName)}-$i';
+        String candidateId = baseId;
+        int collision = 2;
+        if (candidateId.length > 120) {
+          candidateId = candidateId.substring(0, 120);
         }
+        while (!ids.add(candidateId)) {
+          final String suffix = '-$collision';
+          final int prefixLength = (120 - suffix.length).clamp(1, 120).toInt();
+          candidateId =
+              '${baseId.substring(0, baseId.length.clamp(1, prefixLength).toInt())}'
+              '$suffix';
+          collision++;
+        }
+        final String? referer = _safeReferer(server['headers']);
+        candidates.add(
+          SourceCandidate(
+            id: candidateId,
+            displayName: serverName,
+            endpoint: rendition.uri,
+            hostId: DirectMediaHostResolver.stableHostId,
+            priority: -candidates.length,
+            kind: PlaybackCandidateKind.media,
+            declaredLanguage: declaredLanguage,
+            mediaFormat: rendition.format,
+            quality: rendition.quality,
+            availability: PlaybackAvailability.listed,
+            sourceEpisodeId: sourceEpisodeId,
+            provenance: 'Miruro catalog · $providerLabel · $track · $serverName',
+            requestHeaders: referer == null
+                ? const PlaybackRequestHeaders.empty()
+                : PlaybackRequestHeaders({'Referer': referer}),
+          ),
+        );
       }
-      final String baseId = '$providerKey-${_slug(serverName)}';
-      String candidateId = baseId;
-      int collision = 2;
-      if (candidateId.length > 120) {
-        candidateId = candidateId.substring(0, 120);
-      }
-      while (!ids.add(candidateId)) {
-        final String suffix = '-$collision';
-        final int prefixLength = (120 - suffix.length).clamp(1, 120).toInt();
-        candidateId =
-            '${baseId.substring(0, baseId.length.clamp(1, prefixLength).toInt())}'
-            '$suffix';
-        collision++;
-      }
-      final String? referer = _safeReferer(server['headers']);
-      candidates.add(
-        SourceCandidate(
-          id: candidateId,
-          displayName: serverName,
-          endpoint: chosen.uri,
-          hostId: DirectMediaHostResolver.stableHostId,
-          priority: -candidates.length,
-          kind: PlaybackCandidateKind.media,
-          declaredLanguage: declaredLanguage,
-          mediaFormat: chosen.format,
-          quality: chosen.quality,
-          availability: PlaybackAvailability.listed,
-          sourceEpisodeId: sourceEpisodeId,
-          provenance: 'Miruro catalog · $providerLabel · $track · $serverName',
-          requestHeaders: referer == null
-              ? const PlaybackRequestHeaders.empty()
-              : PlaybackRequestHeaders({'Referer': referer}),
-        ),
-      );
     }
     return List.unmodifiable(candidates);
   }

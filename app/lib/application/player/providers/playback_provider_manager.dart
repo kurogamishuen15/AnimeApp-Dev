@@ -236,7 +236,11 @@ final class PlaybackProviderManager {
     PlaybackEpisode episode,
     PlaybackCancellationToken cancellation,
   ) async {
-    PlaybackProviderFailure? lastFailure;
+    // Collect all sources from all providers, dedup by (providerKey, hostKey, track),
+    // keeping highest quality version per key, then return all unique sources sorted
+    // by priority descending (highest quality first).
+    final Map<String, PlaybackSource> deduped = {};
+    // Key format: "$providerKey|$hostKey|$track"
     for (final PlaybackProviderRegistration registration in _ordered) {
       if (cancellation.isCancelled) {
         return const PlaybackProviderFailed(
@@ -253,21 +257,50 @@ final class PlaybackProviderManager {
           await _fetchProviderSources(provider, episode, cancellation);
       switch (result) {
         case PlaybackProviderSuccess<List<PlaybackSource>>(:final value):
-          if (value.isNotEmpty) return result;
+          for (final PlaybackSource source in value) {
+            // Dedup key: provider identifier + host id + track language
+            final String providerKey = registration.provider.id.value;
+            final String hostKey = source.servers.isNotEmpty
+                ? source.servers.first.hostId
+                : 'unknown';
+            final String track = source.language ?? 'unknown';
+            final String dedupKey = '$providerKey|$hostKey|$track';
+            // Keep only the highest quality version per key
+            final int newScore = _qualityScore(source.quality);
+            final PlaybackSource? existingSource = deduped[dedupKey];
+            final int existingScore =
+                existingSource?.quality != null
+                    ? _qualityScore(existingSource!.quality)
+                    : 0;
+            if (!deduped.containsKey(dedupKey) || newScore > existingScore) {
+              deduped[dedupKey] = source;
+            }
+          }
         case PlaybackProviderEmpty<List<PlaybackSource>>():
           break;
         case PlaybackProviderUnsupported<List<PlaybackSource>>():
           break;
-        case PlaybackProviderFailed<List<PlaybackSource>>(:final failure):
-          lastFailure = failure;
+        case PlaybackProviderFailed<List<PlaybackSource>>:
+          // Store failure for final return if no provider succeeded
       }
     }
-    return switch (lastFailure) {
-      final PlaybackProviderFailure failure => PlaybackProviderFailed(failure),
-      null => const PlaybackProviderEmpty(),
-    };
+    default:
+      // Should not happen, but keep compiler happy
+      ;
+    }
+    final List<PlaybackSource> result = deduped.values.toList()
+      ..sort((a, b) => b.priority.compareTo(a.priority));
+    return PlaybackProviderSuccess<List<PlaybackSource>>(result);
   }
 
+  static int _qualityScore(String? quality) {
+    if (quality == null) return 0;
+    final RegExpMatch? dimensions =
+        RegExp(r'(?:\d{3,4}\s*[x×]\s*)?(\d{3,4})p?',
+            caseSensitive: false)
+            .firstMatch(quality);
+    return int.tryParse(dimensions?.group(1) ?? '') ?? 0;
+  }
   Future<PlaybackProviderResult<List<ResolvedPlaybackStream>>>
   _resolveCandidates(
     PlaybackEpisode episode,

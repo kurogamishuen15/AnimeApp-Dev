@@ -48,6 +48,22 @@ void main() {
         case '/challenge.mp4':
           response.statusCode = HttpStatus.forbidden;
           response.headers.set('cf-mitigated', 'challenge');
+        case '/cf-challenge-page.mp4':
+          response.statusCode = HttpStatus.forbidden;
+          response.headers.contentType = ContentType.html;
+          response.write(
+            '<!DOCTYPE html><html><head><title>Just a moment...</title>'
+            '</head><body><script src="/cdn-cgi/challenge-platform/x.js">'
+            '</script></body></html>',
+          );
+        case '/cf-block-page.mp4':
+          response.statusCode = HttpStatus.forbidden;
+          response.headers.contentType = ContentType.html;
+          response.write(
+            '<!DOCTYPE html><html><head>'
+            '<title>Attention Required! | Cloudflare</title></head><body>'
+            'Sorry, you have been blocked</body></html>',
+          );
         case '/quota.mp4':
           response.statusCode = HttpStatus.tooManyRequests;
           response.headers.set('retry-after', '19');
@@ -145,6 +161,36 @@ void main() {
       expect(received.map((item) => item.$1), everyElement('HEAD'));
     },
   );
+
+  test('a body-read 403 separates challenge pages from WAF blocks', () async {
+    // `cf-mitigated` is the documented signal; the page title is the fallback
+    // when a proxy strips it. A block page is not a challenge: it means the
+    // site owner (not the visitor) has to change the policy.
+    await expectLater(
+      http.read(
+        Uri.https('video.example.org', '/cf-challenge-page.mp4'),
+        PlaybackCancellationToken(),
+        stage: PlaybackHttpStage.media,
+      ),
+      throwsA(failure(PlaybackProviderFailureKind.challenge, 403)),
+    );
+    await expectLater(
+      http.read(
+        Uri.https('video.example.org', '/cf-block-page.mp4'),
+        PlaybackCancellationToken(),
+        stage: PlaybackHttpStage.media,
+      ),
+      throwsA(failure(PlaybackProviderFailureKind.forbidden, 403)),
+    );
+    await expectLater(
+      http.read(
+        Uri.https('video.example.org', '/forbidden.mp4'),
+        PlaybackCancellationToken(),
+        stage: PlaybackHttpStage.media,
+      ),
+      throwsA(failure(PlaybackProviderFailureKind.forbidden, 403)),
+    );
+  });
 
   test(
     'honors Retry-After and keeps the cooldown scoped to the origin',

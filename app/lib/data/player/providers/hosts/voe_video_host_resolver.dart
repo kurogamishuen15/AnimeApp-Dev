@@ -97,6 +97,10 @@ final class VoeVideoHostResolver implements PlaybackVideoHostResolver {
           DirectMediaHostResolver.formatFor(media) != PlaybackMediaFormat.hls) {
         throw const FormatException('Invalid published VOE HLS');
       }
+      final published = decodePlayer(page);
+      final List<ProviderSubtitle> subtitles = published == null
+          ? source.subtitles
+          : _mergeSubtitles(published.captions, source.subtitles);
       final mediaHeaders = PlaybackRequestHeaders({
         'User-Agent': _http.userAgent,
       });
@@ -121,7 +125,7 @@ final class VoeVideoHostResolver implements PlaybackVideoHostResolver {
           displayName: candidate.displayName ?? 'VOE',
           availability: PlaybackAvailability.transportResponded,
           httpHeaders: mediaHeaders,
-          subtitles: source.subtitles,
+          subtitles: subtitles,
           provenance: 'VOE published player config; Anilili MIT-0',
         ),
       );
@@ -146,7 +150,15 @@ final class VoeVideoHostResolver implements PlaybackVideoHostResolver {
         : null;
   }
 
-  static Uri? decodeSource(String page) {
+  static Uri? decodeSource(String page) => decodePlayer(page)?.source;
+
+  /// Decodes the published player config once: the signed HLS source plus any
+  /// soft subtitle tracks it genuinely declares. Captions are optional and are
+  /// only accepted as public HTTPS `.vtt` files; an entry that fails validation
+  /// is dropped rather than repaired or invented.
+  static ({Uri source, List<ProviderSubtitle> captions})? decodePlayer(
+    String page,
+  ) {
     const marker = '<script type="application/json">';
     final open = page.indexOf(marker);
     if (open < 0) return null;
@@ -179,12 +191,74 @@ final class VoeVideoHostResolver implements PlaybackVideoHostResolver {
         return null;
       }
       final uri = Uri.tryParse(config['source'] as String);
-      return uri != null &&
-              DirectMediaHostResolver.isSyntacticallyPublicHttps(uri)
-          ? uri
-          : null;
+      if (uri == null ||
+          !DirectMediaHostResolver.isSyntacticallyPublicHttps(uri)) {
+        return null;
+      }
+      return (source: uri, captions: _captions(config['captions']));
     } on FormatException {
       return null;
     }
+  }
+
+  static const int _maxCaptions = 8;
+  static final RegExp _language = RegExp(r'^[a-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$');
+
+  static List<ProviderSubtitle> _captions(Object? value) {
+    if (value is! List || value.isEmpty) return const <ProviderSubtitle>[];
+    final List<ProviderSubtitle> captions = [];
+    for (var index = 0; index < value.length && index < _maxCaptions; index++) {
+      final entry = value[index];
+      if (entry is! Map) continue;
+      final file = entry['file'];
+      if (file is! String || file.length > 8192) continue;
+      final uri = Uri.tryParse(file);
+      if (uri == null ||
+          uri.userInfo.isNotEmpty ||
+          uri.hasFragment ||
+          !uri.path.toLowerCase().endsWith('.vtt') ||
+          !DirectMediaHostResolver.isSyntacticallyPublicHttps(uri)) {
+        continue;
+      }
+      final declared = entry['language'];
+      final language = declared is String && _language.hasMatch(declared.trim())
+          ? declared.trim()
+          : 'unknown';
+      final rawLabel = entry['label'];
+      final label = rawLabel is String && rawLabel.trim().isNotEmpty
+          ? rawLabel.trim()
+          : 'Subtitles ${index + 1}';
+      try {
+        captions.add(
+          ProviderSubtitle(
+            id: 'voe-$index',
+            uri: uri,
+            label: label.length > 128 ? 'Subtitles ${index + 1}' : label,
+            language: language,
+            isDefault: index == 0,
+          ),
+        );
+      } on ArgumentError {
+        continue;
+      }
+    }
+    return List<ProviderSubtitle>.unmodifiable(captions);
+  }
+
+  /// Published captions first, then any track the provider already declared.
+  static List<ProviderSubtitle> _mergeSubtitles(
+    List<ProviderSubtitle> published,
+    List<ProviderSubtitle> declared,
+  ) {
+    if (published.isEmpty) return declared;
+    if (declared.isEmpty) return published;
+    final Set<Uri> seen = {
+      for (final ProviderSubtitle caption in published) caption.uri,
+    };
+    return List<ProviderSubtitle>.unmodifiable([
+      ...published,
+      for (final ProviderSubtitle caption in declared)
+        if (seen.add(caption.uri)) caption,
+    ]);
   }
 }

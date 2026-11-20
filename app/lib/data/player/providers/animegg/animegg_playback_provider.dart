@@ -80,13 +80,11 @@ final class AnimeGgPlaybackProvider extends EpisodeSourceAdapter {
   PlaybackRequestHeaders get _referer =>
       PlaybackRequestHeaders({'Referer': origin.resolve('/').toString()});
 
-  /// Media candidates carry a browser User-Agent: the vidcache CDN serves
-  /// library clients at unusable rates (verified live, ~28 KB/s vs ~176 KB/s).
+  /// Media candidates identify Kongroo honestly. The CDN's different rates
+  /// for browser and library clients do not justify impersonating a browser.
   PlaybackRequestHeaders get _mediaHeaders => PlaybackRequestHeaders({
     'Referer': origin.resolve('/').toString(),
-    'User-Agent':
-        'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 '
-        '(KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
+    'User-Agent': _http.userAgent,
   });
 
   bool _validMatch(SourceAnimeMatch match) =>

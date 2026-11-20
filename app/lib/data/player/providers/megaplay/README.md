@@ -62,3 +62,20 @@ Las pruebas de otras plataformas y episodios permanecen pendientes.
 La implementación usa `cryptography 2.9.0` para el formato del payload. Los
 avisos y el lanzamiento Linux con el códec opcional están en
 [PLAYBACK-DEPENDENCIES.md](../../../../../../docs/third-party/PLAYBACK-DEPENDENCIES.md).
+
+# Estado de disponibilidad (2026-11-19)
+
+Una prueba en vivo detectó una regresión del engine: al abrir una fuente con
+captions remotas, el marcado `default` hacía que Kongroo las cargara durante
+`open()`. libmpv emitía un error nativo por esa pista y el coordinador lo
+trataba como fallo del medio, aunque el HLS hubiera mostrado el primer frame.
+La prueba A/B del 19-11 aisló el problema: sin auto-cargar la pista externa, el
+episodio 9 de Tokyo Ghoul:re completó
+`FRAME → ADVANCE → SEEK → REOPEN → LIVE-ENGINE-OK` en Fedora. MegaPlay vuelve a
+estar verificado en ese recorrido en **sub y dub**. Ambos completaron frame,
+avance, seek a 20 s, reapertura y cierre limpio en la prueba del 19-11. Las
+captions VTT siguen disponibles para selección explícita desde el menú.
+
+El módulo de medios también registra una denegación 403 histórica del CDN en
+otras comprobaciones. Esa observación no explica la regresión reproducida
+aquí; el recorrido N5 actual de ambas variantes avanzó correctamente.

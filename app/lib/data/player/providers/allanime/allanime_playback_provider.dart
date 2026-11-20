@@ -124,13 +124,11 @@ final class AllAnimePlaybackProvider extends EpisodeSourceAdapter {
     'Origin': 'https://mkissa.to',
   });
 
-  /// Direct media candidates carry a browser User-Agent: the fast4speed CDN
-  /// throttles library clients (verified live, same family as vidcache).
+  /// Direct media requests identify Kongroo honestly; provider resolution must
+  /// not impersonate a browser to influence host access decisions.
   PlaybackRequestHeaders get _mediaHeaders => PlaybackRequestHeaders({
     'Referer': 'https://mkissa.to/',
-    'User-Agent':
-        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 '
-        '(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+    'User-Agent': _http.userAgent,
   });
 
   int? _mal(AnimeIdentity identity) {
@@ -344,16 +342,7 @@ final class AllAnimePlaybackProvider extends EpisodeSourceAdapter {
       // evaded here); a stale or rejected token degrades to noSources so the
       // manager can fall back to other providers.
       final Object? errors = decoded['errors'];
-      final bool captcha =
-          errors is List &&
-          errors.any(
-            (Object? error) =>
-                error is Map &&
-                (error['message'] == 'NEED_CAPTCHA' ||
-                    (error['extensions'] is Map &&
-                        (error['extensions'] as Map)['code'] ==
-                            'NEED_CAPTCHA')),
-          );
+      final bool captcha = _isCaptchaDemand(errors);
       throw PublicPlaybackFailure(
         captcha
             ? PlaybackProviderFailureKind.challenge
@@ -411,7 +400,6 @@ final class AllAnimePlaybackProvider extends EpisodeSourceAdapter {
           headers: PlaybackRequestHeaders({
             'Referer': 'https://mkissa.to/',
             'Origin': 'https://mkissa.to',
-            'User-Agent': _browserUa,
             'x-build-id': _materials.buildId,
             'x-aa-boot': token,
           }),
@@ -453,12 +441,6 @@ final class AllAnimePlaybackProvider extends EpisodeSourceAdapter {
     }
     return (epoch: epochValue, key: key);
   }
-
-  /// Desktop web client UA: the API demands a captcha for non-desktop client
-  /// classes on the sources query (verified live 2026-11-18).
-  static const String _browserUa =
-      'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 '
-      '(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
 
   Future<String> _bootToken(int epoch) async {
     final Mac inner = await Hmac.sha256().calculateMac(
@@ -502,7 +484,6 @@ final class AllAnimePlaybackProvider extends EpisodeSourceAdapter {
       headers: PlaybackRequestHeaders({
         'Referer': 'https://mkissa.to/',
         'Origin': 'https://mkissa.to',
-        'User-Agent': _browserUa,
         'x-build-id': _materials.buildId,
         'x-aa-boot': await _bootToken(boot.epoch),
       }),
@@ -630,6 +611,33 @@ final class AllAnimePlaybackProvider extends EpisodeSourceAdapter {
   static bool _isHls(String url) =>
       url.toLowerCase().contains('.m3u8') ||
       url.toLowerCase().contains('repackager.wixmp');
+
+  /// Mirrors the site's own detector: the demand can arrive as the message,
+  /// as `extensions.code` or as `extensions.exception.code`, and the message
+  /// is matched by substring because the API has used variants. Only the
+  /// signal is classified; no token is requested, read or replayed.
+  static bool _isCaptchaDemand(Object? errors) =>
+      errors is List &&
+      errors.any(
+        (Object? error) =>
+            error is Map &&
+            (_mentionsCaptcha(error['message']) ||
+                _mentionsCaptcha(
+                  error['extensions'] is Map
+                      ? (error['extensions'] as Map)['code']
+                      : null,
+                ) ||
+                _mentionsCaptcha(
+                  error['extensions'] is Map &&
+                          (error['extensions'] as Map)['exception'] is Map
+                      ? ((error['extensions'] as Map)['exception']
+                            as Map)['code']
+                      : null,
+                )),
+      );
+
+  static bool _mentionsCaptcha(Object? value) =>
+      value is String && value.contains('NEED_CAPTCHA');
 
   static Uint8List _hexDecode(String hex) {
     if (hex.length != 64 || !_hex64.hasMatch(hex)) {

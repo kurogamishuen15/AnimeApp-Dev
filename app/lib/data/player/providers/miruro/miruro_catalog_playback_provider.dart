@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:collection';
 
 import 'package:anime_app/domain/catalog/external_anime_id.dart';
@@ -78,19 +79,36 @@ final class MiruroCatalogPlaybackProvider extends EpisodeSourceAdapter {
   Future<PlaybackProviderResult<List<PlaybackSource>>> findSources(
     PlaybackEpisode requested, {
     required PlaybackCancellationToken cancellation,
-  }) => EpisodeSourceSupport.read(() async {
+  }) async {
     EpisodeSourceSupport.check(cancellation);
-    if (requested.episodeNumber < 1) return null;
+    if (requested.episodeNumber < 1) return const PlaybackProviderEmpty<List<PlaybackSource>>();
     final int? anilistId = _anilistId(requested.identity);
-    if (anilistId == null) return null;
+    // ── DEBUG DIAGNOSTIC ──────────────────────────────────────────────
+    // Log what we have before deciding. This never blocks UI; the log
+    // appears in the trace/kongroo.playback.http output.
+    // ignore: avoid_print
+    print('MIRURO_DIAG: findSources anilistId=${anilistId ?? 'null'} '
+        'episodeNumber=${requested.episodeNumber} '
+        'kitsuId=${_kitsuId(requested.identity)} '
+        'tmdbId=${_tmdbId(requested.identity)} '
+        'flag=${Platform.environment['KONGROO_ENABLE_MIRURO_BACKEND'] ?? 'not-set'}');
+    // ────────────────────────────────────────────────────────────────────
+    // OC-07.7 §3: Si no hay ID, la entrada sigue visible pero deshabilitada
+    // con motivo "sin identificar", en lugar de desaparecer en silencio.
+    if (anilistId == null) {
+      return PlaybackProviderEmpty<List<PlaybackSource>>();
+    }
     final MiruroTitleRecord? title = await _title(anilistId, cancellation);
-    if (title == null) return null;
+    if (title == null) return const PlaybackProviderEmpty<List<PlaybackSource>>();
     final SourceAnimeMatch match = _match(requested.identity, title, anilistId);
-    return _sourcesFor(
+    final List<PlaybackSource>? sources = await _sourcesFor(
       _episodeRef(match, requested.episodeNumber),
       cancellation,
     );
-  });
+    return sources != null
+      ? PlaybackProviderSuccess<List<PlaybackSource>>(sources)
+      : const PlaybackProviderEmpty<List<PlaybackSource>>();
+  }
 
   @override
   Future<PlaybackProviderResult<List<EpisodeRef>>> listEpisodes(
@@ -190,6 +208,28 @@ final class MiruroCatalogPlaybackProvider extends EpisodeSourceAdapter {
     if (ids.length != 1) return null;
     final int? id = int.tryParse(ids.single.value);
     return id != null && id > 0 && id <= 0x7fffffff ? id : null;
+  }
+
+  String? _kitsuId(AnimeIdentity identity) {
+    final List<ExternalAnimeId> ids = identity.externalIds
+        .where(
+          (ExternalAnimeId value) =>
+              value.providerId.value == 'kitsu',
+        )
+        .toList(growable: false);
+    if (ids.length != 1) return null;
+    return ids.single.value;
+  }
+
+  String? _tmdbId(AnimeIdentity identity) {
+    final List<ExternalAnimeId> ids = identity.externalIds
+        .where(
+          (ExternalAnimeId value) =>
+              value.providerId.value == 'tmdb',
+        )
+        .toList(growable: false);
+    if (ids.length != 1) return null;
+    return ids.single.value;
   }
 
   SourceAnimeMatch _match(

@@ -26,8 +26,9 @@ cliente web del sitio, verificado en vivo el 2026-11-18:
    iframe que Kongroo nunca devuelve como reproducibles.
 
 Sin cookies, sin sesiones, sin ejecución de JavaScript remoto; sólo los
-materiales públicos del build del sitio, como hacen los clientes mantenidos
-(ani-cli/Goanime). La máscara rota por build del sitio: la clase
+materiales públicos del build del sitio. Kongroo se identifica con su propio
+`User-Agent` (`Kongroo/0.1`); no emula Chrome para alterar la clasificación del
+servicio. La máscara rota por build del sitio: la clase
 `AllAnimeBootMaterials` centraliza las constantes y el adaptador clasifica
 `invalid_boot_token` como rotación pendiente (`unavailable`).
 
@@ -54,6 +55,11 @@ materiales públicos del build del sitio, como hacen los clientes mantenidos
   `challenge` (regresión dedicada) y el manager continúa con los demás
   proveedores. El estado decae con el tiempo; la cadena ya quedó acreditada
   con evidencia previa.
+- **Acceso honesto vigente:** las respuestas anteriores de medios/`206` se
+  obtuvieron con un `User-Agent` Chrome heredado. Se retiró esa suplantación el
+  2026-11-19; los fixtures prueban contratos, no acceso live. La consulta live
+  con el identificador de Kongroo queda limitada a la comprobación puntual
+  registrada en el informe OC-06 del 19-11.
 - Nivel: **N2 protocolo verificado (con descifrado real) · reproducción
   pendiente de ventana sin captcha**.
 

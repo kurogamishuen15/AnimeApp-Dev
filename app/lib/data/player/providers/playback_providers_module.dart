@@ -11,8 +11,10 @@ import 'megaplay/megaplay_playback_provider.dart';
 import 'miruro/miruro_catalog_api.dart';
 import 'miruro/miruro_catalog_playback_provider.dart';
 import 'public_playback_http.dart';
+import 'registry/provider_spec.dart';
 import 'user_sources/user_defined_playback_provider.dart';
 import 'wikimedia/wikimedia_anime_provider.dart';
+import 'jkanime/jkanime_playback_provider.dart';
 
 /// Composition root for anime discovery and shared direct-media resolution.
 ///
@@ -32,11 +34,24 @@ final class PlaybackProvidersModule {
     bool enableAniZone = true,
     bool enableAnimeGg = true,
     bool enableWikimedia = false,
+    bool enableJkanime = true,
     Iterable<UserDefinedSourceEntry> userSources = const [],
   }) {
     final List<PlaybackProviderRegistration> providers =
         <PlaybackProviderRegistration>[];
-    final List<UserDefinedSourceEntry> userEntries = userSources.toList();
+        if (enableJkanime) {
+      final JKAnimePlaybackProvider jkanime = JKAnimePlaybackProvider();
+      providers.add(
+        PlaybackProviderRegistration(
+          provider: jkanime,
+          priority: 70,
+          cacheTtl: Duration.zero,
+          version: jkanime.adapterVersion,
+        ),
+      );
+    }
+
+final List<UserDefinedSourceEntry> userEntries = userSources.toList();
     final Dio? publicClient =
         enableMiruro ||
             enableMegaPlay ||

@@ -142,9 +142,17 @@ void main() {
         streams.single.httpHeaders.values['Referer'],
         'https://mkissa.to/',
       );
+      expect(
+        streams.single.httpHeaders.values['User-Agent'],
+        'Kongroo/0.1 (public anime catalog client)',
+      );
       // Bootstrap carries the signed boot token and build id.
       final RequestOptions bootstrap = api.requests.firstWhere(
         (RequestOptions r) => r.uri.path == '/client-crypto/v1/bootstrap',
+      );
+      expect(
+        bootstrap.headers['User-Agent'],
+        'Kongroo/0.1 (public anime catalog client)',
       );
       expect(bootstrap.headers['x-build-id'], '190');
       expect(
@@ -155,6 +163,10 @@ void main() {
       // The sources query carries the lane and the aaReq token.
       final RequestOptions sources = api.requests.firstWhere(
         (RequestOptions r) => r.uri.path == '/api' && r.method == 'GET',
+      );
+      expect(
+        sources.headers['User-Agent'],
+        'Kongroo/0.1 (public anime catalog client)',
       );
       expect(sources.headers['x-build-id'], '190');
       final Map<String, Object?> extensions = (jsonDecode(
@@ -406,6 +418,50 @@ void main() {
       );
     },
   );
+
+  test('captcha variants the site itself detects stay challenge', () async {
+    // The site's own client matches NEED_CAPTCHA as a substring and also reads
+    // `extensions.exception.code`; the API has used both shapes. A variant
+    // that only matched strictly would silently degrade to noSources and stop
+    // the manager from reporting the honest access condition.
+    final api = _Api(
+      searchBody: {
+        'data': {
+          'shows': {
+            'edges': [
+              {'_id': 'show-1', 'name': 'Tokyo Ghoul:re', 'malId': '21199'},
+            ],
+          },
+        },
+      },
+      bootstrapBody: {'epoch': 2967, 'partB': _testPartB, 'k': 'k7'},
+      sourcesBody: jsonEncode({
+        'errors': [
+          {
+            'message': 'Request rejected: NEED_CAPTCHA required',
+            'extensions': {
+              'exception': {'code': 'NEED_CAPTCHA'},
+            },
+          },
+        ],
+        'data': <String, Object?>{'episode': null},
+      }),
+    );
+    final Dio client = Dio()..httpClientAdapter = api;
+    addTearDown(() => client.close(force: true));
+    final provider = AllAnimePlaybackProvider(
+      client,
+      materials: _testMaterials,
+    );
+    final result = await provider.findSources(
+      _episode(),
+      cancellation: PlaybackCancellationToken(),
+    );
+    expect(
+      (result as PlaybackProviderFailed).failure.kind,
+      PlaybackProviderFailureKind.challenge,
+    );
+  });
 
   test('no direct player sources is noSources', () async {
     final String tobeparsed = await _encryptTobeparsed({

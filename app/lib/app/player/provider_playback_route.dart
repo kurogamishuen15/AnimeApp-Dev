@@ -7,6 +7,7 @@ import '../../application/player/playback_spike_contract.dart';
 import '../../application/player/providers/playback_provider_manager.dart';
 import '../../application/player/spike_player_coordinator.dart';
 import '../../domain/player/providers/playback_source.dart';
+import '../../domain/player/subtitles/external_subtitle_catalog.dart';
 import 'playback_route_session.dart';
 import 'spike_player_module.dart';
 
@@ -25,6 +26,8 @@ final class ProviderPlaybackRoute extends StatefulWidget {
     required this.initialStream,
     this.startPosition = Duration.zero,
     this.trackProgress,
+    this.externalSubtitleCatalog,
+    this.disposeExternalSubtitleCatalog,
     @visibleForTesting this.moduleLoader,
     super.key,
   });
@@ -35,6 +38,13 @@ final class ProviderPlaybackRoute extends StatefulWidget {
   final ResolvedPlaybackStream initialStream;
   final Duration startPosition;
   final PlaybackProgressSession Function(SpikePlayerCoordinator)? trackProgress;
+
+  /// Optional external subtitle catalog, built by the composition root. It is
+  /// null when no catalog is configured, so the subtitle panel never
+  /// advertises a search it cannot perform; provider-declared tracks keep
+  /// working either way.
+  final ExternalSubtitleCatalog? externalSubtitleCatalog;
+  final FutureOr<void> Function()? disposeExternalSubtitleCatalog;
   final PlaybackRouteSessionLoader? moduleLoader;
 
   @override
@@ -59,6 +69,9 @@ final class _ProviderPlaybackRouteState extends State<ProviderPlaybackRoute> {
                   for (final ResolvedPlaybackStream stream in widget.streams)
                     stream.uri,
                 },
+                externalSubtitleCatalog: widget.externalSubtitleCatalog,
+                disposeExternalSubtitleCatalog:
+                    widget.disposeExternalSubtitleCatalog,
                 startupCancellation: _openCancellation,
                 startPosition: startPosition,
                 trackProgress: widget.trackProgress,
