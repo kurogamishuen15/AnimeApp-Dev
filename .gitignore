@@ -56,3 +56,7 @@ client_secret*.json
 credentials*.json
 token.json
 auth.json
+
+# Adjuntos locales de agentes y artefactos zip de misiones en la raiz
+.codex-attachments/
+/*.zip

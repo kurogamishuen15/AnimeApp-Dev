@@ -94,7 +94,7 @@ void main() {
         await db.close();
         final raw = sqlite.sqlite3.open(file.path);
         expect(raw.select('PRAGMA integrity_check').single.values.single, 'ok');
-        expect(raw.select('PRAGMA user_version').single.values.single, 8);
+        expect(raw.select('PRAGMA user_version').single.values.single, 9);
         raw.close();
       } finally {
         await db.close();
@@ -146,7 +146,7 @@ void main() {
           (await db.customSelect('PRAGMA user_version').getSingle()).read<int>(
             'user_version',
           ),
-          8,
+          9,
         );
       } finally {
         await db.close();

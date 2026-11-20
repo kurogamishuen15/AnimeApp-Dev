@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
+import '../../domain/player/providers/playback_provider_contract.dart';
+
 /// The closeable player session owned by the playback navigation route.
 ///
 /// Keeping the route contract small lets tests control close completion without
@@ -18,14 +20,14 @@ abstract interface class PlaybackRouteSession {
 /// lease. The startup owner must observe the request at safe points, finish
 /// cleanup, and only then complete its loader Future.
 final class PlaybackRouteOpenCancellation {
-  bool _requested = false;
+  final PlaybackCancellationToken token = PlaybackCancellationToken();
 
-  bool get isRequested => _requested;
+  bool get isRequested => token.isCancelled;
 
-  void request() => _requested = true;
+  void request() => token.cancel();
 
   void throwIfRequested() {
-    if (_requested) throw const PlaybackRouteOpenCancelled();
+    if (isRequested) throw const PlaybackRouteOpenCancelled();
   }
 }
 

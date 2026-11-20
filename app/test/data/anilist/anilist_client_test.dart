@@ -75,11 +75,13 @@ void main() {
                     'coverImage': {'extraLarge': 'https://img.test/cover.jpg'},
                     'bannerImage': 'https://img.test/banner.jpg',
                     'episodes': 2,
+                    'idMal': 20,
                     'streamingEpisodes': [
                       {
                         'title': 'Episode 1 - A real title',
                         'thumbnail': 'http://img.test/episode-1.jpg',
                         'site': 'Fixture Stream',
+                        'url': 'https://stream.example/watch/episode-1',
                       },
                     ],
                     'characters': {'edges': <Object?>[]},
@@ -101,15 +103,26 @@ void main() {
         );
         expect(requestBody?['query'], contains(r'media(id: $id'));
         expect(requestBody?['query'], contains('streamingEpisodes'));
+        expect(
+          requestBody?['query'],
+          contains('streamingEpisodes { title thumbnail site url }'),
+        );
         expect(_map(requestBody?['variables']), {'id': 21});
         expect(authorizationHeader, isNull);
         final item = result.value.items.single;
         expect(item.detail?.episodeCount, 2);
+        expect(item.detail?.externalIds.single.providerId.value, 'myanimelist');
+        expect(item.detail?.externalIds.single.value, '20');
+        expect(requestBody!['query'].toString(), contains('idMal'));
         expect(item.detail?.episodes.single.number, 1);
         expect(item.detail?.episodes.single.title, 'Episode 1 - A real title');
         expect(
           item.detail?.episodes.single.thumbnailUrl,
           'https://img.test/episode-1.jpg',
+        );
+        expect(
+          item.detail?.episodes.single.externalWatchUri,
+          Uri.parse('https://stream.example/watch/episode-1'),
         );
       } finally {
         client.close();
@@ -266,12 +279,76 @@ void main() {
   );
 
   test(
-    'rejects invalid optional metadata instead of accepting corrupt values',
+    'skips a corrupt browse entry without hiding the valid entries of the page',
     () async {
       final LoopbackServer server = await _startServer(
         (request) => _respond(
           request,
-          body: '{"data":{"Page":{"media":[{"id":1,"averageScore":101}]}}}',
+          body: jsonEncode({
+            'data': {
+              'Page': {
+                'media': [
+                  {
+                    'id': 1,
+                    'title': {'romaji': 'Valid one'},
+                    'coverImage': {'extraLarge': 'https://img.test/1.jpg'},
+                  },
+                  {
+                    'id': 'not-a-number',
+                    'title': {'romaji': 'Corrupt id'},
+                  },
+                  {
+                    'id': 3,
+                    'title': {'romaji': 'Valid two'},
+                    'coverImage': {'extraLarge': 'https://img.test/3.jpg'},
+                  },
+                ],
+              },
+            },
+          }),
+        ),
+      );
+      final Dio dio = Dio(BaseOptions(baseUrl: server.baseUrl));
+      final AniListClient client = _createClient(dio);
+      try {
+        final Result<AnimeSearchResult> result = await client.browseAnime();
+        expect(result, isA<Success<AnimeSearchResult>>());
+        expect(
+          (result as Success<AnimeSearchResult>).value.items.map(
+            (item) => item.id,
+          ),
+          [1, 3],
+        );
+      } finally {
+        dio.close(force: true);
+        await server.close();
+      }
+    },
+  );
+
+  test(
+    'drops only the invalid optional field and keeps the valid anime',
+    () async {
+      final LoopbackServer server = await _startServer(
+        (request) => _respond(
+          request,
+          body: jsonEncode({
+            'data': {
+              'Page': {
+                'media': [
+                  {
+                    'id': 1,
+                    'title': {'romaji': 'Still listed'},
+                    'coverImage': {'extraLarge': 'https://img.test/1.jpg'},
+                    'averageScore': 101,
+                    'popularity': -4,
+                    'bannerImage': 'javascript:alert(1)',
+                    'startDate': {'year': 2020, 'month': 13},
+                  },
+                ],
+              },
+            },
+          }),
         ),
       );
       final Dio dio = Dio(BaseOptions(baseUrl: server.baseUrl));
@@ -280,11 +357,16 @@ void main() {
         final Result<AnimeSearchResult> result = await client.searchAnime(
           'invalid',
         );
-        expect(result, isA<Failure<AnimeSearchResult>>());
-        expect(
-          (result as Failure<AnimeSearchResult>).error,
-          isA<UnknownAppError>(),
-        );
+        expect(result, isA<Success<AnimeSearchResult>>());
+        final AnimeSummary item =
+            (result as Success<AnimeSearchResult>).value.items.single;
+        expect(item.id, 1);
+        expect(item.romajiTitle, 'Still listed');
+        expect(item.coverImageUrl, 'https://img.test/1.jpg');
+        expect(item.score, isNull);
+        expect(item.popularity, isNull);
+        expect(item.bannerImageUrl, isNull);
+        expect(item.startDate, isNull);
       } finally {
         dio.close(force: true);
         await server.close();

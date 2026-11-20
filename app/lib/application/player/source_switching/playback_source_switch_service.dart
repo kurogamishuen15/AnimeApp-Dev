@@ -62,14 +62,19 @@ final class PlaybackSourceSwitchService {
     required PlaybackEpisode episode,
     required SpikePlayerCoordinator coordinator,
     required ResolvedPlaybackStream initialSource,
+    List<ResolvedPlaybackStream>? authorizedAlternatives,
   }) => PlaybackSourceSwitchService._(
+    authorizedAlternatives == null
+        ? null
+        : List.unmodifiable(authorizedAlternatives),
     manager: manager,
     episode: episode,
     coordinator: coordinator,
     initialSource: initialSource,
   );
 
-  PlaybackSourceSwitchService._({
+  PlaybackSourceSwitchService._(
+    this._authorizedAlternatives, {
     required this._manager,
     required this._episode,
     required this._coordinator,
@@ -80,6 +85,7 @@ final class PlaybackSourceSwitchService {
        _checkpointPlaying = _coordinator.state.playing;
 
   final PlaybackProviderManager _manager;
+  final List<ResolvedPlaybackStream>? _authorizedAlternatives;
   final PlaybackEpisode _episode;
   final SpikePlayerCoordinator _coordinator;
   final StreamController<PlaybackSourceSwitchSnapshot> _states =
@@ -141,8 +147,16 @@ final class PlaybackSourceSwitchService {
       ),
     );
 
+    final List<ResolvedPlaybackStream>? alternatives = _authorizedAlternatives;
+    final DateTime now = DateTime.now();
     final PlaybackProviderResult<List<ResolvedPlaybackStream>> result =
-        await _manager.resolveCandidates(_episode, cancellation: cancellation);
+        alternatives == null
+        ? await _manager.resolveCandidates(_episode, cancellation: cancellation)
+        : PlaybackProviderSuccess(
+            alternatives
+                .where((stream) => !stream.isExpiredAt(now))
+                .toList(growable: false),
+          );
     if (!_isCurrent(generation)) {
       return const PlaybackSourceSwitchAttempt(
         status: PlaybackSourceSwitchAttemptStatus.superseded,

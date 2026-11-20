@@ -10,6 +10,7 @@ enum MockPlaybackScenario {
   timeout,
   empty,
   providerError,
+  forbidden,
   malformed,
   wrongEpisode,
   malformedResolution,
@@ -94,6 +95,13 @@ final class MockPlaybackProvider
         case MockPlaybackScenario.providerError:
           return const PlaybackProviderFailed(
             PlaybackProviderFailure(PlaybackProviderFailureKind.network),
+          );
+        case MockPlaybackScenario.forbidden:
+          return const PlaybackProviderFailed(
+            PlaybackProviderFailure(
+              PlaybackProviderFailureKind.forbidden,
+              httpStatus: 403,
+            ),
           );
         case MockPlaybackScenario.empty:
           return const PlaybackProviderEmpty();

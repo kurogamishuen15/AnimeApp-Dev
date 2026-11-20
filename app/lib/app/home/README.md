@@ -15,7 +15,7 @@ Home presenta metadatos de catálogo público y datos personales únicamente cua
 | `home_icons.dart` | IDs semánticos estables para navegación, detalle, opciones y estados de biblioteca; paquete minimalista predeterminado. |
 | `home_appearance.dart` | Tokens AMOLED y acento morado con `ThemeExtension`. |
 
-`CatalogHomeSource` consume `CatalogService`. Home no conoce GraphQL, Dio ni SQLite. Populares y tendencias consultan AniList público mediante `MetadataProvider` y `PublicAnimeBrowseProvider`. Biblioteca y progreso permanecen locales y separados de cualquier cuenta AniList. Las secciones Continue watching y Currently watching se omiten completas si no hay registros locales; no se crean entradas personales. El CTA Watch now se muestra deshabilitado hasta que exista una fuente de reproducción válida.
+`CatalogHomeSource` consume `CatalogService`. Home no conoce GraphQL, Dio ni SQLite. Populares y tendencias consultan AniList público mediante `MetadataProvider` y `PublicAnimeBrowseProvider`. Biblioteca y progreso permanecen locales y separados de cualquier cuenta AniList. Continue watching lee solo progreso local en curso (`CatalogService.listProgress`) de títulos guardados en la biblioteca; se omite si no hay registros o si la lectura falla. Currently watching sale de la biblioteca local. No se crean entradas personales. El CTA Watch now se muestra deshabilitado hasta que exista una fuente de reproducción válida.
 
 ## Tarjetas e interacciones
 
@@ -34,3 +34,10 @@ El shell usa rail lateral en escritorio, navegación inferior en superficies com
 ## Pruebas y ejecución
 
 Desde `app/`, ejecutar `flutter test --no-pub test/home test/widget_test.dart test/data/anilist` y `flutter analyze --no-pub`. La prueba externa real se ejecuta separada de fixtures HTTP y puede depender de red, disponibilidad y límites de AniList.
+
+## Carga por sección (OC-02)
+
+- Populares, tendencias, biblioteca y progreso tienen presupuesto propio (`CatalogHomeSource.sectionBudget`, 10 s por defecto). Un feed lento o fallido no oculta los demás.
+- `HomeScreen` conserva solo un techo de seguridad de 30 s para cargadores ajenos.
+- `HomeArtwork` registra fallos de imagen sin URL ni query: solo tipo (`http_403`, `socket`, `decode`…) y host (`HomeArtworkDiagnostics`).
+- Pruebas: `test/home/home_data_test.dart`, `test/home/home_artwork_diagnostics_test.dart`.

@@ -71,14 +71,19 @@ and [`ADR-A14`](../../../../docs/adr/additional/ADR-A14-catalog-providers-identi
 `AniListClient.searchAnimeById` consulta de forma anónima el ID exacto, con los
 campos de cabecera existentes y un suplemento de estudios principales, tráiler,
 hasta 12 personajes con voces japonesas, relaciones de tipo anime, total de
-episodios y `streamingEpisodes` públicos (título, miniatura y sitio). El códec
+episodios y `streamingEpisodes` públicos (título, miniatura, sitio y URL externa). El códec
 `anilist_detail_fields.dart` mantiene el mapeo GraphQL fuera de la UI. Los
 resultados de búsqueda y Home conservan su consulta breve.
 
 `AniListMetadataProvider` declara `episodeMetadata` y expone esa lista mediante
-el contrato neutral. Las miniaturas HTTP recibidas se normalizan a HTTPS. Ni la
-URL de streaming ni el sitio se tratan como una fuente reproducible de Kongroo;
-no se inventan títulos o imágenes cuando AniList solo conoce el total.
+el contrato neutral. Las miniaturas HTTP recibidas se normalizan a HTTPS. Los
+enlaces externos se aceptan solo con esquema HTTPS y sin credenciales embebidas;
+la ficha permite copiarlos para abrirlos en el servicio indicado. AniList
+describe `MediaStreamingEpisode.url` como un enlace legal externo: no es una
+fuente reproducible de Kongroo y nunca se entrega a libmpv. Si el proveedor
+interno devuelve 403, Kongroo no reintenta ni cambia la identidad de la
+solicitud. Ver la alternativa de enlace externo en
+[`app/catalog/detail`](../../app/catalog/detail/README.md).
 
 `OfflineFirstAnimeCatalog` lee primero Drift. Un registro completo de menos de
 24 horas evita la solicitud. Los registros creados antes del campo de episodios
@@ -95,3 +100,7 @@ siendo opciones documentadas sin adaptador activo; un reemplazo debe implementar
 Desde `app/`, ejecutar `flutter test --no-pub test/data/anilist`. El acceso real
 se habilita por separado con `--dart-define=KONGROO_TEST_ANILIST_LIVE=true` y
 comprueba, entre otros datos, los episodios públicos de AniList 16498.
+
+## Caché de feeds públicos (OC-02)
+
+`OfflineFirstAnimeCatalog.browseAnime` guarda populares y tendencias en `anilist_browse_cache` (esquema v9, máximo 16 feeds). Un feed fresco (<30 min) se sirve sin red; si la red falla, se sirve la copia local con `refreshError`. Una respuesta vacía nunca sobrescribe un feed útil. Pruebas: `test/data/anilist/browse_cache_test.dart`.

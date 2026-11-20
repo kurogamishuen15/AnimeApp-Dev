@@ -13,6 +13,7 @@ final class HomeScreen extends StatefulWidget {
     required this.load,
     required this.onDetails,
     required this.onLibraryAction,
+    this.onResume,
     this.refreshRevision = 0,
     super.key,
   });
@@ -21,6 +22,7 @@ final class HomeScreen extends StatefulWidget {
   final ValueChanged<HomeTitle> onDetails;
   final Future<void> Function(HomeTitle, HomeCardLibraryCommand)
   onLibraryAction;
+  final ValueChanged<HomeEpisode>? onResume;
   final int refreshRevision;
 
   @override
@@ -55,12 +57,14 @@ final class _HomeScreenState extends State<HomeScreen> {
     if (oldWidget.refreshRevision != widget.refreshRevision) _reload();
   }
 
+  /// Backstop only: CatalogHomeSource bounds each section itself, so partial
+  /// content is shown well before this ceiling applies to any other loader.
+  static const Duration loadCeiling = Duration(seconds: 30);
+
   void _reload() {
-    _result = Future<Result<HomeContent>>.sync(() async => await widget.load())
-        .timeout(
-          const Duration(seconds: 12),
-          onTimeout: () => const Failure(TimeoutAppError()),
-        );
+    _result = Future<Result<HomeContent>>.sync(
+      () async => await widget.load(),
+    ).timeout(loadCeiling, onTimeout: () => const Failure(TimeoutAppError()));
   }
 
   void _scheduleHeroVisibilityCheck() {
@@ -179,6 +183,7 @@ final class _HomeScreenState extends State<HomeScreen> {
                       ...HomeSections.buildSections(
                         value,
                         widget.onDetails,
+                        onResume: widget.onResume,
                         onLibraryAction: widget.onLibraryAction,
                         wide: constraints.maxWidth - 2 * inset >= 720,
                       ),

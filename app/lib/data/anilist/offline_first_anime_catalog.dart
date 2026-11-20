@@ -6,8 +6,8 @@ import '../../domain/catalog/anime_catalog_repository.dart';
 import '../../domain/catalog/anime_summary.dart';
 import '../local_db/app_database.dart';
 import '../local_db/drift_anilist_detail_cache.dart';
-
 import 'anilist_detail_fields.dart';
+import 'drift_anilist_browse_cache.dart';
 
 /// Keeps the latest search and a bounded cache of requested details.
 class OfflineFirstAnimeCatalog
@@ -26,17 +26,24 @@ class OfflineFirstAnimeCatalog
   final DateTime Function() _clock;
 
   final DriftAniListDetailCache _details;
+  late final DriftAniListBrowseCache _browseCache = DriftAniListBrowseCache(
+    database,
+  );
   final _pending = <int, Future<Result<AnimeSearchResult>>>{};
 
-  Future<({AnimeSummary anime, DateTime fetchedAt})?> _readDetails(
-    int id,
-  ) async {
+  Future<({AnimeSummary anime, DateTime fetchedAt, bool crosswalkSchema})?>
+  _readDetails(int id) async {
     try {
       final cached = await _details.read(id);
       if (cached == null) return null;
-      final anime = _decode(cached.payload).single;
+      final raw = (jsonDecode(cached.payload) as List).single;
+      final anime = _decodeAnime(raw);
       return anime.id == id
-          ? (anime: anime, fetchedAt: cached.fetchedAt)
+          ? (
+              anime: anime,
+              fetchedAt: cached.fetchedAt,
+              crosswalkSchema: raw is Map && raw['metadataSchemaVersion'] == 2,
+            )
           : null;
     } on Object {
       // A damaged or unavailable cache must not prevent a public refresh.
@@ -67,6 +74,7 @@ class OfflineFirstAnimeCatalog
         cached?.anime.detail?.episodeMetadataFetched ?? false;
     if (cached != null &&
         hasCurrentEpisodeMetadata &&
+        cached.crosswalkSchema &&
         _clock().difference(cached.fetchedAt) < const Duration(hours: 24)) {
       return Success(
         AnimeSearchResult(
@@ -150,18 +158,76 @@ class OfflineFirstAnimeCatalog
         );
   }
 
+  /// Public feeds are fresh for this long; afterwards the network is asked again
+  /// and a stale copy is served only when that request fails.
+  static const Duration browseTtl = Duration(minutes: 30);
+
   @override
   Future<Result<AnimeSearchResult>> browseAnime({
     AnimeBrowseSort sort = AnimeBrowseSort.popular,
     int page = 1,
     int perPage = 20,
-  }) => remote.browseAnime(sort: sort, page: page, perPage: perPage);
+  }) async {
+    final String feedKey = 'browse:${sort.name}:$page:$perPage';
+    final cached = await _readBrowse(feedKey);
+    if (cached != null && _clock().difference(cached.fetchedAt) < browseTtl) {
+      return Success(
+        AnimeSearchResult(
+          items: cached.items,
+          source: AnimeSearchSource.localCache,
+        ),
+      );
+    }
+    final Result<AnimeSearchResult> response = await remote.browseAnime(
+      sort: sort,
+      page: page,
+      perPage: perPage,
+    );
+    switch (response) {
+      case Success<AnimeSearchResult>(:final value):
+        if (value.items.isNotEmpty) {
+          try {
+            await _browseCache.write(
+              feedKey,
+              _encode(value.items),
+              _clock().toUtc(),
+            );
+          } on Object {
+            // A failed cache write must not hide valid remote data.
+          }
+        }
+        return response;
+      case Failure<AnimeSearchResult>(:final error):
+        if (cached == null) return response;
+        return Success(
+          AnimeSearchResult(
+            items: cached.items,
+            source: AnimeSearchSource.localCache,
+            refreshError: error,
+          ),
+        );
+    }
+  }
+
+  Future<({List<AnimeSummary> items, DateTime fetchedAt})?> _readBrowse(
+    String feedKey,
+  ) async {
+    try {
+      final cached = await _browseCache.read(feedKey);
+      if (cached == null) return null;
+      return (items: _decode(cached.payload), fetchedAt: cached.fetchedAt);
+    } on Object {
+      // A damaged feed cache is ignored; the network remains authoritative.
+      return null;
+    }
+  }
 
   static String _encode(List<AnimeSummary> items) => jsonEncode(
     items
         .map(
           (item) => {
             'id': item.id,
+            'metadataSchemaVersion': 2,
             'romajiTitle': item.romajiTitle,
             'englishTitle': item.englishTitle,
             'nativeTitle': item.nativeTitle,

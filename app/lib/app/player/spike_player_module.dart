@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/widgets.dart';
 
 import '../../application/player/diagnostics/playback_performance.dart';
 import '../../application/player/external_subtitles/external_subtitle_service.dart';
+import '../../application/player/playback_progress_session.dart';
 import '../../application/player/providers/playback_provider_manager.dart';
 import '../../application/player/skips/automatic_skip_controller.dart';
 import '../../application/player/skips/skip_segment_service.dart';
@@ -12,6 +14,7 @@ import '../../application/player/source_switching/playback_source_switch_service
 import '../../application/player/spike_player_coordinator.dart';
 import '../../data/player/engine/active_player_lease.dart';
 import '../../data/player/engine/media_kit_spike_engine.dart';
+import '../../domain/player/providers/playback_provider_contract.dart';
 import '../../domain/player/providers/playback_source.dart';
 import '../../domain/player/skips/skip_automation_policy.dart';
 import '../../domain/player/skips/skip_segment_catalog.dart';
@@ -38,6 +41,7 @@ final class SpikePlayerModule implements PlaybackRouteSession {
     this._disposeExternalSubtitleCatalog,
     this._disposeSkipSegmentCatalog,
     this.pageOptions,
+    this._progressSession,
   );
 
   final MediaKitSpikeEngine engine;
@@ -52,6 +56,7 @@ final class SpikePlayerModule implements PlaybackRouteSession {
   final FutureOr<void> Function()? _disposeExternalSubtitleCatalog;
   final FutureOr<void> Function()? _disposeSkipSegmentCatalog;
   final SpikePlayerPageOptions pageOptions;
+  final PlaybackProgressSession? _progressSession;
   bool _catalogDisposed = false;
   bool _skipCatalogDisposed = false;
 
@@ -65,6 +70,7 @@ final class SpikePlayerModule implements PlaybackRouteSession {
     PlaybackProviderManager? sourceProviderManager,
     PlaybackEpisode? sourceEpisode,
     ResolvedPlaybackStream? initialResolvedSource,
+    List<ResolvedPlaybackStream>? authorizedAlternatives,
     SkipSegmentCatalog? skipSegmentCatalog,
     PlaybackEpisode? skipEpisode,
     MyAnimeListAnimeId? skipMalAnimeId,
@@ -73,6 +79,8 @@ final class SpikePlayerModule implements PlaybackRouteSession {
     EpisodeFillerEvidence? fillerEvidence,
     FutureOr<void> Function()? disposeSkipSegmentCatalog,
     PlaybackRouteOpenCancellation? startupCancellation,
+    Duration startPosition = Duration.zero,
+    PlaybackProgressSession Function(SpikePlayerCoordinator)? trackProgress,
     @visibleForTesting MediaKitSpikeEngine Function()? engineFactory,
   }) async {
     // Ownership of supplied catalog disposers transfers only after argument
@@ -107,6 +115,16 @@ final class SpikePlayerModule implements PlaybackRouteSession {
       throw ArgumentError(
         'Skip lookup requires a catalog and episode; a MAL ID must be explicitly mapped.',
       );
+    }
+    final providerSubtitles = <Uri, List<ProviderSubtitle>>{};
+    for (final stream in [?initialResolvedSource, ...?authorizedAlternatives]) {
+      final previous = providerSubtitles[stream.uri];
+      if (previous != null && !listEquals(previous, stream.subtitles)) {
+        throw ArgumentError(
+          'Conflicting caption catalogs for the same media URI.',
+        );
+      }
+      providerSubtitles[stream.uri] = stream.subtitles;
     }
     var catalogDisposed = false;
     Future<void> disposeCatalog() async {
@@ -167,6 +185,7 @@ final class SpikePlayerModule implements PlaybackRouteSession {
           MediaKitSpikeEngine(
             demoSources: demoSources,
             trustedExternalSources: trustedExternalSources,
+            providerSubtitles: providerSubtitles,
           );
       coordinator = SpikePlayerCoordinator(
         engine,
@@ -185,6 +204,17 @@ final class SpikePlayerModule implements PlaybackRouteSession {
             const PlaybackRequestHeaders.empty(),
       );
       startupCancellation?.throwIfRequested();
+      if (startPosition > Duration.zero) {
+        try {
+          await coordinator.restoreStartPosition(
+            startPosition,
+            cancellation:
+                startupCancellation?.token ?? PlaybackCancellationToken(),
+          );
+        } finally {
+          startupCancellation?.throwIfRequested();
+        }
+      }
       if (sourceProviderManager case final PlaybackProviderManager manager) {
         final ResolvedPlaybackStream initial = initialResolvedSource!;
         if (fixtureUri != null && initial.uri != fixtureUri) {
@@ -197,6 +227,7 @@ final class SpikePlayerModule implements PlaybackRouteSession {
           episode: sourceEpisode!,
           coordinator: coordinator,
           initialSource: initial,
+          authorizedAlternatives: authorizedAlternatives,
         );
       }
       if (skipSegmentCatalog case final SkipSegmentCatalog catalog) {
@@ -233,6 +264,7 @@ final class SpikePlayerModule implements PlaybackRouteSession {
         disposeCatalog,
         disposeSkipCatalog,
         SpikePlayerPageOptions.fromEnvironment(Platform.environment),
+        trackProgress?.call(coordinator),
       );
     } on Object catch (startupError, startupStack) {
       final PlaybackSourceSwitchService? sourceSwitch = sourceSwitchService;
@@ -330,7 +362,11 @@ final class SpikePlayerModule implements PlaybackRouteSession {
     await attemptCleanup(() => sourceSwitchService?.dispose());
     await attemptCleanup(() => automaticSkipController?.dispose());
     await attemptCleanup(() => skipSegmentService?.dispose());
+    final Future<bool> saveProgress = attemptCleanup(
+      () => _progressSession?.close().timeout(const Duration(seconds: 2)),
+    );
     await attemptCleanup(coordinator.dispose);
+    await saveProgress;
     if (!_catalogDisposed) {
       _catalogDisposed = await attemptCleanup(
         () => _disposeExternalSubtitleCatalog?.call(),

@@ -194,6 +194,14 @@ final class PlaybackSessionSnapshot {
   );
 }
 
+enum PlaybackResumeFailureReason { durationUnknown, seekFailed }
+
+final class PlaybackResumeFailure implements Exception {
+  const PlaybackResumeFailure(this.reason);
+
+  final PlaybackResumeFailureReason reason;
+}
+
 enum PlaybackSourceSwitchDisposition {
   changed,
   unchanged,

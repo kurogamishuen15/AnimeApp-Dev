@@ -37,11 +37,19 @@ class AppDatabase extends _$AppDatabase {
   factory AppDatabase.atFile(File file) => AppDatabase(NativeDatabase(file));
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   Future<void> _createDetailCache() => customStatement('''
     CREATE TABLE anilist_detail_cache (
       media_id INTEGER PRIMARY KEY,
+      payload TEXT NOT NULL,
+      fetched_at INTEGER NOT NULL
+    )
+  ''');
+
+  Future<void> _createBrowseCache() => customStatement('''
+    CREATE TABLE anilist_browse_cache (
+      feed_key TEXT PRIMARY KEY,
       payload TEXT NOT NULL,
       fetched_at INTEGER NOT NULL
     )
@@ -52,6 +60,7 @@ class AppDatabase extends _$AppDatabase {
     onCreate: (migrator) async {
       await migrator.createAll();
       await _createDetailCache();
+      await _createBrowseCache();
     },
     onUpgrade: (migrator, from, to) async {
       if (from < 2) {
@@ -100,6 +109,7 @@ class AppDatabase extends _$AppDatabase {
         );
       }
       if (from < 8) await _createDetailCache();
+      if (from < 9) await _createBrowseCache();
     },
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');

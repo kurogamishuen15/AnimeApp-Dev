@@ -124,7 +124,7 @@ void main() {
         final version = await database
             .customSelect('PRAGMA user_version')
             .getSingle();
-        expect(version.read<int>('user_version'), 8);
+        expect(version.read<int>('user_version'), 9);
         expect(
           await database.select(database.animeIdentityEntries).get(),
           isEmpty,
@@ -175,7 +175,7 @@ void main() {
         final version = await database
             .customSelect('PRAGMA user_version')
             .getSingle();
-        expect(version.read<int>('user_version'), 8);
+        expect(version.read<int>('user_version'), 9);
         expect(
           await database.select(database.animeIdentityEntries).get(),
           isEmpty,
@@ -276,7 +276,7 @@ void main() {
         expect(
           (await database.customSelect('PRAGMA user_version').getSingle())
               .read<int>('user_version'),
-          8,
+          9,
         );
         expect(
           (await database.customSelect('PRAGMA integrity_check').getSingle())
@@ -366,7 +366,7 @@ void main() {
       expect(
         (await database.customSelect('PRAGMA user_version').getSingle())
             .read<int>('user_version'),
-        8,
+        9,
       );
       await expectLater(
         database.customStatement(
@@ -450,7 +450,7 @@ void main() {
         expect(
           (await database.customSelect('PRAGMA user_version').getSingle())
               .read<int>('user_version'),
-          8,
+          9,
         );
         expect(
           (await database.customSelect('PRAGMA integrity_check').getSingle())

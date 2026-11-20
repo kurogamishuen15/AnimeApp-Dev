@@ -464,3 +464,25 @@ mostrar desde la ficha. Se retiró el smoke
 resultados históricos permanecen en el
 [informe S0](../../../../docs/ai-system/missions/S0-REAL-PLAYBACK-REPORT.md)
 y la [auditoría de limpieza](../../../../docs/ai-system/audits/S0-provider-cleanup-audit-2026-11-15.md).
+
+## Reanudación desde la ficha o Inicio
+
+`ProviderPlaybackRoute` abre el medio pausado. El coordinador comparte un
+presupuesto de 12 s entre la espera de duración y la confirmación de posición
+del motor. El retorno, un cambio de medio y el cierre invalidan las esperas
+pendientes. Una llamada nativa en curso conserva su lease hasta terminar.
+Si la posición no se confirma, la ruta muestra el motivo y permite volver o
+elegir explícitamente «Abrir desde el inicio».
+
+La sesión guarda posiciones observadas, por episodio y para identidades ya
+persistidas. El guardado ocurre durante reproducción, pausa o cierre. El
+cambio de fuente usa las alternativas autorizadas en el selector actual y
+omite las que tienen expiración conocida vencida.
+
+## Subtítulos publicados con la fuente
+
+`SpikePlayerModule` entrega al engine el catálogo VTT de las fuentes autorizadas;
+rechaza dos catálogos distintos para una misma URI antes de asignar recursos.
+El diálogo de subtítulos existente permite elegir idioma sin otro player ni un
+flujo de URLs manuales. El menú usa IDs revisados por apertura/Stop para impedir
+que una elección antigua se aplique a otro episodio o fuente.

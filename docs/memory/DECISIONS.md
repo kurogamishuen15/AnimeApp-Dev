@@ -34,7 +34,20 @@ operativos ni aceptación de S0.
 Evidencia histórica: [auditoría de hosts](../ai-system/audits/S0-video-host-audit-2026-11-15.md)
 y [matriz S0](../ai-system/missions/S0-REAL-PLAYBACK-REPORT.md).
 
-### Implementación S0-S — actualización del mandato del propietario — 2026-11-16
+### Migración de providers por instrucción del propietario — 2026-11-17
+
+Se retiró el runtime experimental anterior y se adaptó el catálogo Miruro de
+Anilili a los contratos existentes, sin añadir otro manager o reproductor. Se
+conservan `PlaybackProviderManager`, `PlaybackSourceSwitchService` y el único
+engine media_kit/libmpv. El adapter nuevo usa solicitudes públicas ordinarias;
+los 403 live no se evaden ni se etiquetan como playback. Los resolutores de
+embeds incompatibles no se conservan. Esta actualización concreta el mandato
+del propietario; no cambia ADR-015 ni declara aceptado el criterio de
+reproducción real. Evidencia: [auditoría OC-03](../ai-system/audits/OC03-MIRURO-MIGRATION-audit-2026-11-17.md),
+[README del módulo](../../app/lib/data/player/providers/README.md) y
+[procedencia/licencia upstream](../third-party/ANILILI-MIT-0.md).
+
+### Snapshot histórico — implementación S0-S — 2026-11-16
 
 El core de identity, episodios, candidates, manager, resolutores y fallback
 debe ser compatible con Linux, Android y Windows. Linux sigue primero para
@@ -51,3 +64,13 @@ MIT, pero el árbol raíz consultado no mostró un archivo `LICENSE`; no copiar
 sus extractores hasta confirmar la licencia en un texto de licencia explícito.
 El informe S0-S registra probes ordinarios de AnimeFire/AnimeDrive/AnivexaAPI
 y clasifica los bloqueos sin declarar funcional ningún proveedor.
+
+## OC04-LANG · Variantes y captions del episodio · 2026-11-17
+
+Decisión técnica de implementación dentro del encargo vigente: reutilizar el
+adapter MegaPlay para sub/dub, compartir transporte por origen y propagar solo
+los VTT publicados por la respuesta de ese episodio. No inferir ISO de audio de
+sub/dub; no prestar subtítulos de otro corte. La selección pertenece al contexto
+de la fuente y sus IDs se invalidan en apertura/Stop. Catálogos contradictorios
+para igual URI se rechazan antes de adquirir recursos. No es aceptación de fase.
+[Revisión y evidencia](../ai-system/audits/OC04-LANGUAGES-audit-2026-11-17.md).

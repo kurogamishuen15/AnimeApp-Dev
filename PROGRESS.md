@@ -4,7 +4,74 @@ Fuente viva del estado de fases. Actualizar al terminar o bloquear una subfase; 
 
 Estados: Pendiente, En desarrollo, Completado, Bloqueado, Requiere revisión.
 
-## Kongroo — S0-S source-first / host-first — 2026-11-16
+## Kongroo OC-04 — alternativa ante HTTP 403 — 2026-11-17
+
+La denegación 403 del origen Miruro permanece sin resolver. Un cliente no puede
+convertirla legítimamente en acceso autorizado: RFC 9110 la define como rechazo
+del servidor y Cloudflare documenta políticas de origen/WAF/IP como causas
+posibles, sin que la respuesta observada permita saber cuál aplica. No se
+repitió la solicitud bloqueada ni se añadieron cookies, tokens, huellas,
+proxies, mirrors o reintentos de evasión.
+
+Quedó preparada una alternativa de uso: la ficha solicita los enlaces
+`streamingEpisodes` públicos de AniList, valida que sean HTTPS sin credenciales,
+los muestra como páginas externas y permite copiar el enlace. Estos enlaces no
+son medios directos y no se envían a libmpv. Además, una prueba confirma que el
+manager puede continuar a un segundo provider registrado después de un 403; esto
+no demuestra que haya un provider alterno real habilitado para ese anime.
+
+Verificación de esta ejecución: pruebas focalizadas **47/47**, `flutter analyze`
+sin issues y build Linux debug aprobados. La suite completa dio **336 aprobadas,
+10 omitidas y 2 timeouts** en pruebas nativas de libmpv; cada timeout pasó al
+repetirse por separado. No se tocó el reproductor. No hubo prueba live de
+AniList, interacción manual ni reproducción externa durante OC-04: Miruro y su
+fallback para AniList 100240 siguen en **0 fuentes confirmadas**. Wikimedia
+conserva evidencia histórica opt-in de Namakura Gatana, que no valida este
+flujo. Android/Windows y rendimiento en el equipo de 4 GB siguen sin validar. La
+respuesta del origen y reproducción en la app requieren que el servicio autorice
+solicitudes ordinarias o que exista otro provider público compatible. Ver
+[auditoría OC-04](docs/ai-system/audits/OC04-HTTP403-FALLBACK-audit-2026-11-17.md).
+No commit ni push.
+
+Anexo de investigación: el DoH de Anilili atiende ausencia/sinkhole de DNS;
+MiruroCatalogApi se detiene en 4xx, también al recibir 403. El manejo Cloudflare
+aparte usa emulación de identidad web y clearance de WebView; no se portó por la
+restricción contra evadir challenges. Kongroo ya tiene sus orígenes configurados.
+Sin autorización del operador, el 403 sigue bloqueando el flujo Miruro.
+
+## Kongroo OC-03 — migración de providers basada en Anilili — 2026-11-17
+
+Se retiraron del runtime los adaptadores y perfiles experimentales anteriores
+de AnimeAV1, TioAnime, AnimeGG, AnimeHeaven, AnimeOnline Ninja, AnimesDigital,
+MP4Upload y YourUpload. Se preservaron `PlaybackProviderManager`,
+`PlaybackSourceSwitchService`, los contratos source/episode, y el único player
+`media_kit/libmpv`. El nuevo `MiruroCatalogPlaybackProvider` consulta por AniList
+ID, descubre episodios/fuentes directas y pasa al normalizador compartido
+`DirectMediaHostResolver`; Wikimedia y `user_sources` siguen opt-in.
+
+Los tests del provider cubren parser, paginación, límites de memoria, grouping de
+calidad, errores, cancelación y denegación. La suite focalizada pasó **62/62**;
+la suite completa pasó **334** y omitió **10** pruebas live opt-in. `flutter
+analyze --no-pub` terminó sin issues y `flutter build linux --debug --no-pub`
+compiló. La Home abrió en Fedora y su primer frame quedó capturado en el archivo
+local ignorado `.ai-local/review/oc03-home.png`; el backend de entrada Wayland no
+estuvo disponible, así que no se afirma interacción gráfica completa.
+
+La evidencia live anterior de Miruro da HTTP 403 en configuración/lookup para
+AniList 100240 antes de obtener episodios o media. No se evadió ni se repitió
+la denegación. No se confirma reproducción externa de anime (**0 servidores**).
+Android/Windows, playback de episodio, RAM/CPU del stream y pruebas en el equipo
+de 4 GB siguen pendientes; el build Linux y los tests locales no cubren esos
+criterios. El log de regresión de 20 aperturas locales informó RSS 251,928,576 B
+antes, 396,959,744 B pico tras Stop y 377,868,288 B después de dispose; es una
+prueba local del engine, no perfilado de la app ni evidencia para inferir fuga o
+ausencia de fugas. Sin commit ni push.
+
+Ver [auditoría de migración](docs/ai-system/audits/OC03-MIRURO-MIGRATION-audit-2026-11-17.md),
+[READMEs de providers](app/lib/data/player/providers/README.md) y
+[procedencia MIT-0](docs/third-party/ANILILI-MIT-0.md).
+
+## Historial — Kongroo S0-S source-first / host-first — 2026-11-16
 
 La limpieza de runtime terminó y se archivaron READMEs/evidencias anteriores.
 El root ahora registra `AnimesDigitalPlaybackProvider` v1.0.0 como candidato,

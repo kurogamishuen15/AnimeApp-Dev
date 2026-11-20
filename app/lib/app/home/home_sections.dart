@@ -16,6 +16,7 @@ abstract final class HomeSections {
     required Future<void> Function(HomeTitle, HomeCardLibraryCommand)
     onLibraryAction,
     required bool wide,
+    ValueChanged<HomeEpisode>? onResume,
   }) => [
     if (content.episodes.isNotEmpty) ...[
       const _SectionTitle('Continue watching'),
@@ -27,6 +28,8 @@ abstract final class HomeSections {
         buildCard: (index, width) => _EpisodeCard(
           episode: content.episodes[index],
           width: width,
+          onResume: onResume,
+          onDetails: onDetails,
           onLibraryAction: onLibraryAction,
         ),
       ),
@@ -66,25 +69,6 @@ abstract final class HomeSections {
       onLibraryAction: onLibraryAction,
     ),
   );
-
-  static void showResume(BuildContext context, HomeEpisode episode) {
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(episode.anime.title),
-        content: Text(
-          '${episode.label} · ${_time(episode.positionMs)}\n\n'
-          'No hay una fuente de reproducción conectada para este episodio.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cerrar'),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _SectionTitle extends StatelessWidget {
@@ -271,11 +255,15 @@ class _EpisodeCard extends StatelessWidget {
   const _EpisodeCard({
     required this.episode,
     required this.width,
+    required this.onResume,
+    required this.onDetails,
     required this.onLibraryAction,
   });
 
   final HomeEpisode episode;
   final double width;
+  final ValueChanged<HomeEpisode>? onResume;
+  final ValueChanged<HomeTitle> onDetails;
   final Future<void> Function(HomeTitle, HomeCardLibraryCommand)
   onLibraryAction;
 
@@ -288,9 +276,9 @@ class _EpisodeCard extends StatelessWidget {
       anime: episode.anime,
       width: width,
       ratio: 16 / 9,
-      onPressed: () => HomeSections.showResume(context, episode),
+      onPressed: () => onResume?.call(episode),
       episode: episode,
-      onDetails: () => HomeSections.showResume(context, episode),
+      onDetails: () => onDetails(episode.anime),
       onLibraryAction: onLibraryAction,
       subtitle:
           '${episode.label}\n'

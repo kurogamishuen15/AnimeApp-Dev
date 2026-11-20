@@ -13,6 +13,14 @@ Encapsula una única instancia activa `Player`, su `VideoController`, comandos n
 | `mpv_subtitle_properties.dart` | Selecciona la API nativa o stub por plataforma | propiedad mpv → operación | conditional export |
 | `mpv_subtitle_properties_native.dart` | Escribe y vuelve a leer propiedades mpv en `NativePlayer` | Player + propiedad/valor → Future validado | API pública de media_kit |
 | `mpv_subtitle_properties_stub.dart` | Informa explícitamente que las propiedades mpv no están disponibles | llamada → `UnsupportedError` | Dart |
+| `media_codec_support.dart` | Selecciona el adaptador de códecs por plataforma | conditional export | Dart |
+| `media_codec_support_model.dart` | Contrato común: `MediaCodecStrategy` y `MediaCodecReport` | estado de códec → reporte | Dart puro |
+| `media_codec_support_io.dart` | Registro de adaptadores, caché por proceso y log `KONGROO_CODEC`; selecciona por `Platform.operatingSystem` | primer uso → reporte único | `dart:io`, adaptadores |
+| `media_codec_support_linux.dart` | Detecta OpenH264 del bundle o carga solo el path explícito `KONGROO_OPENH264_PATH`; no busca bibliotecas en cwd ni ancestros | proceso → `bundled/preloaded/system` | `dart:ffi`, `dart:io` |
+| `media_codec_support_android.dart` | Declara H.264 por `MediaCodec` a través de libmpv; no empaqueta códecs | llamada → reporte | Dart |
+| `media_codec_support_windows.dart` | Declara H.264 por el ffmpeg de media_kit; no empaqueta códecs | llamada → reporte | Dart |
+| `media_codec_support_system.dart` | Fallback para plataformas sin adaptador (macOS, iOS, BSD) | plataforma → `system` | Dart |
+| `media_codec_support_stub.dart` | Entornos sin `dart:io`: sin backend nativo que preparar | llamada → reporte | Dart |
 | `README.md` | Inicialización, eventos, recursos y diagnóstico | guía técnica | ADR-002, F2.2 |
 
 ## Comportamiento y ciclo de vida
@@ -21,9 +29,18 @@ La fábrica llama `MediaKit.ensureInitialized()`, adquiere el lease único y cre
 
 `play`, `pause`, `seek` y `stop` traducen operaciones nativas. `stop` descarga el medio y deja reusable el Player; el adaptador conserva la URI que se abrió correctamente y marca el snapshot `stopped`, sin destruir Player ni VideoController. El siguiente `play` revalida el archivo y lo abre de nuevo en el mismo Player con reproducción desde el inicio. Si la validación/reapertura falla, la operación propaga el error y mantiene la fuente y el estado stopped para permitir reintentar. Play tras Pause solo llama a `Player.play()` y conserva la posición. La prueba libmpv cubre ambos contratos, ciclos Stop→Play repetidos, archivo retenido ausente y recuperación. La reapertura de la misma URI en Linux aún requiere confirmación de imagen en compositor: upstream mantiene abierta la issue [#957](https://github.com/media-kit/media-kit/issues/957), que informa pantalla negra para una secuencia similar; el test nativo comprueba estado/avance, no píxeles presentados. `dispose` hace el engine no utilizable y delega a `ActivePlayerLease`: llamadas concurrentes comparten Future. El lease representa solo la propiedad del Player nativo: se libera cuando `Player.dispose()` termina, aunque luego falle una limpieza auxiliar Dart. El engine reintenta de forma idempotente la cancelación de subscriptions/cierre del stream mediante su propio `dispose()`; no libera un Player nativo incierto. El dispose nativo es un intento único porque media_kit 1.2.6 cambia su indicador `disposed` antes de completar todo el teardown. Si ese Future falla, se conserva el lease y no se repite la operación. El error tipado `MediaKitSpikeEngineDisposeFailure` informa `nativePlayerStillOwned`; los fallos de subscriptions o del stream se marcan como auxiliares y no conservan el lease si el dispose nativo terminó. Un error de `Player.dispose()` también cierra el stream de snapshots; una prueba con fallo inyectado confirma `onDone`, aunque no simula internamente un fallo parcial de libmpv. Esta cuarentena requiere reiniciar el proceso antes de crear otro Player tras fallo nativo. `retryPendingDispose()` atiende exclusivamente un lease nativo huérfano o retenido y propaga su fallo. Si el Player ya se liberó y solo falló una etapa auxiliar, se reintenta llamando `dispose()` sobre el mismo engine mientras siga accesible. No desplaza un engine activo antes de dispose. `Player.stream.error` se publica como texto fijo sin rutas/detalles arbitrarios. Los errores de reproducción persisten a través de cambios no relacionados y solo se limpian en una recuperación de `open` sin un nuevo error.
 
-Los streams resueltos pueden llevar `PlaybackRequestHeaders`, que actualmente
-solo permite un `Referer` público HTTPS validado en domain. `MediaKitSpikeEngine`
-lo entrega a `Media(httpHeaders: ...)` y lo conserva junto a la fuente lógica
+Las pistas de subtítulos VTT publicadas por el proveedor se enumeran como
+alternativas y se seleccionan desde el menú. El engine no carga automáticamente
+una URL externa marcada como predeterminada durante `open()`: el origen de esa
+pista puede fallar o requerir contexto HTTP distinto, y libmpv reporta errores
+de subtítulos mediante el mismo stream nativo de errores del medio. Esa carga
+automática hizo que el error de una pista remota detuviera el avance de
+MegaPlay. Las pistas integradas en el medio conservan la selección automática
+propia de libmpv.
+
+Los streams resueltos pueden llevar `PlaybackRequestHeaders` con Referer,
+Origin y User-Agent validados en domain. `MediaKitSpikeEngine`
+los entrega a `Media(httpHeaders: ...)` y los conserva junto a la fuente lógica
 para Stop→Play. El contexto se reemplaza con cada apertura/cambio de servidor y
 el servicio de rollback restaura el contexto de la fuente previa; no se heredan
 cookies, Authorization ni cabeceras arbitrarias. En AnimeGG, la integración
@@ -33,6 +50,44 @@ resolución o reproducción de sus cinco medios públicos observados.
 El `VideoController` está ligado a la vida del mismo Player. En la versión fijada `media_kit_video 2.0.1`, el release de la plataforma del Player elimina sus listeners/recursos; `VideoController` no expone `dispose()` público. La UI informa tres estados separables: `platform.future` completado (controller creado), `id` no nulo (textura registrada en Flutter) y `waitUntilFirstFrameRendered` resuelto (primer frame procesado/renderizado por el plugin). Ninguna señal demuestra que el compositor de escritorio presentó el frame; se requiere inspección visual independiente.
 
 ## Configuración y dependencias
+
+En Linux, `app/linux/media_kit_video_lifetime.cmake` compila una copia generada
+de `video_output.cc` de media_kit_video 2.0.1 con propiedad explícita del objeto
+durante los callbacks GTK pendientes. El fallo observado al cerrar era un idle
+de software que accedía a `VideoOutput` con contador de referencias cero. La
+copia usa `gdk_threads_add_idle_full`, retiene el objeto y lo libera al retirar
+el idle. El código del paquete y el caché de dependencias quedan intactos.
+El test de dispositivo recorre reproducción, pausa, seek y cierre por la ruta
+real y verifica el retorno a la ficha.
+
+### Códecs por plataforma
+
+La fábrica llama `prepareMediaCodecSupport()` antes de `MediaKit.ensureInitialized()`.
+El módulo es el único punto que decide cómo se obtiene H.264; los adaptadores
+nunca lanzan y un códec ausente es un estado reportado, no un fallo de arranque.
+El reporte se calcula una vez por proceso y se registra como
+`KONGROO_CODEC <estrategia> <ruta|plataforma>`.
+
+| Plataforma | Estrategia | Preparación | Estado |
+|---|---|---|---|
+| Linux | `bundled` / `preloaded` / `system` | `app/linux/local_codec.cmake` instala el OpenH264 verificado en `bundle/lib/` y enlaza con `DT_RPATH`; el adaptador detecta y reporta | **verificado** (motor real) |
+| Android | `platform` | `MediaCodec` a través de libmpv; el proyecto no empaqueta códecs | **NO VERIFICADO** en dispositivo |
+| Windows | `platform` | ffmpeg de media_kit (D3D11VA/MF disponible) | **NO VERIFICADO** |
+| Otros | `system` | Sin adaptador: política del sistema, sin afirmar soporte | — |
+
+Fedora aporta `noopenh264` (ABI sin decodificador) y `libavcodec` la declara
+como `DT_NEEDED`; por eso el informe por sí solo no arregla la reproducción en
+Linux: la corrección es el empaquetado con `RPATH` transitivo descrito en
+`app/linux/local_codec.cmake`. La carga en proceso
+(`MediaCodecStrategy.preloaded`) solo cubre pilas que abren el códec de forma
+perezosa; no sustituye una biblioteca ya mapeada por el enlazador.
+
+Para añadir una plataforma: implementa un adaptador que devuelva
+`MediaCodecReport` (sin I/O en el constructor), regístralo en
+`MediaCodecSupportRegistry` y añade su rama al `switch`. No dupliques la
+detección de rutas ni el contrato.
+[Licencias y control del códec](../../../../../docs/third-party/PLAYBACK-DEPENDENCIES.md),
+[ADR-A15](../../../../../docs/adr/additional/ADR-A15-frontera-codecs-multimedia.md).
 
 | Opción | Valor F2.2 | Lugar | Efecto/limitación |
 |---|---|---|---|
@@ -175,3 +230,79 @@ completo de `VideoController` no quedan demostrados por esta captura.
 ## Audio y transportes de la operación extendida
 
 AudioTrackInfo se publica desde tracks y track junto con los subtítulos. La selección usa el ID nativo de la generación actual y confirma aid en mpv. El coordinador serializa la operación y rechaza selecciones atrasadas. Las entradas de red se limitan a URI HTTP loopback exactas del DEMO. El resto conserva la validación de archivo regular. Consultar la [guía de ejecución, fixtures y pruebas](../../../../../docs/player/operacion-extendida.md).
+
+## Pistas VTT del proveedor
+
+El composition root entrega catálogos de `ProviderSubtitle` exclusivamente para
+medios autorizados. Catálogos contradictorios para una misma URI se rechazan
+antes de adquirir el player. El motor añade opciones al menú existente y
+selecciona mediante `SubtitleTrack.uri` del media_kit fijado; no crea otro motor.
+Los IDs de menú llevan revisión de apertura/Stop y una elección antigua se
+rechaza aunque otra fuente tenga un índice igual. Cambiar fuente oculta el
+catálogo anterior; Stop→Play restaura las pistas de la fuente retenida.
+La importación manual de subtítulos continúa limitada a archivos locales;
+no se amplía esa API a URLs arbitrarias. Las pistas remotas publicadas usan
+el contexto del medio vigente y solo se cargan al seleccionarlas.
+
+## OC-05: latencia del selector y subtítulos publicados (2026-11-18)
+
+### Instrumentación reproducible
+
+`app/tool/animeav1_timing_probe.dart` mide por separado las etapas de un
+proveedor (`search`, `findSources`, resolución del host) y el camino completo
+del selector. Sirve para distinguir «AnimeAV1 es lento» de «el selector espera a
+todos». Ejecución desde `app/` con la toolchain local:
+
+```bash
+dart run tool/animeav1_timing_probe.dart 9
+```
+
+Las líneas `manager.resolveCandidates <ms>`, `manager.streams=<n>` y
+`manager.diag=<proveedor> last=<estado>` son la evidencia primaria. La sonda no
+se compila en la app y no se ejecuta desde la interfaz.
+
+### Fan-out acotado del selector
+
+`PlaybackProviderManager.resolveCandidates` resolvía las nueve cadenas de
+proveedor en serie: el selector tardaba la suma de todas. Ahora usa
+`maxConcurrentProviderChains = 4` con `_ProviderCandidates`, mantiene el orden
+de prioridad del registro en el resultado, comparte **un intento por host**
+entre proveedores (el mismo host en SUB y DUB cuenta un solo resultado de
+circuito) y cierra los breakers una sola vez al terminar.
+
+`resolveBestStream` conserva el recorrido secuencial: su contrato es devolver
+siempre la primera fuente por prioridad, no la más rápida.
+
+| Medición (Tokyo Ghoul:re ep. 9) | Antes | Después |
+|---|---:|---:|
+| `manager.resolveCandidates` | 21 918 ms | 12 303 / 13 825 / 14 055 ms (mediana 13 825) |
+| AnimeAV1 `total` | 4 070 ms | 3 629–4 167 ms |
+
+La cola restante no es de AnimeAV1: `animegg-dub` agota su presupuesto de 6 s
+por petición en dos de tres rondas. El siguiente paso, si se quiere bajar de
+~13 s, es revisar ese presupuesto, no paralelizar más.
+
+### Auto-selección de pistas publicadas
+
+Tras `open`, `_selectDefaultProviderCaption()` busca en
+`_currentProviderSubtitles` la primera pista con `isDefault` y la selecciona
+solo si libmpv quedó en `auto`/`no`. Es *best-effort*: si la pista remota no
+carga, el error se descarta y la reproducción continúa con estado de subtítulos
+degradado. El motor nunca inventa pistas ni descarga VTT por su cuenta; el
+catálogo llega del composition root.
+
+`VoeVideoHostResolver.decodePlayer` publica `ProviderSubtitle` únicamente si el
+config del reproductor declara captions HTTPS públicas terminadas en `.vtt`;
+las entradas `http:`, `.srt`, con fragmento o con host no público se descartan.
+
+### Riesgos conocidos (no resueltos aquí)
+
+- [`media-kit#1450`](https://github.com/media-kit/media-kit/issues/1450): en HLS,
+  cambiar de pista de subtítulo puede hacer desaparecer los subtítulos hasta
+  reabrir la fuente. Afecta al usuario que cambia manualmente de pista.
+- [`mpv#13120`](https://github.com/mpv-player/mpv/issues/13120): un `.vtt`
+  externo puede no mostrarse al seleccionarlo según versión de mpv.
+- AnimeAV1/VOE no publica pistas suaves en el episodio inspeccionado
+  (`captions: []`, sin `EXT-X-MEDIA`): el subtítulo español que se ve es
+  **hardsub**. La extracción de captions queda probada con fixtures, **NO
+  VERIFICADA** contra un caption real.

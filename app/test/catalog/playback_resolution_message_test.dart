@@ -43,6 +43,7 @@ void main() {
       PlaybackProviderFailureKind.cancelled:
           'La consulta se canceló. Inténtalo de nuevo.',
       PlaybackProviderFailureKind.circuitOpen: 'Los proveedores están temporalmente en pausa tras varios fallos. Inténtalo más tarde.',
+      PlaybackProviderFailureKind.forbidden: 'El proveedor denegó la solicitud (HTTP 403). Kongroo no la repetirá; consulta los enlaces externos de la ficha si están disponibles.',
     };
 
     for (final MapEntry<PlaybackProviderFailureKind, String> entry

@@ -197,6 +197,37 @@ void main() {
   );
 
   test(
+    'a provider 403 does not prevent a configured fallback provider',
+    () async {
+      final MockPlaybackProvider forbidden = MockPlaybackProvider(
+        id: PlaybackProviderId('forbidden'),
+        scenario: MockPlaybackScenario.forbidden,
+      );
+      final MockPlaybackProvider authorizedFallback = MockPlaybackProvider(
+        id: PlaybackProviderId('authorized-fallback'),
+      );
+      final PlaybackProviderManager manager = _manager([
+        (forbidden, 20),
+        (authorizedFallback, 10),
+      ]);
+
+      final PlaybackProviderSuccess<List<PlaybackSource>> result =
+          await manager.findSources(
+            _episode(),
+            cancellation: PlaybackCancellationToken(),
+          ) as PlaybackProviderSuccess<List<PlaybackSource>>;
+
+      expect(result.value.single.providerId, authorizedFallback.id);
+      expect(forbidden.findCalls, 1);
+      expect(authorizedFallback.findCalls, 1);
+      expect(
+        manager.diagnostics.first.lastFailure,
+        PlaybackProviderFailureKind.forbidden,
+      );
+    },
+  );
+
+  test(
     'falls back to the next provider when every server for a source fails',
     () async {
       final MockPlaybackProvider unavailableSource = MockPlaybackProvider(
@@ -802,6 +833,97 @@ void main() {
           )
           .lastFailure,
       PlaybackProviderFailureKind.invalidResponse,
+    );
+  });
+
+  test('resolveCandidates runs provider chains concurrently and keeps priority order', () async {
+    final Completer<void> firstGate = Completer<void>();
+    final Completer<void> secondGate = Completer<void>();
+    final Completer<void> firstStarted = Completer<void>();
+    final Completer<void> secondStarted = Completer<void>();
+    final MockPlaybackProvider first = MockPlaybackProvider(
+      id: PlaybackProviderId('higher-priority'),
+      requestGate: firstGate,
+      requestStarted: firstStarted,
+    );
+    final MockPlaybackProvider second = MockPlaybackProvider(
+      id: PlaybackProviderId('lower-priority'),
+      requestGate: secondGate,
+      requestStarted: secondStarted,
+    );
+    final PlaybackProviderManager manager = _manager([
+      (first, 30),
+      (second, 10),
+    ]);
+
+    final Future<PlaybackProviderResult<List<ResolvedPlaybackStream>>> pending =
+        manager.resolveCandidates(
+          _episode(),
+          cancellation: PlaybackCancellationToken(),
+        );
+    await firstStarted.future;
+    await secondStarted.future.timeout(
+      const Duration(seconds: 2),
+      onTimeout: () => throw StateError(
+        'the second provider did not start while the first was blocked',
+      ),
+    );
+    firstGate.complete();
+    secondGate.complete();
+    final List<ResolvedPlaybackStream> streams =
+        (await pending as PlaybackProviderSuccess<List<ResolvedPlaybackStream>>)
+            .value;
+    expect(
+      streams.map((ResolvedPlaybackStream stream) => stream.providerId.value),
+      ['higher-priority', 'lower-priority'],
+    );
+  });
+
+  test('resolveCandidates bounds provider fan-out to four chains', () async {
+    final List<Completer<void>> gates = [];
+    final List<Completer<void>> started = [];
+    final List<MockPlaybackProvider> providers = [];
+    for (var i = 0; i < 6; i++) {
+      final Completer<void> gate = Completer<void>();
+      final Completer<void> began = Completer<void>();
+      gates.add(gate);
+      started.add(began);
+      providers.add(
+        MockPlaybackProvider(
+          id: PlaybackProviderId('bounded-$i'),
+          requestGate: gate,
+          requestStarted: began,
+        ),
+      );
+    }
+    final PlaybackProviderManager manager = _manager([
+      for (var i = 0; i < 6; i++) (providers[i], 100 - i),
+    ]);
+
+    final Future<PlaybackProviderResult<List<ResolvedPlaybackStream>>> pending =
+        manager.resolveCandidates(
+          _episode(),
+          cancellation: PlaybackCancellationToken(),
+        );
+    await Future.wait(started.take(4).map((Completer<void> c) => c.future));
+    expect(
+      providers.skip(4).map((MockPlaybackProvider p) => p.findCalls),
+      everyElement(0),
+      reason: 'no more than four chains may run at once',
+    );
+    for (var i = 0; i < 4; i++) {
+      gates[i].complete();
+    }
+    await Future.wait(started.skip(4).map((Completer<void> c) => c.future));
+    for (var i = 4; i < 6; i++) {
+      gates[i].complete();
+    }
+    final List<ResolvedPlaybackStream> streams =
+        (await pending as PlaybackProviderSuccess<List<ResolvedPlaybackStream>>)
+            .value;
+    expect(
+      streams.map((ResolvedPlaybackStream stream) => stream.providerId.value),
+      [for (var i = 0; i < 6; i++) 'bounded-$i'],
     );
   });
 

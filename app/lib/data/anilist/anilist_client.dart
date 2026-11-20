@@ -20,6 +20,7 @@ query SearchAnime($search: String!, $page: Int!, $perPage: Int!) {
 }
 fragment AnimeSummaryFields on Media {
   id
+  idMal
   title { romaji english native }
   coverImage { extraLarge }
   bannerImage
@@ -46,6 +47,7 @@ query BrowseAnime($sort: [MediaSort!]!, $page: Int!, $perPage: Int!) {
 }
 fragment AnimeSummaryFields on Media {
   id
+  idMal
   title { romaji english native }
   coverImage { extraLarge }
   bannerImage
@@ -72,6 +74,7 @@ query AnimeById($id: Int!) {
 }
 fragment AnimeSummaryFields on Media {
   id
+  idMal
   title { romaji english native }
   coverImage { extraLarge }
   bannerImage
@@ -88,7 +91,7 @@ fragment AnimeSummaryFields on Media {
   episodes
   studios(isMain: true) { nodes { name } }
   trailer { site id }
-  streamingEpisodes { title thumbnail site }
+  streamingEpisodes { title thumbnail site url }
   characters(perPage: 12, sort: [ROLE, RELEVANCE]) {
     edges {
       role
@@ -320,17 +323,33 @@ class AniListClient implements AnimeCatalogRepository {
       );
     }
 
-    try {
-      return Success(
-        AnimeSearchResult(
-          items: List.unmodifiable(media.map(_mapAnime)),
-          source: AnimeSearchSource.anilist,
-        ),
-      );
-    } on Object {
+    final List<AnimeSummary> items = [];
+    for (final Object? entry in media) {
+      try {
+        items.add(_mapAnime(entry));
+      } on Object {
+        continue;
+      }
+    }
+    if (items.isEmpty && media.isNotEmpty) {
       return const Failure(
         UnknownAppError('AniList result could not be mapped.'),
       );
+    }
+    return Success(
+      AnimeSearchResult(
+        items: List.unmodifiable(items),
+        source: AnimeSearchSource.anilist,
+      ),
+    );
+  }
+
+  /// Optional AniList fields that fail validation are dropped, not the anime.
+  static T? _lenient<T>(T? Function() read) {
+    try {
+      return read();
+    } on FormatException {
+      return null;
     }
   }
 
@@ -346,20 +365,20 @@ class AniListClient implements AnimeCatalogRepository {
       romajiTitle: _optionalString(title?['romaji']),
       englishTitle: _optionalString(title?['english']),
       nativeTitle: _optionalString(title?['native']),
-      coverImageUrl: _coverImageUrl(media?['coverImage']),
-      bannerImageUrl: _optionalUrl(media?['bannerImage']),
-      description: _strictOptionalString(media?['description']),
-      genres: _stringList(media?['genres']),
-      status: _strictOptionalString(media?['status']),
-      format: _strictOptionalString(media?['format']),
-      season: _strictOptionalString(media?['season']),
-      seasonYear: _optionalPositiveInt(media?['seasonYear']),
-      startDate: _releaseDate(media?['startDate']),
-      endDate: _releaseDate(media?['endDate']),
-      score: _optionalScore(media?['averageScore']),
-      popularity: _optionalNonNegativeInt(media?['popularity']),
+      coverImageUrl: _lenient(() => _coverImageUrl(media?['coverImage'])),
+      bannerImageUrl: _lenient(() => _optionalUrl(media?['bannerImage'])),
+      description: _lenient(() => _strictOptionalString(media?['description'])),
+      genres: _lenient(() => _stringList(media?['genres'])) ?? const [],
+      status: _lenient(() => _strictOptionalString(media?['status'])),
+      format: _lenient(() => _strictOptionalString(media?['format'])),
+      season: _lenient(() => _strictOptionalString(media?['season'])),
+      seasonYear: _lenient(() => _optionalPositiveInt(media?['seasonYear'])),
+      startDate: _lenient(() => _releaseDate(media?['startDate'])),
+      endDate: _lenient(() => _releaseDate(media?['endDate'])),
+      score: _lenient(() => _optionalScore(media?['averageScore'])),
+      popularity: _lenient(() => _optionalNonNegativeInt(media?['popularity'])),
       detail: media!.containsKey('characters')
-          ? decodeAniListDetails(media)
+          ? _lenient(() => decodeAniListDetails(media))
           : null,
     );
   }

@@ -13,6 +13,7 @@ import 'package:anime_app/data/opensubtitles/opensubtitles_client.dart';
 import 'package:anime_app/data/player/engine/active_player_lease.dart';
 import 'package:anime_app/data/player/engine/media_kit_spike_engine.dart';
 import 'package:anime_app/data/player/providers/mock/mock_playback_provider.dart';
+import 'package:anime_app/data/player/providers/wikimedia/wikimedia_identity.dart';
 import 'package:anime_app/domain/catalog/anime_id.dart';
 import 'package:anime_app/domain/player/providers/playback_source.dart';
 import 'package:anime_app/domain/player/subtitles/external_subtitle_catalog.dart';
@@ -35,6 +36,79 @@ void main() {
   final File stressMedia = useRealDemo
       ? File('$demoDirectory/episode-1.mkv')
       : fixture;
+
+  test(
+    'provider captions belong only to the active authorized source',
+    () async {
+      final alternate = Uri.parse('https://media.anime.org/alternate.m3u8');
+      final engine = MediaKitSpikeEngine(
+        demoSources: {fixture.uri, alternate},
+        providerSubtitles: {
+          fixture.uri: [
+            ProviderSubtitle(
+              id: 'es',
+              uri: Uri.parse('https://captions.anime.org/es.vtt'),
+              label: 'Spanish',
+              language: 'es',
+              isDefault: true,
+            ),
+          ],
+        },
+      );
+      try {
+        await engine.initialize();
+        await engine.open(fixture.uri);
+        expect(engine.currentSnapshot.error, isNull);
+        expect(engine.currentSnapshot.selectedSubtitleId, 'auto');
+        expect(
+          engine.currentSnapshot.subtitleTracks.any(
+            (t) => t.id.startsWith('provider:') && t.language == 'es',
+          ),
+          isTrue,
+        );
+        final oldCaptionId = engine.currentSnapshot.subtitleTracks
+            .singleWhere((t) => t.language == 'es')
+            .id;
+        await engine.stop();
+        expect(engine.currentSnapshot.subtitleTracks, isEmpty);
+        await engine.play();
+        expect(
+          engine.currentSnapshot.subtitleTracks.any((t) => t.language == 'es'),
+          isTrue,
+        );
+        await expectLater(
+          engine.selectSubtitleTrack(oldCaptionId),
+          throwsArgumentError,
+        );
+        final reopenedId = engine.currentSnapshot.subtitleTracks
+            .singleWhere((t) => t.language == 'es')
+            .id;
+        await engine.open(resolveF2_6SubtitleFixture().uri);
+        expect(
+          engine.currentSnapshot.subtitleTracks.any((t) => t.id == reopenedId),
+          isFalse,
+        );
+        await expectLater(
+          engine.selectSubtitleTrack(reopenedId),
+          throwsArgumentError,
+        );
+        await engine.stop();
+        expect(engine.currentSnapshot.subtitleTracks, isEmpty);
+        // Unrecognized catalog entries never turn arbitrary IDs into URLs.
+        await expectLater(
+          engine.selectSubtitleTrack('provider:missing'),
+          throwsArgumentError,
+        );
+      } finally {
+        await engine.dispose();
+      }
+      expect(
+        () => MediaKitSpikeEngine(providerSubtitles: {alternate: const []}),
+        throwsArgumentError,
+      );
+      expect(MediaKitSpikeEngine.hasActivePlayerLease, isFalse);
+    },
+  );
 
   test(
     'Morevna selects published Spanish and English tracks in libmpv',
@@ -155,7 +229,7 @@ void main() {
   }, timeout: const Timeout(Duration(minutes: 2)));
 
   test(
-    'libmpv preserves a public Referer across open and replay after Stop',
+    'libmpv scopes Referer Origin and Kongroo UA through replay and source change',
     () async {
       final HttpServer server = await HttpServer.bind(
         InternetAddress.loopbackIPv4,
@@ -164,10 +238,28 @@ void main() {
       var requestCount = 0;
       var validRefererSeen = false;
       var sensitiveHeaderSeen = false;
+      final List<String?> scopedAgents = [];
+      final List<String?> scopedOrigins = [];
+      final List<String?> unscopedAgents = [];
+      final List<String?> unscopedReferers = [];
+      final List<String?> unscopedOrigins = [];
       final StreamSubscription<HttpRequest> requests = server.listen((
         HttpRequest request,
       ) async {
         requestCount++;
+        final bool unscoped = request.uri.path == '/next.mkv';
+        if (unscoped) {
+          unscopedOrigins.add(request.headers.value('origin'));
+          unscopedAgents.add(
+            request.headers.value(HttpHeaders.userAgentHeader),
+          );
+          unscopedReferers.add(
+            request.headers.value(HttpHeaders.refererHeader),
+          );
+        } else {
+          scopedOrigins.add(request.headers.value('origin'));
+          scopedAgents.add(request.headers.value(HttpHeaders.userAgentHeader));
+        }
         validRefererSeen =
             validRefererSeen ||
             request.headers.value(HttpHeaders.refererHeader) ==
@@ -176,8 +268,10 @@ void main() {
             sensitiveHeaderSeen ||
             request.headers.value(HttpHeaders.cookieHeader) != null ||
             request.headers.value(HttpHeaders.authorizationHeader) != null;
-        if (request.headers.value(HttpHeaders.refererHeader) !=
-            'https://www.animegg.org/') {
+        if (!unscoped &&
+            (request.headers.value(HttpHeaders.refererHeader) !=
+                    'https://www.animegg.org/' ||
+                request.headers.value('origin') != 'https://www.animegg.org')) {
           request.response.statusCode = HttpStatus.forbidden;
           await request.response.close();
           return;
@@ -232,15 +326,18 @@ void main() {
         await request.response.close();
       });
       final Uri source = Uri.http('127.0.0.1:${server.port}', '/episode.mkv');
+      final Uri next = source.replace(path: '/next.mkv');
       final PlaybackRequestHeaders headers = PlaybackRequestHeaders({
         'Referer': 'https://www.animegg.org/',
+        'Origin': 'https://www.animegg.org',
+        'User-Agent': wikimediaUserAgent,
       });
       final MediaKitSpikeEngine engine = MediaKitSpikeEngine(
-        demoSources: {source},
+        demoSources: {source, next},
       );
       final SpikePlayerCoordinator coordinator = SpikePlayerCoordinator(
         engine,
-        demoSources: {source},
+        demoSources: {source, next},
       );
       try {
         await coordinator.initialize();
@@ -273,16 +370,37 @@ void main() {
           'requests=$requestCount; expected_referer_seen=$validRefererSeen',
         );
         await coordinator.stop();
+        final int beforeReplay = scopedAgents.length;
         await coordinator.play();
-        await coordinator.states
+        final replay = await coordinator.states
             .firstWhere(
               (snapshot) =>
                   snapshot.position > Duration.zero || snapshot.error != null,
             )
             .timeout(const Duration(seconds: 12));
+        expect(replay.error, isNull);
+        expect(replay.position, greaterThan(Duration.zero));
+        expect(scopedAgents.length, greaterThan(beforeReplay));
         expect(validRefererSeen, isTrue);
         expect(sensitiveHeaderSeen, isFalse);
         expect(requestCount, greaterThanOrEqualTo(2));
+        expect(scopedAgents.length, greaterThanOrEqualTo(2));
+        expect(scopedAgents, everyElement(wikimediaUserAgent));
+        expect(scopedOrigins, everyElement('https://www.animegg.org'));
+        await coordinator.open(next);
+        await coordinator.play();
+        final switched = await coordinator.states
+            .firstWhere((s) => s.position > Duration.zero || s.error != null)
+            .timeout(const Duration(seconds: 12));
+        expect(switched.error, isNull);
+        expect(switched.position, greaterThan(Duration.zero));
+        expect(unscopedAgents, isNotEmpty);
+        expect(unscopedAgents, everyElement(isNot(wikimediaUserAgent)));
+        expect(unscopedReferers, everyElement(isNull));
+        expect(unscopedOrigins, everyElement(isNull));
+        stdout.writeln(
+          'Wire UA: scoped=${scopedAgents.toSet()} unscoped=${unscopedAgents.toSet()}',
+        );
       } finally {
         await coordinator.dispose();
         await requests.cancel();

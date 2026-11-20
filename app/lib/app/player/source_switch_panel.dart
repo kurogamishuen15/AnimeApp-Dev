@@ -18,9 +18,10 @@ final class SourceSwitchPanel extends StatelessWidget {
       final PlaybackSourceSwitchSnapshot state = snapshot.data ?? service.state;
       final String? current = state.current == null
           ? null
-          : '${state.current!.providerId.value} · ${state.current!.serverId}';
+          : '${state.current!.sourceLabel ?? state.current!.providerId.value} · '
+                '${state.current!.displayName ?? state.current!.serverId}';
       final String status = switch (state.activity) {
-        PlaybackSourceSwitchActivity.idle => 'Source ready',
+        PlaybackSourceSwitchActivity.idle => 'Source selected',
         PlaybackSourceSwitchActivity.resolving => 'Finding alternatives…',
         PlaybackSourceSwitchActivity.switching => 'Switching source…',
         PlaybackSourceSwitchActivity.fallback =>
@@ -48,7 +49,10 @@ final class SourceSwitchPanel extends StatelessWidget {
               Text('Source: ${current ?? 'Unavailable'}'),
               Text(status),
               if (state.pending case final pending?)
-                Text('Next: ${pending.providerId.value} · ${pending.serverId}'),
+                Text(
+                  'Next: ${pending.sourceLabel ?? pending.providerId.value} · '
+                  '${pending.displayName ?? pending.serverId}',
+                ),
               if (state.error case final error?)
                 Text(error, key: const ValueKey<String>('source-switch-error')),
               if (deltaLabel case final label?) Text(label),

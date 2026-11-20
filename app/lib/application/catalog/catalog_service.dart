@@ -3,6 +3,7 @@ import '../../core/result/result.dart';
 import '../../domain/catalog/anime_id.dart';
 import '../../domain/catalog/anime_identity.dart';
 import '../../domain/catalog/anime_identity_repository.dart';
+import '../../domain/catalog/episode_index_provider.dart';
 import '../../domain/catalog/external_anime_id.dart';
 import '../../domain/catalog/library_entry.dart';
 import '../../domain/catalog/library_repository.dart';
@@ -37,9 +38,11 @@ final class CatalogService {
     required this.library,
     required this.progress,
     DateTime Function()? clock,
+    this.episodeIndex,
   }) : _clock = clock ?? DateTime.now;
 
   final MetadataProvider metadataProvider;
+  final EpisodeIndexProvider? episodeIndex;
   final AnimeIdentityRepository identities;
   final LocalLibraryRepository library;
   final PlaybackProgressRepository progress;
@@ -117,6 +120,34 @@ final class CatalogService {
         UnavailableError('Details are unsupported: $capability.'),
       ),
       ProviderFailure<ProviderAnimeMetadata>(:final kind, :final retryAfter) =>
+        Failure(_mapProviderFailure(kind, retryAfter)),
+    };
+  }
+
+  /// Lists which episodes exist for a title. The index never grants playback:
+  /// a listed episode still needs a verified source before it can play.
+  Future<Result<EpisodeIndexPage>> listEpisodes(
+    ExternalAnimeId anime, {
+    int offset = 0,
+    int limit = 20,
+  }) async {
+    final EpisodeIndexProvider? index = episodeIndex;
+    if (index == null) {
+      return const Failure(UnavailableError('Episode index is unavailable.'));
+    }
+    return switch (await index.listEpisodes(
+      anime,
+      offset: offset,
+      limit: limit,
+    )) {
+      ProviderSuccess<EpisodeIndexPage>(:final value) => Success(value),
+      ProviderNoResults<EpisodeIndexPage>() => Success(
+        EpisodeIndexPage(episodes: const [], totalCount: 0, hasMore: false),
+      ),
+      ProviderUnsupported<EpisodeIndexPage>(:final capability) => Failure(
+        UnavailableError('Episode index is unsupported: $capability.'),
+      ),
+      ProviderFailure<EpisodeIndexPage>(:final kind, :final retryAfter) =>
         Failure(_mapProviderFailure(kind, retryAfter)),
     };
   }
@@ -228,6 +259,20 @@ final class CatalogService {
   Future<Result<PlaybackProgress?>> getProgress(AnimeId animeId) =>
       progress.get(_progressKey(animeId));
 
+  Future<Result<PlaybackProgress?>> getEpisodeProgress(
+    AnimeId animeId,
+    int episode,
+  ) => progress.get(episodeProgressKey(animeId, episode));
+
+  static ProgressKey episodeProgressKey(AnimeId animeId, int episode) =>
+      ProgressKey(
+        contentId: ContentId(animeId.value),
+        episodeId: EpisodeId('episode:$episode'),
+      );
+
+  Future<Result<List<PlaybackProgress>>> listProgress() =>
+      progress.list(const ContentIdFilter(null));
+
   Future<Result<PlaybackProgress>> saveProgress({
     required AnimeId animeId,
     required int positionMs,
@@ -245,10 +290,8 @@ final class CatalogService {
     return Success(value);
   }
 
-  static ProgressKey _progressKey(AnimeId animeId) => ProgressKey(
-    contentId: ContentId(animeId.value),
-    episodeId: EpisodeId('episode:1'),
-  );
+  static ProgressKey _progressKey(AnimeId animeId) =>
+      episodeProgressKey(animeId, 1);
 
   static AppError _mapProviderFailure(
     ProviderFailureKind kind,

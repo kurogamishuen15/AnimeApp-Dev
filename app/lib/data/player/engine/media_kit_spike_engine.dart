@@ -14,6 +14,7 @@ import '../../../domain/player/subtitles/subtitle_style.dart';
 import '../../../domain/player/subtitles/subtitle_track_info.dart';
 import '../../../domain/player/video_track_info.dart';
 import 'active_player_lease.dart';
+import 'media_codec_support.dart';
 import 'mpv_performance_reader.dart';
 import 'mpv_subtitle_properties.dart';
 
@@ -27,13 +28,26 @@ final class MediaKitSpikeEngine
   factory MediaKitSpikeEngine({
     Set<Uri> demoSources = const {},
     Set<Uri> trustedExternalSources = const {},
+    Map<Uri, List<ProviderSubtitle>> providerSubtitles = const {},
   }) {
+    if (providerSubtitles.keys.any(
+      (uri) =>
+          !trustedExternalSources.contains(uri) && !demoSources.contains(uri),
+    )) {
+      throw ArgumentError(
+        'Caption catalogs require an authorized media source.',
+      );
+    }
     final ActivePlayerLease lease = ActivePlayerLease.acquire();
     final StreamController<PlaybackSpikeSnapshot> snapshots =
         StreamController<PlaybackSpikeSnapshot>.broadcast();
     Player? player;
     try {
-      // media_kit must be initialized before constructing Player.
+      // media_kit must be initialized before constructing Player. The codec
+      // module reports the platform H.264 strategy (Linux bundles a verified
+      // decoder; Android/Windows use the platform stack) and is a no-op when
+      // no preparation is required.
+      prepareMediaCodecSupport();
       MediaKit.ensureInitialized();
       player = Player(configuration: const PlayerConfiguration(libass: true));
       // Keep construction minimal: surface/controller creation happens only
@@ -44,6 +58,7 @@ final class MediaKitSpikeEngine
         lease,
         demoSources: demoSources,
         trustedExternalSources: trustedExternalSources,
+        providerSubtitles: providerSubtitles,
       );
     } catch (error, stack) {
       final Player? allocatedPlayer = player;
@@ -163,11 +178,17 @@ final class MediaKitSpikeEngine
     this._auxiliaryCleanupForTesting,
     Set<Uri> demoSources = const {},
     Set<Uri> trustedExternalSources = const {},
-  }) : _demoSources = Set.unmodifiable(demoSources),
+    Map<Uri, List<ProviderSubtitle>> providerSubtitles = const {},
+  }) : _providerSubtitles = Map.unmodifiable({
+         for (final entry in providerSubtitles.entries)
+           entry.key: List<ProviderSubtitle>.unmodifiable(entry.value),
+       }),
+       _demoSources = Set.unmodifiable(demoSources),
        _trustedExternalSources = Set.unmodifiable(trustedExternalSources),
        _player = player,
        _disposePlayer = disposePlayer ?? player.dispose;
 
+  final Map<Uri, List<ProviderSubtitle>> _providerSubtitles;
   final Set<Uri> _demoSources;
   final Set<Uri> _trustedExternalSources;
   final Player _player;
@@ -187,6 +208,7 @@ final class MediaKitSpikeEngine
   Object? _playerDisposeFailure;
   StackTrace? _playerDisposeFailureStack;
   int _nativeErrorRevision = 0;
+  int? _nativeHttpStatus;
   int _sourceGeneration = 0;
   Uri? _currentSource;
   PlaybackRequestHeaders _currentHttpHeaders =
@@ -291,6 +313,8 @@ final class MediaKitSpikeEngine
     _ensureReady();
     await _validateSource(source);
     _sourceGeneration = sourceGeneration;
+    _captionRevision++;
+    _captionSource = null;
     _automaticVideoSelection = false;
     await _replaceSourceErrorSubscription(sourceGeneration);
     _copy(
@@ -307,15 +331,18 @@ final class MediaKitSpikeEngine
       selectedSubtitleId: 'auto',
       clearError: true,
     );
+    // Hide the previous source's optional captions even while open is pending.
+    _captionSource = null;
     await _openValidated(source, play: false, httpHeaders: httpHeaders);
     _currentSource = source;
+    _captionSource = source;
     _currentHttpHeaders = httpHeaders;
     _stopped = false;
     _copy(
       stopped: false,
       position: Duration.zero,
       subtitleTracks: _subtitleTrackInfo(),
-      selectedSubtitleId: _player.state.track.subtitle.id,
+      selectedSubtitleId: _selectedSubtitleId,
       audioTracks: _audioTrackInfo(),
       selectedAudioId: _player.state.track.audio.id,
       videoTracks: _videoTrackInfo(),
@@ -329,6 +356,17 @@ final class MediaKitSpikeEngine
         source.userInfo.isEmpty &&
         !source.hasFragment &&
         _trustedExternalSources.contains(source)) {
+      return;
+    }
+    if (source.scheme == 'http' &&
+        source.host == '127.0.0.1' &&
+        source.hasPort &&
+        source.userInfo.isEmpty &&
+        !source.hasQuery &&
+        !source.hasFragment &&
+        _trustedExternalSources.contains(source)) {
+      // The loopback media proxy. Only the exact URI the manager resolved is
+      // accepted, so the engine never opens an arbitrary local address.
       return;
     }
     if (source.scheme == 'http' &&
@@ -366,6 +404,7 @@ final class MediaKitSpikeEngine
     PlaybackRequestHeaders httpHeaders = const PlaybackRequestHeaders.empty(),
   }) async {
     final int errorRevisionAtOpen = _nativeErrorRevision;
+    _nativeHttpStatus = null;
     await _player.open(
       Media(source.toString(), httpHeaders: httpHeaders.values),
       play: play,
@@ -406,6 +445,7 @@ final class MediaKitSpikeEngine
         httpHeaders: _currentHttpHeaders,
       );
       _stopped = false;
+      _syncTrackState();
       _copy(
         stopped: false,
         position: Duration.zero,
@@ -447,6 +487,19 @@ final class MediaKitSpikeEngine
   @override
   Future<void> selectSubtitleTrack(String id) async {
     _ensureReady();
+    for (final caption in _currentProviderSubtitles) {
+      if (id == _captionTrackId(caption)) {
+        await _player.setSubtitleTrack(
+          SubtitleTrack.uri(
+            caption.uri.toString(),
+            title: caption.label,
+            language: caption.language,
+          ),
+        );
+        _syncTrackState();
+        return;
+      }
+    }
     SubtitleTrack? track;
     for (final SubtitleTrack candidate in _player.state.tracks.subtitle) {
       if (candidate.id == id) {
@@ -533,6 +586,7 @@ final class MediaKitSpikeEngine
   @override
   Future<void> stop() async {
     _ensureReady();
+    _captionRevision++;
     await _player.stop();
     _stopped = true;
     _automaticVideoSelection = false;
@@ -806,8 +860,23 @@ final class MediaKitSpikeEngine
         ? 'auto'
         : _player.state.track.video.id,
     subtitleTracks: _subtitleTrackInfo(),
-    selectedSubtitleId: _player.state.track.subtitle.id,
+    selectedSubtitleId: _selectedSubtitleId,
   );
+
+  Uri? _captionSource;
+  int _captionRevision = 0;
+  String _captionTrackId(ProviderSubtitle caption) =>
+      'provider:$_captionRevision:${caption.id}';
+  List<ProviderSubtitle> get _currentProviderSubtitles =>
+      _stopped ? const [] : _providerSubtitles[_captionSource] ?? const [];
+
+  String get _selectedSubtitleId {
+    final selected = _player.state.track.subtitle.id;
+    for (final caption in _currentProviderSubtitles) {
+      if (caption.uri.toString() == selected) return _captionTrackId(caption);
+    }
+    return selected;
+  }
 
   List<SubtitleTrackInfo> _subtitleTrackInfo() {
     final SubtitleTrack selected = _player.state.track.subtitle;
@@ -815,35 +884,50 @@ final class MediaKitSpikeEngine
     if (!available.any((SubtitleTrack track) => track.id == selected.id)) {
       available.add(selected);
     }
-    return List.unmodifiable(
-      available.map((SubtitleTrack track) {
-        final SubtitleTrackKind kind = switch (track.id) {
-          'auto' => SubtitleTrackKind.automatic,
-          'no' => SubtitleTrackKind.disabled,
-          _ when track.uri || track.data => SubtitleTrackKind.external,
-          _ => SubtitleTrackKind.embedded,
-        };
-        final String? title = track.title?.trim();
-        final String? language = track.language?.trim();
-        return SubtitleTrackInfo(
-          id: track.id,
-          label: title != null && title.isNotEmpty
-              ? title
-              : language != null && language.isNotEmpty
-              ? language
-              : switch (track.id) {
-                  'auto' => 'Automatic subtitles',
-                  'no' => 'Subtitles off',
-                  _ => 'Subtitle ${track.id}',
-                },
-          kind: kind,
-          language: language?.isEmpty ?? true ? null : language,
-          codec: track.codec,
-          isDefault: track.isDefault ?? false,
-          isSelected: track.id == selected.id,
-        );
-      }),
-    );
+    return List.unmodifiable([
+      for (final caption in _currentProviderSubtitles)
+        SubtitleTrackInfo(
+          id: _captionTrackId(caption),
+          label: caption.label,
+          kind: SubtitleTrackKind.external,
+          language: caption.language,
+          isDefault: caption.isDefault,
+          isSelected: _selectedSubtitleId == _captionTrackId(caption),
+        ),
+      ...available
+          .where(
+            (track) => !_currentProviderSubtitles.any(
+              (caption) => caption.uri.toString() == track.id,
+            ),
+          )
+          .map((SubtitleTrack track) {
+            final SubtitleTrackKind kind = switch (track.id) {
+              'auto' => SubtitleTrackKind.automatic,
+              'no' => SubtitleTrackKind.disabled,
+              _ when track.uri || track.data => SubtitleTrackKind.external,
+              _ => SubtitleTrackKind.embedded,
+            };
+            final String? title = track.title?.trim();
+            final String? language = track.language?.trim();
+            return SubtitleTrackInfo(
+              id: track.id,
+              label: title != null && title.isNotEmpty
+                  ? title
+                  : language != null && language.isNotEmpty
+                  ? language
+                  : switch (track.id) {
+                      'auto' => 'Automatic subtitles',
+                      'no' => 'Subtitles off',
+                      _ => 'Subtitle ${track.id}',
+                    },
+              kind: kind,
+              language: language?.isEmpty ?? true ? null : language,
+              codec: track.codec,
+              isDefault: track.isDefault ?? false,
+              isSelected: track.id == selected.id,
+            );
+          }),
+    ]);
   }
 
   String _number(num value) => value.toString();
@@ -856,7 +940,22 @@ final class MediaKitSpikeEngine
     if (!_snapshots.isClosed) _snapshots.add(_state);
   }
 
-  String _safeError(String _) => 'The media could not be opened or decoded.';
+  static final RegExp _httpErrorCode = RegExp(
+    r'\b(?:HTTP(?:/[0-9.]+)?(?: error)?|Server returned)\s+([45][0-9]{2})\b',
+    caseSensitive: false,
+  );
+
+  String _safeError(String nativeMessage) {
+    final String? status = _httpErrorCode.firstMatch(nativeMessage)?.group(1);
+    if (status != null) _nativeHttpStatus = int.parse(status);
+    return switch (_nativeHttpStatus) {
+      401 || 403 =>
+        'El servidor del vídeo denegó el acceso (HTTP $_nativeHttpStatus).',
+      429 => 'El servidor del vídeo limitó las solicitudes (HTTP 429). Intenta más tarde.',
+      final int code => 'El servidor del vídeo respondió HTTP $code.',
+      null => 'The media could not be opened or decoded.',
+    };
+  }
 
   void _ensureReady() {
     _ensureNotDisposed();

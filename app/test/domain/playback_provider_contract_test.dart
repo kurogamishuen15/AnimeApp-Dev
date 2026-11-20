@@ -74,6 +74,28 @@ void playbackSourceProviderContractTests(
 }
 
 void main() {
+  test(
+    'provider captions reject private, active and non-HTTPS destinations',
+    () {
+      for (final value in [
+        'https://127.0.0.1/es.vtt',
+        'http://captions.anime.org/es.vtt',
+        'https://user:password@captions.anime.org/es.vtt',
+        'https://captions.anime.org/es.html',
+        'https://captions.local/es.vtt',
+      ]) {
+        expect(
+          () => ProviderSubtitle(
+            id: 'es',
+            uri: Uri.parse(value),
+            label: 'Spanish',
+          ),
+          throwsArgumentError,
+        );
+      }
+    },
+  );
+
   playbackSourceProviderContractTests(
     'MockPlaybackProvider',
     () => MockPlaybackProvider(id: PlaybackProviderId('contract-mock')),
@@ -162,13 +184,37 @@ void main() {
     expect(fromIdentity.requestKey, reversed.requestKey);
   });
 
-  test('playback request context permits only a public HTTPS referer', () {
+  test('playback request context permits public Referer and User-Agent', () {
     final PlaybackRequestHeaders headers = PlaybackRequestHeaders({
       'referer': 'https://www.animegg.org/watch/episode-1',
     });
     expect(headers.values, {
       'Referer': 'https://www.animegg.org/watch/episode-1',
     });
+    expect(PlaybackRequestHeaders({'user-agent': 'Kongroo/1.0'}).values, {
+      'User-Agent': 'Kongroo/1.0',
+    });
+    // Fetch-metadata context: a closed, non-credential set.
+    expect(
+      PlaybackRequestHeaders({'sec-fetch-site': 'same-origin'}).values,
+      {'Sec-Fetch-Site': 'same-origin'},
+    );
+    for (final String invalid in <String>[
+      'same-origin; Bearer x',
+      'unknown',
+      'SAME-ORIGIN',
+      '',
+    ]) {
+      expect(
+        () => PlaybackRequestHeaders({'Sec-Fetch-Site': invalid}),
+        throwsArgumentError,
+      );
+    }
+    expect(
+      () =>
+          PlaybackRequestHeaders({'user-agent': 'Kongroo\r\nCookie: private'}),
+      throwsArgumentError,
+    );
     expect(
       () => PlaybackRequestHeaders({'Cookie': 'session=private'}),
       throwsArgumentError,
@@ -215,6 +261,36 @@ void main() {
     expect(
       () => PlaybackRequestHeaders({
         'Referer': 'https://example.org/\r\nCookie: x',
+      }),
+      throwsArgumentError,
+    );
+  });
+
+  test('Origin carries a public HTTPS origin without request data', () {
+    expect(
+      PlaybackRequestHeaders({'origin': 'https://megaplay.buzz/'}).values,
+      {'Origin': 'https://megaplay.buzz'},
+    );
+    for (final value in [
+      'http://example.org',
+      'https://example.org/episode',
+      'https://example.org/?secret=x',
+      'https://example.org/#fragment',
+      'https://user:password@example.org',
+      'https://127.0.0.1',
+      'https://example.org:8443',
+      'https://example.org/\r\nCookie: private',
+    ]) {
+      expect(
+        () => PlaybackRequestHeaders({'Origin': value}),
+        throwsArgumentError,
+        reason: value,
+      );
+    }
+    expect(
+      () => PlaybackRequestHeaders({
+        'Origin': 'https://example.org',
+        'origin': 'https://example.net',
       }),
       throwsArgumentError,
     );

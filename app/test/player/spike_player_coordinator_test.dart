@@ -8,6 +8,7 @@ import 'package:anime_app/application/player/source_switching/playback_source_sw
 import 'package:anime_app/application/player/spike_player_coordinator.dart';
 import 'package:anime_app/data/player/providers/mock/mock_playback_provider.dart';
 import 'package:anime_app/domain/catalog/anime_id.dart';
+import 'package:anime_app/domain/player/providers/playback_provider_contract.dart';
 import 'package:anime_app/domain/player/providers/playback_source.dart';
 import 'package:anime_app/domain/player/skips/skip_automation_policy.dart';
 import 'package:anime_app/domain/player/skips/skip_segment.dart';
@@ -17,6 +18,127 @@ import 'package:anime_app/domain/player/subtitles/subtitle_style.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test(
+    'Play preserves the asynchronous failure of a reopened medium',
+    () async {
+      final engine = _FakeEngine()
+        ..playbackErrorOnPlay = 'El servidor del vídeo respondió HTTP 403.';
+      final coordinator = SpikePlayerCoordinator(engine);
+      addTearDown(coordinator.dispose);
+      await coordinator.initialize();
+      await coordinator.open(Uri.file('/blocked-reopen.mp4'));
+      await coordinator.stop();
+      await coordinator.play();
+      expect(coordinator.state.error, engine.playbackErrorOnPlay);
+      expect(coordinator.state.playing, isFalse);
+      expect(coordinator.state.status, PlaybackSessionStatus.error);
+    },
+  );
+
+  group('restore resume position', () {
+    const target = Duration(seconds: 12);
+    const duration = Duration(seconds: 120);
+    late _FakeEngine engine;
+    late SpikePlayerCoordinator player;
+    late PlaybackCancellationToken cancellation;
+
+    setUp(() async {
+      engine = _FakeEngine();
+      player = SpikePlayerCoordinator(engine);
+      cancellation = PlaybackCancellationToken();
+      await player.initialize();
+      await player.open(Uri.file('/resume.mp4'));
+    });
+    tearDown(() => player.dispose());
+
+    test('waits for a duration and confirms the native position', () async {
+      final result = player.restoreStartPosition(
+        target,
+        cancellation: cancellation,
+      );
+      await Future<void>.delayed(Duration.zero);
+      expect(engine.seeks, isEmpty);
+      engine.emit(const PlaybackSpikeSnapshot(duration: duration));
+      engine.emitSourceEvents = true;
+      await result;
+      expect(engine.seeks, [target]);
+      expect(player.state.observedPosition, target);
+      expect(player.state.playing, isFalse);
+    });
+
+    test('reports unknown duration without issuing a seek', () async {
+      await expectLater(
+        player.restoreStartPosition(
+          target,
+          cancellation: cancellation,
+          budget: const Duration(milliseconds: 35),
+        ),
+        throwsA(
+          isA<PlaybackResumeFailure>().having(
+            (e) => e.reason,
+            'reason',
+            PlaybackResumeFailureReason.durationUnknown,
+          ),
+        ),
+      );
+      expect(engine.seeks, isEmpty);
+    });
+
+    test(
+      'rejects a seek that resolves without a position observation',
+      () async {
+        engine.emit(const PlaybackSpikeSnapshot(duration: duration));
+        await expectLater(
+          player.restoreStartPosition(
+            target,
+            cancellation: cancellation,
+            budget: const Duration(milliseconds: 35),
+          ),
+          throwsA(
+            isA<PlaybackResumeFailure>().having(
+              (e) => e.reason,
+              'reason',
+              PlaybackResumeFailureReason.seekFailed,
+            ),
+          ),
+        );
+        expect(engine.seeks, [target]);
+        expect(player.state.observedPosition, Duration.zero);
+      },
+    );
+
+    test(
+      'cancels a pending wait and rejects the old source after replacement',
+      () async {
+        final pending = player.restoreStartPosition(
+          target,
+          cancellation: cancellation,
+        );
+        final expectation = expectLater(
+          pending,
+          throwsA(isA<PlaybackResumeFailure>()),
+        );
+        await Future<void>.delayed(Duration.zero);
+        cancellation.cancel();
+        await expectation;
+
+        final next = player.restoreStartPosition(
+          target,
+          cancellation: PlaybackCancellationToken(),
+        );
+        final rejected = expectLater(
+          next,
+          throwsA(isA<PlaybackResumeFailure>()),
+        );
+        await Future<void>.delayed(Duration.zero);
+        final opened = player.open(Uri.file('/new-source.mp4'));
+        await rejected;
+        await opened;
+        expect(engine.seeks, isEmpty);
+      },
+    );
+  });
+
   test(
     'manual skip appears only in a valid segment and confirms observed seek',
     () async {
@@ -1064,6 +1186,7 @@ final class _FakeEngine implements PlaybackSpikeEngine {
   final List<Uri> openedSources = [];
   final List<PlaybackRequestHeaders> openedHttpHeaders = [];
   final Set<Uri> openFailureUris = {};
+  String? playbackErrorOnPlay;
   bool emitSourceEvents = false;
   int disposeFailuresRemaining = 0;
   int initializeFailuresRemaining = 0;
@@ -1131,7 +1254,13 @@ final class _FakeEngine implements PlaybackSpikeEngine {
   }
 
   @override
-  Future<void> play() async => calls.add('play');
+  Future<void> play() async {
+    calls.add('play');
+    if (playbackErrorOnPlay case final String error) {
+      emit(PlaybackSpikeSnapshot(error: error));
+    }
+  }
+
   @override
   Future<void> pause() async => calls.add('pause');
   @override

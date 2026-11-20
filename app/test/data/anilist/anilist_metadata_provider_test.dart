@@ -12,6 +12,17 @@ import 'package:anime_app/domain/catalog/provider_result.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('MAL crosswalk survives the detail cache; absent and invalid IDs stay absent', () {
+    for (final raw in [20, null, -1, '20']) {
+      final details = decodeAniListDetails({'idMal': raw});
+      final restored = decodeAniListDetails(encodeAniListDetails(details));
+      expect(
+        restored.externalIds.map((id) => id.toString()),
+        raw == 20 ? ['myanimelist:20'] : isEmpty,
+      );
+    }
+  });
+
   test('detail cache codec preserves an incomplete episode marker', () {
     const detail = AnimeDetailMetadata(
       episodeCount: 12,
@@ -20,6 +31,26 @@ void main() {
     final decoded = decodeAniListDetails(encodeAniListDetails(detail));
     expect(decoded.episodeMetadataFetched, isFalse);
     expect(decoded.episodeCount, 12);
+  });
+
+  test('detail cache preserves a validated legal external episode link', () {
+    final AnimeDetailMetadata detail = AnimeDetailMetadata(
+      episodes: [
+        AnimeEpisodeMetadata(
+          number: 1,
+          title: 'Episode 1',
+          site: 'Official service',
+          externalWatchUri: Uri.parse('https://service.example/watch/1'),
+        ),
+      ],
+    );
+    final AnimeDetailMetadata decoded = decodeAniListDetails(
+      encodeAniListDetails(detail),
+    );
+    expect(
+      decoded.episodes.single.externalWatchUri,
+      Uri.parse('https://service.example/watch/1'),
+    );
   });
 
   test('episode contracts reject malformed thumbnail URLs', () {
@@ -49,6 +80,28 @@ void main() {
       throwsArgumentError,
     );
   });
+
+  test(
+    'episode external link accepts HTTPS and rejects unsafe URL schemes',
+    () {
+      expect(
+        () => AnimeEpisodeMetadata(
+          number: 1,
+          title: 'Episode 1',
+          externalWatchUri: Uri.parse('javascript:alert(1)'),
+        ),
+        throwsArgumentError,
+      );
+      expect(
+        () => AnimeEpisodeMetadata(
+          number: 1,
+          title: 'Episode 1',
+          externalWatchUri: Uri.parse('https://user:password@service.example/'),
+        ),
+        throwsArgumentError,
+      );
+    },
+  );
 
   test('provider preserves existing romaji and end-year fields', () async {
     final AniListMetadataProvider provider = AniListMetadataProvider(
